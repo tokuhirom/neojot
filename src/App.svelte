@@ -5,7 +5,7 @@
 
 <main class="container">
   <div class="input-box">
-    <InputBox />
+    <InputBox replyTo={null} />
   </div>
   <div class="log-view">
     <LogView />

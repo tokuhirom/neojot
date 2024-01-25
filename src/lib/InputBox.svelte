@@ -2,12 +2,14 @@
 
     import {emit} from "@tauri-apps/api/event";
 
+    export let replyTo: string | null;
+
     let body="";
     let inserted = true;
 
     async function send() {
         if (body.length > 0) {
-            await emit("send_message", {body});
+            await emit("send_message", {body, replyTo});
         }
         body = "";
     }
