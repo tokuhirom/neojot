@@ -31,6 +31,11 @@
         await writeText(message.body);
     }
 
+    async function handleUpdateMessageBody() {
+        console.log(`UPDATED: ${message.body}`)
+        await messageRepository.save();
+    }
+
     function toggleReply() {
         showReply = !showReply;
     }
@@ -49,7 +54,7 @@
                 <button on:click={copy}>Copy</button>
             </div>
         </div>
-        <div>{message.body}</div>
+        <div contenteditable on:input={handleUpdateMessageBody} bind:innerHTML={message.body}></div>
         {#if showReply}
             <div class="reply-container">
                 {#each message.replies as reply}
