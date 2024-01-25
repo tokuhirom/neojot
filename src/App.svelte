@@ -1,14 +1,17 @@
 <script lang="ts">
   import InputBox from "./lib/InputBox.svelte";
   import LogView from "./lib/LogView.svelte";
+  import {MessageRepository} from "./lib/repository/MessageRepository";
+
+  let messageRepository = new MessageRepository();
 </script>
 
 <main class="container">
   <div class="input-box">
-    <InputBox replyTo={null} />
+    <InputBox replyTo={null} messageRepository={messageRepository} />
   </div>
   <div class="log-view">
-    <LogView />
+    <LogView messageRepository={messageRepository} />
   </div>
 </main>
 

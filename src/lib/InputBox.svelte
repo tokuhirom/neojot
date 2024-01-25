@@ -1,15 +1,23 @@
 <script lang="ts">
 
     import {emit} from "@tauri-apps/api/event";
+    import type {MessageRepository} from "./repository/MessageRepository";
+    import type {Message} from "./Message";
 
-    export let replyTo: string | null;
+    export let replyTo: Message | null;
+    export let messageRepository: MessageRepository;
 
     let body="";
     let inserted = true;
 
     async function send() {
         if (body.length > 0 && body.match(/\S/)) {
-            await emit("send_message", {body, replyTo});
+            if (replyTo) {
+                await messageRepository.reply(replyTo, body);
+            } else {
+                await messageRepository.post(body);
+            }
+            await emit("sent_message");
         }
         body = "";
     }

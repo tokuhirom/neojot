@@ -1,7 +1,6 @@
 export type Message = {
     id: string,
-    replyTo: string | null,
-    replyCount: number,
+    replies: Message[],
     createdSeconds: number,
     body: string,
 }

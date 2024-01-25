@@ -1,11 +1,20 @@
 <script lang="ts">
     import type {Message} from "./Message";
     import InputBox from "./InputBox.svelte";
+    import MessageItem from "./MessageItem.svelte";
     import {writeText} from "@tauri-apps/api/clipboard";
+    import {MessageRepository} from "./repository/MessageRepository";
+    import {onMount} from "svelte";
 
     export let message: Message;
-
+    export let messageRepository: MessageRepository;
     let showReply = false;
+
+    onMount(() => {
+        if (message.replies.length > 0) {
+            showReply = true;
+        }
+    });
 
     function convertEpochToDateTime(epochSeconds: number) {
         const date = new Date(epochSeconds * 1000); // Convert epoch seconds to milliseconds
@@ -31,13 +40,10 @@
     <div class="message">
         <div class="header">
             <div class="time">{convertEpochToDateTime(message.createdSeconds)}</div>
-            {#if message.replyTo}
-                <button class="reply-to">>{message.replyTo}</button>
-            {/if}
             <div class="ops">
                 <button on:click|preventDefault={toggleReply}>Reply
-                    {#if message.replyCount > 0}
-                        ({message.replyCount})
+                    {#if message.replies.length > 0}
+                        ({message.replies.length})
                     {/if}
                 </button>
                 <button on:click={copy}>Copy</button>
@@ -46,7 +52,10 @@
         <div>{message.body}</div>
         {#if showReply}
             <div class="reply-container">
-                <InputBox replyTo={message.id} />
+                {#each message.replies as reply}
+                    <MessageItem message={reply} messageRepository={messageRepository} />
+                {/each}
+                <InputBox replyTo={message} messageRepository={messageRepository} />
             </div>
         {/if}
     </div>
@@ -63,16 +72,6 @@
         display: flex; /* Enables Flexbox */
         justify-content: space-between; /* Aligns children with space between them */
         align-items: center; /* Aligns children vertically in the center */
-    }
-
-    .header .reply-to {
-        background: none; /* Removes background */
-        border: none; /* Removes border */
-        color: #646cff; /* Sets text color to blue */
-        font: inherit; /* Inherits font from parent */
-        cursor: pointer; /* Changes cursor to pointer on hover */
-        padding: 0; /* Removes padding */
-        margin: 0; /* Removes margin */
     }
 
     .ops > button {
