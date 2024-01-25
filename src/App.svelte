@@ -30,7 +30,6 @@
   }
 
   .input-box {
-    margin-top: auto;
-    height: 200px; /* Fixed height for InputBox */
+    margin-top: 9px;
   }
 </style>

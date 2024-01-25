@@ -15,6 +15,9 @@
       "dialog": {
         "all": true
       },
+      "clipboard": {
+        "writeText": true
+      },
       "shell": {
         "all": false,
         "open": true

@@ -3,6 +3,7 @@
     import {listen} from "@tauri-apps/api/event";
     import {onDestroy, onMount} from "svelte";
     import {MessageRepository} from "./repository/MessageRepository";
+    import {writeText} from "@tauri-apps/api/clipboard";
 
     function uuidv4() {
         return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c: string) =>
@@ -47,8 +48,8 @@
         return `${year}-${month}-${day} ${hour}:${minutes}`;
     }
 
-    function copy(message: Message) {
-        alert("Copy to clipboard");
+    async function copy(message: Message) {
+        await writeText(message.body);
     }
 </script>
 
