@@ -8,7 +8,7 @@
     let inserted = true;
 
     async function send() {
-        if (body.length > 0) {
+        if (body.length > 0 && body.match(/\S/)) {
             await emit("send_message", {body, replyTo});
         }
         body = "";

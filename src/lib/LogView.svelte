@@ -3,8 +3,6 @@
     import {listen} from "@tauri-apps/api/event";
     import {onDestroy, onMount} from "svelte";
     import {MessageRepository} from "./repository/MessageRepository";
-    import {writeText} from "@tauri-apps/api/clipboard";
-    import InputBox from "./InputBox.svelte";
     import MessageItem from "./MessageItem.svelte";
 
     function uuidv4() {
@@ -28,14 +26,26 @@
         let body = payload.body;
         console.log(body)
         let createdSeconds = Math.floor(new Date().getTime() / 1000);
-        messages.push({
+        let message = {
             id: uuidv4(),
             replyTo: payload.replyTo,
             createdSeconds:createdSeconds,
+            replyCount: 0,
             body: body,
-        });
+        }
+        messages.unshift(message);
+
+        if (message.replyTo) {
+            for (const target of messages) {
+                if (target.id === message.replyTo) {
+                    target.replyCount++;
+                    break;
+                }
+            }
+        }
+
         messageRepository.save(messages);
-        messages = messages;
+        messages = messages.slice();
     });
     onDestroy(async () => {
         if (unlisten) {
@@ -46,7 +56,7 @@
 </script>
 
 <div>
-    {#each messages.reverse() as message}
+    {#each messages as message}
         <MessageItem message={message} />
     {/each}
 </div>

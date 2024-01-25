@@ -35,7 +35,11 @@
                 <button class="reply-to">>{message.replyTo}</button>
             {/if}
             <div class="ops">
-                <button on:click|preventDefault={toggleReply}>Reply</button>
+                <button on:click|preventDefault={toggleReply}>Reply
+                    {#if message.replyCount > 0}
+                        ({message.replyCount})
+                    {/if}
+                </button>
                 <button on:click={copy}>Copy</button>
             </div>
         </div>
