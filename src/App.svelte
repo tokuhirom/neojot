@@ -4,11 +4,11 @@
 </script>
 
 <main class="container">
-  <div class="log-view">
-    <LogView />
-  </div>
   <div class="input-box">
     <InputBox />
+  </div>
+  <div class="log-view">
+    <LogView />
   </div>
 </main>
 
@@ -26,6 +26,7 @@
     flex-grow: 1;
     margin-block-start: 0;
     margin-block-end: 0;
+    max-height: 80vh;
   }
 
   .input-box {

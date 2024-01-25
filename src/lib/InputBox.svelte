@@ -1,13 +1,23 @@
 <script lang="ts">
 
-    let body="";
+    import {emit} from "@tauri-apps/api/event";
 
-    function send() {
-        alert(`body: ${body}`)
+    let body="";
+    let inserted = true;
+
+    async function send() {
+        if (body.length > 0) {
+            await emit("send_message", {body});
+        }
+        body = "";
     }
 
     function handleKeydown(event: KeyboardEvent) {
         if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+            return;
+        }
+        if (inserted) {
+            inserted = false; // ignore the insertFromComposition event.
             return;
         }
 
@@ -17,30 +27,37 @@
             send();
         }
     }
+
+    function handleInput(event: InputEvent) {
+        if (event.inputType === "insertFromComposition") {
+            inserted = true;
+        }
+    }
 </script>
 
 <div>
-    <form on:submit={send}>
-        <textarea bind:value={body} cols="40" rows="3" on:keydown={handleKeydown}></textarea>
-        <button>Send</button>
+    <form on:submit|preventDefault={send}>
+        <textarea bind:value={body} cols="40" rows="3" on:keyup={handleKeydown}
+                  on:input={handleInput}
+        ></textarea>
+        <button type="submit">Send</button>
     </form>
 </div>
 
 <style>
     form {
-        display: flex; /* Use flexbox to layout children */
-        flex-direction: row; /* Stack children vertically */
-        align-items: stretch; /* Stretch children to match the width of the container */
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
     }
 
     textarea {
-        font-size: 1em; /* Sets font size to match default browser font size */
-        width: 90%; /* Sets width to 70% of the container's width */
-        resize: vertical; /* Allows resizing only vertically */
+        font-size: 1em;
+        width: 90%;
+        resize: vertical;
     }
 
     button {
-        width: 10%; /* Sets width to 30% of the container's width */
-        /* Additional styling for the button, if needed */
+        width: 10%;
     }
 </style>
