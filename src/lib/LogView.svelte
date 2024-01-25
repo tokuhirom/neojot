@@ -1,7 +1,8 @@
 <script lang="ts">
     import type {Message} from "./Message";
     import {listen} from "@tauri-apps/api/event";
-    import {onDestroy} from "svelte";
+    import {onDestroy, onMount} from "svelte";
+    import {MessageRepository} from "./repository/MessageRepository";
 
     function uuidv4() {
         return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c: string) =>
@@ -9,14 +10,12 @@
         );
     }
 
+    let messages: Message[] = [];
+    const messageRepository = new MessageRepository();
 
-    let messages: Message[] = [ // mock
-        {
-            "id": uuidv4(),
-            "createdSeconds": 1706073531,
-            "body": "hello",
-        }
-    ];
+    onMount(async () => {
+        messages = await messageRepository.load();
+    })
 
     let unlisten = listen("send_message", (event) => {
         let payload = event.payload as {body: string};
@@ -28,6 +27,7 @@
             createdSeconds:createdSeconds,
             body: body,
         });
+        messageRepository.save(messages);
         messages = messages;
     });
     onDestroy(async () => {
