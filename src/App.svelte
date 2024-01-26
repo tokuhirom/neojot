@@ -14,15 +14,23 @@
     children = node.children;
   });
 
-  let unlisten = listen("sent_message", async () => {
+  let unlistenSave = listen("save", async () => {
     if (node) {
       await nodeRepository.save(node);
       children = node.children;
     }
   });
+  let unlistenRenderNodes = listen("render-nodes", () => {
+    console.log("render-nodes");
+    node = node;
+    children = node?.children || [];
+  });
   onDestroy(async () => {
-    if (unlisten) {
-      (await unlisten)();
+    if (unlistenSave) {
+      (await unlistenSave)();
+    }
+    if (unlistenRenderNodes) {
+      (await unlistenRenderNodes)();
     }
   });
 </script>

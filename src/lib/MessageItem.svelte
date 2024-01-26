@@ -1,21 +1,43 @@
 <script lang="ts">
     import {createOutlineNode, type OutlineNode} from "./OutlineNode";
     import MessageItem from "./MessageItem.svelte";
-    import {emit} from "@tauri-apps/api/event";
+    import {emit, listen} from "@tauri-apps/api/event";
+    import {onDestroy, onMount} from "svelte";
 
     export let parent: OutlineNode;
     export let node: OutlineNode;
+    let children: OutlineNode[];
 
-    export function handleKeyPress(event: KeyboardEvent) {
+    onMount(() => {
+        children = node.children;
+    });
+
+    let unlisten = listen("render-nodes", () => {
+        console.log("render-nodes");
+        node = node;
+        parent = parent;
+        children = node.children;
+    });
+    onDestroy(async () => {
+        if (unlisten) {
+            (await unlisten)();
+        }
+    });
+
+    export async function handleKeyPress(event: KeyboardEvent) {
         if ((event.key === "h" && event.ctrlKey) || event.key === "Backspace") {
             if (node.body === "" || node.body === "<br>") {
                 // delete node.
                 console.log(`Delete node: ${node.body} (parent=${parent.children.length}`);
+                console.log(node, parent);
                 parent.children = parent.children.filter((it) => {
-                   console.log(it, node);
                    return it.id !== node.id;
                 });
                 console.log(`Deleted node: (parent=${parent.children.length}`);
+                node = {...node};
+                parent = {...parent};
+                await emit("save");
+                await emit("render-nodes");
             }
         }
         console.log(`keypress: ${event.key} ${event.keyCode}`)
@@ -36,7 +58,7 @@
                 console.log("parent would be null");
             //     await messageRepository.post("");
             }
-            await emit("sent_message");
+            await emit("save");
 
             return;
         }
@@ -50,8 +72,8 @@
              on:keydown={handleKeyPress}
              bind:innerHTML={node.body}></div>
         <div class="reply-container">
-            {#if node.children}
-                {#each node.children as child}
+            {#if children}
+                {#each children as child}
                     <MessageItem parent={node} node={child} />
                 {/each}
             {/if}
