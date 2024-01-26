@@ -50,3 +50,17 @@ export function removeNode(parentNode: OutlineNode, node: OutlineNode): OutlineN
     }
 }
 
+export function moveNodeDown(parentNode: OutlineNode, node: OutlineNode): boolean {
+    const children = parentNode.children;
+    const nodeIndex = children.findIndex(child => child.id === node.id);
+
+    if (nodeIndex <= 0) {
+        return false;
+    }
+
+    const previousSibling = children[nodeIndex - 1];
+    children.splice(nodeIndex, 1);
+    previousSibling.children.push(node);
+
+    return true;
+}

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {createOutlineNode, insertNewNodeAfter, type OutlineNode, removeNode} from "./OutlineNode";
+    import {createOutlineNode, insertNewNodeAfter, moveNodeDown, type OutlineNode, removeNode} from "./OutlineNode";
     import MessageItem from "./MessageItem.svelte";
     import {emit, listen} from "@tauri-apps/api/event";
     import {onDestroy, onMount} from "svelte";
@@ -57,8 +57,17 @@
                 await emit("save");
                 await emit("render-nodes");
 
-                newFocus(newTarget);
+                newFocus(newTarget); // TODO focus した上で、末尾にカーソル合わせたいかも。。
+                return;
             }
+        } else if (event.key === "Tab") {
+            event.preventDefault();
+            event.stopPropagation();
+            moveNodeDown(parent, node);
+            await emit("save");
+            await emit("render-nodes");
+            newFocus(node);
+            return false;
         }
 
         if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
@@ -84,6 +93,7 @@
 
             return;
         }
+
         console.log(`keypress: ${event.key} ${event.keyCode}`)
     }
 
