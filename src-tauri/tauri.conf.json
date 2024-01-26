@@ -25,11 +25,13 @@
       "fs": {
         "readFile": true,
         "writeFile": true,
+        "readDir": true,
         "createDir": true,
         "exists": true,
         "scope": [
           "$APPDATA",
-          "$APPDATA/*"
+          "$APPDATA/*",
+          "$APPDATA/data/*"
         ]
       }
     },
