@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {createOutlineNode, type OutlineNode} from "./OutlineNode";
+    import {createOutlineNode, insertNewNodeAfter, type OutlineNode} from "./OutlineNode";
     import MessageItem from "./MessageItem.svelte";
     import {emit, listen} from "@tauri-apps/api/event";
     import {onDestroy, onMount} from "svelte";
@@ -7,6 +7,8 @@
     export let parent: OutlineNode;
     export let node: OutlineNode;
     let children: OutlineNode[];
+
+    let inserted = false;
 
     onMount(() => {
         children = node.children;
@@ -40,10 +42,31 @@
                 await emit("render-nodes");
             }
         }
+
+        if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+            return;
+        }
+        if (inserted) {
+            inserted = false; // ignore the insertFromComposition event.
+            return;
+        }
+
+        if (event.key == "Enter") {
+            // enter key was already handled by handleInput.
+            console.log("ENTER");
+            event.preventDefault();
+
+            // 現行ノードに対して、直後にノードを追加する
+            insertNewNodeAfter(parent, node);
+            await emit("save");
+            await emit("render-nodes");
+
+            return;
+        }
         console.log(`keypress: ${event.key} ${event.keyCode}`)
     }
 
-    async function handleUpdateMessageBody(event: InputEvent) {
+    async function handleInput(event: InputEvent) {
         console.log(`UPDATED: ${node.body} ${event.inputType}`)
 
         if (event.inputType == "insertParagraph") {
@@ -62,13 +85,18 @@
 
             return;
         }
+
+        if (event.inputType === "insertFromComposition") {
+            inserted = true;
+            return;
+        }
     }
 </script>
 
 <div>
     <div class="message">
         <div contenteditable
-             on:input={handleUpdateMessageBody}
+             on:input={handleInput}
              on:keydown={handleKeyPress}
              bind:innerHTML={node.body}></div>
         <div class="reply-container">

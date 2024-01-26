@@ -22,7 +22,7 @@
   });
   let unlistenRenderNodes = listen("render-nodes", () => {
     console.log("render-nodes");
-    node = node;
+    node = {...node};
     children = node?.children || [];
   });
   onDestroy(async () => {

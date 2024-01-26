@@ -24,3 +24,13 @@ export function generateTimestampId() {
 
     return `${year}${month}${day}${hour}${minute}${second}${millis}`;
 }
+
+export function insertNewNodeAfter(parentNode: OutlineNode, node: OutlineNode) {
+    const index = parentNode.children.findIndex(child => child.id === node.id);
+    if (index === -1) {
+        return;
+    }
+
+    const newNode = createOutlineNode();
+    parentNode.children.splice(index + 1, 0, newNode);
+}
