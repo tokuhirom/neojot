@@ -57,9 +57,20 @@
             event.preventDefault();
 
             // 現行ノードに対して、直後にノードを追加する
-            insertNewNodeAfter(parent, node);
+            let inserted = insertNewNodeAfter(parent, node);
             await emit("save");
             await emit("render-nodes");
+
+            setTimeout(() => {
+                if (inserted) {
+                    let el = document.getElementById(inserted.id);
+                    if (el) {
+                        el.focus();
+                    } else {
+                        console.log("The element is not ready...");
+                    }
+                }
+            }, 0);
 
             return;
         }
@@ -98,7 +109,8 @@
         <div contenteditable
              on:input={handleInput}
              on:keydown={handleKeyPress}
-             bind:innerHTML={node.body}></div>
+             bind:innerHTML={node.body}
+             id={node.id}></div>
         <div class="reply-container">
             {#if children}
                 {#each children as child}
