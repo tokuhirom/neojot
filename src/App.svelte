@@ -39,7 +39,8 @@
   <div class="log-view">
     {#if node && children}
       {#each children as child}
-        <MessageItem parent={node} node={child} />
+        <MessageItem root={node} parent={node} node={child}
+        />
       {/each}
     {/if}
   </div>
@@ -60,9 +61,5 @@
     margin-block-start: 0;
     margin-block-end: 0;
     max-height: 80vh;
-  }
-
-  .input-box {
-    margin-top: 9px;
   }
 </style>

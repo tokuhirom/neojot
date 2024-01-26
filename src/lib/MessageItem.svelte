@@ -1,9 +1,17 @@
 <script lang="ts">
-    import {createOutlineNode, insertNewNodeAfter, moveNodeDown, type OutlineNode, removeNode} from "./OutlineNode";
+    import {
+        createOutlineNode,
+        insertNewNodeAfter,
+        moveNodeDown,
+        moveNodeUp,
+        type OutlineNode,
+        removeNode
+    } from "./OutlineNode";
     import MessageItem from "./MessageItem.svelte";
     import {emit, listen} from "@tauri-apps/api/event";
     import {onDestroy, onMount} from "svelte";
 
+    export let root: OutlineNode;
     export let parent: OutlineNode;
     export let node: OutlineNode;
     let children: OutlineNode[];
@@ -63,7 +71,11 @@
         } else if (event.key === "Tab") {
             event.preventDefault();
             event.stopPropagation();
-            moveNodeDown(parent, node);
+            if (event.shiftKey) {
+                moveNodeUp(root, parent, node);
+            } else {
+                moveNodeDown(parent, node);
+            }
             await emit("save");
             await emit("render-nodes");
             newFocus(node);
@@ -134,7 +146,7 @@
         <div class="reply-container">
             {#if children}
                 {#each children as child}
-                    <MessageItem parent={node} node={child} />
+                    <MessageItem root={root} parent={node} node={child} />
                 {/each}
             {/if}
         </div>

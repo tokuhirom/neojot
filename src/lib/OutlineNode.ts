@@ -64,3 +64,43 @@ export function moveNodeDown(parentNode: OutlineNode, node: OutlineNode): boolea
 
     return true;
 }
+
+function findParentNode(root: OutlineNode, childId: string): OutlineNode | null {
+    for (const child of root.children) {
+        if (child.id === childId) {
+            return root;
+        }
+        const potentialParent = findParentNode(child, childId);
+        if (potentialParent) {
+            return potentialParent;
+        }
+    }
+    return null;
+}
+
+export function moveNodeUp(root: OutlineNode, parentNode: OutlineNode, node: OutlineNode): boolean {
+    const parentOfParent = findParentNode(root, parentNode.id);
+    const nodeIndex = parentNode.children.findIndex(child => child.id === node.id);
+
+    // ノードが親ノードの中に見つからない場合は何もしない
+    if (nodeIndex === -1) {
+        return false;
+    }
+
+    // 親ノードがルートノードである場合、直接ルートの子として挿入
+    if (!parentOfParent) {
+        root.children.push(node);
+    } else {
+        // 親の兄弟ノードとして挿入
+        const parentIndex = parentOfParent.children.findIndex(child => child.id === parentNode.id);
+        if (parentIndex === -1) {
+            return false;
+        }
+        parentOfParent.children.splice(parentIndex + 1, 0, node);
+    }
+
+    // 元の親からノードを削除
+    parentNode.children.splice(nodeIndex, 1);
+
+    return true;
+}

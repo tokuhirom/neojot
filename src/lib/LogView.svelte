@@ -5,6 +5,7 @@
     import MessageItem from "./MessageItem.svelte";
 
     let messages: OutlineNode[] = [];
+    export let root: OutlineNode;
     export let messageRepository: NodeRepository;
 
     onMount(async () => {
@@ -25,7 +26,10 @@
 
 <div>
     {#each messages as message}
-        <MessageItem parent={null} message={message} messageRepository={messageRepository} />
+        <MessageItem root={root}
+                     parent={null}
+                     message={message}
+                     messageRepository={messageRepository} />
     {/each}
 </div>
 
