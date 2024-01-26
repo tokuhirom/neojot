@@ -22,10 +22,10 @@ export class NodeRepository {
     }
 }
 
-export function buildRootNode() {
+export function buildRootNode(): OutlineNode {
     return {
         id: "**ROOT**",
-        body: "",
+        body: "**ROOT**",
         children: [
             {
                 id: generateTimestampId(),

@@ -25,6 +25,7 @@ export function generateTimestampId() {
     return `${year}${month}${day}${hour}${minute}${second}${millis}`;
 }
 
+// Enter 押したときの挙動。
 export function insertNewNodeAfter(parentNode: OutlineNode, node: OutlineNode): OutlineNode | undefined {
     const index = parentNode.children.findIndex(child => child.id === node.id);
     if (index === -1) {
