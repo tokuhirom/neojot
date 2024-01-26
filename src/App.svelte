@@ -9,7 +9,6 @@
 
   let nodeRepository = new NodeRepository();
   let rootNode: OutlineNode | null;
-  let children: OutlineNode[] = [];
 
   let entries: FileEntry[];
   let selectedEntry: FileEntry | undefined;
@@ -44,21 +43,13 @@
       rootNode = targetNode;
     });
   }
-  $: if (rootNode) {
-    children = rootNode.children;
-  }
 
   listen("save", async () => {
     if (rootNode) {
       console.log(`SAVING: ${stringifyNode(rootNode)}`);
       await nodeRepository.save(selectedEntry!!.name!!, rootNode);
       rootNode = rootNode;
-      children = rootNode.children;
     }
-  });
-  let unlistenRenderNodes = listen("render-nodes", () => {
-    console.log("render-nodes");
-    children = rootNode?.children || [];
   });
   listen("do_new_file", async () => {
     function getFormattedDate() {
@@ -79,17 +70,11 @@
     await nodeRepository.save(filename, buildRootNode());
     await loadFileList();
   })
-  onDestroy(async () => {
-    if (unlistenRenderNodes) {
-      (await unlistenRenderNodes)();
-    }
-  });
 
   async function openEntry(fileEntry: FileEntry) {
     console.log(`open: ${fileEntry.path}`)
     selectedEntry = fileEntry;
     rootNode = await nodeRepository.load(fileEntry.name!!);
-    children = rootNode.children;
   }
 </script>
 
@@ -103,8 +88,8 @@
     {/if}
   </div>
   <div class="log-view">
-    {#if rootNode && children}
-      {#each children as child}
+    {#if rootNode}
+      {#each rootNode.children as child}
         <MessageItem root={rootNode} parent={rootNode} node={child} />
       {/each}
 <!--      <pre>{stringifyNode(rootNode)}</pre>-->

@@ -17,17 +17,6 @@
 
     let inserted = false;
 
-    let unlisten = listen("render-nodes", () => {
-        console.log("render-nodes");
-        node = node;
-        parent = parent;
-    });
-    onDestroy(async () => {
-        if (unlisten) {
-            (await unlisten)();
-        }
-    });
-
     function newFocus(target: OutlineNode | undefined) {
         if (target) {
             setTimeout(() => {
@@ -46,10 +35,7 @@
             if (node.body === "" || node.body === "<br>") {
                 let newTarget = removeNode(parent, node);
 
-                // node = {...node};
-                // parent = {...parent};
                 await emit("save");
-                await emit("render-nodes");
 
                 newFocus(newTarget); // TODO focus した上で、末尾にカーソル合わせたいかも。。
                 return;
@@ -63,7 +49,6 @@
                 moveNodeDown(parent, node);
             }
             await emit("save");
-            await emit("render-nodes");
             newFocus(node);
             return false;
         }
@@ -86,7 +71,6 @@
             let inserted = insertNewNodeAfter(parent, node);
             console.log(`AFTER:ENTER, insertNewNodeAfter:: ${stringifyNode(root)}`);
             await emit("save");
-            await emit("render-nodes");
 
             newFocus(inserted);
 
