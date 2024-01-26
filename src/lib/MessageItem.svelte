@@ -5,7 +5,7 @@
         moveNodeDown,
         moveNodeUp,
         type OutlineNode,
-        removeNode
+        removeNode, stringifyNode
     } from "./OutlineNode";
     import MessageItem from "./MessageItem.svelte";
     import {emit, listen} from "@tauri-apps/api/event";
@@ -14,19 +14,13 @@
     export let root: OutlineNode;
     export let parent: OutlineNode;
     export let node: OutlineNode;
-    let children: OutlineNode[];
 
     let inserted = false;
-
-    onMount(() => {
-        children = node.children;
-    });
 
     let unlisten = listen("render-nodes", () => {
         console.log("render-nodes");
         node = node;
         parent = parent;
-        children = node.children;
     });
     onDestroy(async () => {
         if (unlisten) {
@@ -50,18 +44,10 @@
     export async function handleKeyPress(event: KeyboardEvent) {
         if ((event.key === "h" && event.ctrlKey) || event.key === "Backspace") {
             if (node.body === "" || node.body === "<br>") {
-                // delete node.
-                // console.log(`Delete node: ${node.body} (parent=${parent.children.length}`);
-                // console.log(node, parent);
-                // parent.children = parent.children.filter((it) => {
-                //    return it.id !== node.id;
-                // });
-                // console.log(`Deleted node: (parent=${parent.children.length}`);
-
                 let newTarget = removeNode(parent, node);
 
-                node = {...node};
-                parent = {...parent};
+                // node = {...node};
+                // parent = {...parent};
                 await emit("save");
                 await emit("render-nodes");
 
@@ -93,11 +79,12 @@
 
         if (event.key == "Enter") {
             // enter key was already handled by handleInput.
-            console.log("ENTER");
             event.preventDefault();
 
             // 現行ノードに対して、直後にノードを追加する
+            console.log(`BEFORFE:ENTER, insertNewNodeAfter:: ${stringifyNode(root)}`);
             let inserted = insertNewNodeAfter(parent, node);
+            console.log(`AFTER:ENTER, insertNewNodeAfter:: ${stringifyNode(root)}`);
             await emit("save");
             await emit("render-nodes");
 
@@ -110,7 +97,7 @@
     }
 
     async function handleInput(event: InputEvent) {
-        console.log(`UPDATED: ${node.body} ${event.inputType}`)
+        console.log(`handleInput: ${node.body},${JSON.stringify(node)},${JSON.stringify(root)}  ${stringifyNode(root)} ${event.inputType}`)
 
         if (event.inputType == "insertParagraph") {
             // When the user push the "Enter" key.
@@ -129,14 +116,15 @@
             return;
         }
 
+
         if (event.inputType === "insertFromComposition") {
             inserted = true;
-            return;
         }
 
         if (node.body.startsWith("TODO:")) {
             node.body = node.body.replace(/^TODO:/, "<span class='todo'>TODO:</span>");
         }
+        await emit("save");
     }
 </script>
 
@@ -150,8 +138,8 @@
              bind:innerHTML={node.body}
              id={node.id}></div>
         <div class="reply-container">
-            {#if children}
-                {#each children as child}
+            {#if node.children}
+                {#each node.children as child}
                     <MessageItem root={root} parent={node} node={child} />
                 {/each}
             {/if}

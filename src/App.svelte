@@ -2,7 +2,7 @@
   import {buildRootNode, NodeRepository} from "./lib/repository/NodeRepository";
   import MessageItem from "./lib/MessageItem.svelte";
   import {onDestroy, onMount} from "svelte";
-  import type {OutlineNode} from "./lib/OutlineNode";
+  import {type OutlineNode, stringifyNode} from "./lib/OutlineNode";
   import {listen} from "@tauri-apps/api/event";
   import {BaseDirectory, createDir, exists, type FileEntry, readDir, writeTextFile} from "@tauri-apps/api/fs";
   import FileListItem from "./lib/FileListItem.svelte";
@@ -14,7 +14,7 @@
   let entries: FileEntry[];
   let selectedEntry: FileEntry | undefined;
 
-  onMount(async () => {
+  async function loadFileList() {
     if (!await exists("data", {dir: BaseDirectory.AppData})) {
       await createDir("data", {dir: BaseDirectory.AppData});
     }
@@ -29,6 +29,10 @@
       // 最初の1ファイルを作成する
       await nodeRepository.save("init.json", buildRootNode());
     }
+  }
+
+  onMount(async () => {
+    await loadFileList();
 
     selectedEntry = entries[0];
     rootNode = await nodeRepository.load(selectedEntry.name!!);
@@ -44,24 +48,38 @@
     children = rootNode.children;
   }
 
-  onMount(async () => {
-  });
-
-  let unlistenSave = listen("save", async () => {
+  listen("save", async () => {
     if (rootNode) {
+      console.log(`SAVING: ${stringifyNode(rootNode)}`);
       await nodeRepository.save(selectedEntry!!.name!!, rootNode);
+      rootNode = rootNode;
       children = rootNode.children;
     }
   });
   let unlistenRenderNodes = listen("render-nodes", () => {
     console.log("render-nodes");
-    rootNode = rootNode;
     children = rootNode?.children || [];
   });
-  onDestroy(async () => {
-    if (unlistenSave) {
-      (await unlistenSave)();
+  listen("do_new_file", async () => {
+    function getFormattedDate() {
+      const now = new Date();
+
+      const year = now.getFullYear();
+      const month = (now.getMonth() + 1).toString().padStart(2, '0');
+      const day = now.getDate().toString().padStart(2, '0');
+      const hours = now.getHours().toString().padStart(2, '0');
+      const minutes = now.getMinutes().toString().padStart(2, '0');
+      const seconds = now.getSeconds().toString().padStart(2, '0');
+
+      return `${year}${month}${day}${hours}${minutes}${seconds}.json`;
     }
+
+    const filename = getFormattedDate();
+    console.log(`Added new file: ${filename}`)
+    await nodeRepository.save(filename, buildRootNode());
+    await loadFileList();
+  })
+  onDestroy(async () => {
     if (unlistenRenderNodes) {
       (await unlistenRenderNodes)();
     }
@@ -89,6 +107,7 @@
       {#each children as child}
         <MessageItem root={rootNode} parent={rootNode} node={child} />
       {/each}
+<!--      <pre>{stringifyNode(rootNode)}</pre>-->
     {/if}
   </div>
 </main>
