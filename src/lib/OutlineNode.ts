@@ -35,3 +35,18 @@ export function insertNewNodeAfter(parentNode: OutlineNode, node: OutlineNode): 
     parentNode.children.splice(index + 1, 0, newNode);
     return newNode;
 }
+
+export function removeNode(parentNode: OutlineNode, node: OutlineNode): OutlineNode | undefined {
+    const index = parentNode.children.findIndex(child => child.id === node.id);
+    if (index === -1) {
+        return;
+    }
+
+    parentNode.children.splice(index, 1);
+    if (index <= 1) {
+        return parentNode;
+    } else {
+        return parentNode.children[index-1];
+    }
+}
+

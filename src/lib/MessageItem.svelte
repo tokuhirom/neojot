@@ -1,5 +1,5 @@
 <script lang="ts">
-    import {createOutlineNode, insertNewNodeAfter, type OutlineNode} from "./OutlineNode";
+    import {createOutlineNode, insertNewNodeAfter, type OutlineNode, removeNode} from "./OutlineNode";
     import MessageItem from "./MessageItem.svelte";
     import {emit, listen} from "@tauri-apps/api/event";
     import {onDestroy, onMount} from "svelte";
@@ -26,20 +26,38 @@
         }
     });
 
+    function newFocus(target: OutlineNode | undefined) {
+        if (target) {
+            setTimeout(() => {
+                let el = document.getElementById(target.id);
+                if (el) {
+                    el.focus();
+                } else {
+                    console.log("The element is not ready...");
+                }
+            }, 0);
+        }
+    }
+
     export async function handleKeyPress(event: KeyboardEvent) {
         if ((event.key === "h" && event.ctrlKey) || event.key === "Backspace") {
             if (node.body === "" || node.body === "<br>") {
                 // delete node.
-                console.log(`Delete node: ${node.body} (parent=${parent.children.length}`);
-                console.log(node, parent);
-                parent.children = parent.children.filter((it) => {
-                   return it.id !== node.id;
-                });
-                console.log(`Deleted node: (parent=${parent.children.length}`);
+                // console.log(`Delete node: ${node.body} (parent=${parent.children.length}`);
+                // console.log(node, parent);
+                // parent.children = parent.children.filter((it) => {
+                //    return it.id !== node.id;
+                // });
+                // console.log(`Deleted node: (parent=${parent.children.length}`);
+
+                let newTarget = removeNode(parent, node);
+
                 node = {...node};
                 parent = {...parent};
                 await emit("save");
                 await emit("render-nodes");
+
+                newFocus(newTarget);
             }
         }
 
@@ -51,6 +69,7 @@
             return;
         }
 
+
         if (event.key == "Enter") {
             // enter key was already handled by handleInput.
             console.log("ENTER");
@@ -61,16 +80,7 @@
             await emit("save");
             await emit("render-nodes");
 
-            setTimeout(() => {
-                if (inserted) {
-                    let el = document.getElementById(inserted.id);
-                    if (el) {
-                        el.focus();
-                    } else {
-                        console.log("The element is not ready...");
-                    }
-                }
-            }, 0);
+            newFocus(inserted);
 
             return;
         }
