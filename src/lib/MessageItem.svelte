@@ -1,82 +1,73 @@
 <script lang="ts">
-    import type {Message} from "./Message";
-    import InputBox from "./InputBox.svelte";
+    import {createOutlineNode, type OutlineNode} from "./OutlineNode";
     import MessageItem from "./MessageItem.svelte";
-    import {writeText} from "@tauri-apps/api/clipboard";
-    import {MessageRepository} from "./repository/MessageRepository";
-    import {onMount} from "svelte";
+    import {emit} from "@tauri-apps/api/event";
 
-    export let message: Message;
-    export let messageRepository: MessageRepository;
-    let showReply = false;
+    export let parent: OutlineNode;
+    export let node: OutlineNode;
 
-    onMount(() => {
-        if (message.replies.length > 0) {
-            showReply = true;
+    export function handleKeyPress(event: KeyboardEvent) {
+        if ((event.key === "h" && event.ctrlKey) || event.key === "Backspace") {
+            if (node.body === "" || node.body === "<br>") {
+                // delete node.
+                console.log(`Delete node: ${node.body} (parent=${parent.children.length}`);
+                parent.children = parent.children.filter((it) => {
+                   console.log(it, node);
+                   return it.id !== node.id;
+                });
+                console.log(`Deleted node: (parent=${parent.children.length}`);
+            }
         }
-    });
-
-    function convertEpochToDateTime(epochSeconds: number) {
-        const date = new Date(epochSeconds * 1000); // Convert epoch seconds to milliseconds
-        const year = date.getFullYear();
-        const month = ('0' + (date.getMonth() + 1)).slice(-2); // Months are zero-based
-        const day = ('0' + date.getDate()).slice(-2);
-        const hour = ('0' + date.getHours()).slice(-2);
-        const minutes = ('0' + date.getMinutes()).slice(-2);
-
-        return `${year}-${month}-${day} ${hour}:${minutes}`;
+        console.log(`keypress: ${event.key} ${event.keyCode}`)
     }
 
-    async function copy() {
-        await writeText(message.body);
-    }
+    async function handleUpdateMessageBody(event: InputEvent) {
+        console.log(`UPDATED: ${node.body} ${event.inputType}`)
 
-    async function handleUpdateMessageBody() {
-        console.log(`UPDATED: ${message.body}`)
-        await messageRepository.save();
-    }
+        if (event.inputType == "insertParagraph") {
+            // When the user push the "Enter" key.
+            event.preventDefault();
+            event.stopPropagation();
 
-    function toggleReply() {
-        showReply = !showReply;
+            if (parent) {
+                 console.log("insert new sibling node");
+                 parent.children.push(createOutlineNode());
+            } else {
+                console.log("parent would be null");
+            //     await messageRepository.post("");
+            }
+            await emit("sent_message");
+
+            return;
+        }
     }
 </script>
 
 <div>
     <div class="message">
-        <div class="header">
-            <div class="time">{convertEpochToDateTime(message.createdSeconds)}</div>
-            <div class="ops">
-                <button on:click|preventDefault={toggleReply}>Reply
-                    {#if message.replies.length > 0}
-                        ({message.replies.length})
-                    {/if}
-                </button>
-                <button on:click={copy}>Copy</button>
-            </div>
-        </div>
-        <div contenteditable on:input={handleUpdateMessageBody} bind:innerHTML={message.body}></div>
-        {#if showReply}
-            <div class="reply-container">
-                {#each message.replies as reply}
-                    <MessageItem message={reply} messageRepository={messageRepository} />
+        <div contenteditable
+             on:input={handleUpdateMessageBody}
+             on:keydown={handleKeyPress}
+             bind:innerHTML={node.body}></div>
+        <div class="reply-container">
+            {#if node.children}
+                {#each node.children as child}
+                    <MessageItem parent={node} node={child} />
                 {/each}
-                <InputBox replyTo={message} messageRepository={messageRepository} />
-            </div>
-        {/if}
+            {/if}
+        </div>
     </div>
 </div>
 
 <style>
     .message {
-        border-top: #535bf2 1px solid;
         padding-top: 8px;
         margin-bottom: 9px;
+        padding-right: 8px;
+        border-bottom: darkgrey 1px solid;
     }
-
-    .header {
-        display: flex; /* Enables Flexbox */
-        justify-content: space-between; /* Aligns children with space between them */
-        align-items: center; /* Aligns children vertically in the center */
+    .message:hover {
+        border-left: yellowgreen 3px solid;
     }
 
     .ops > button {

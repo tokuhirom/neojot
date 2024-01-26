@@ -1,17 +1,39 @@
 <script lang="ts">
-  import InputBox from "./lib/InputBox.svelte";
-  import LogView from "./lib/LogView.svelte";
-  import {MessageRepository} from "./lib/repository/MessageRepository";
+  import {NodeRepository} from "./lib/repository/NodeRepository";
+  import MessageItem from "./lib/MessageItem.svelte";
+  import {onDestroy, onMount} from "svelte";
+  import type {OutlineNode} from "./lib/OutlineNode";
+  import {listen} from "@tauri-apps/api/event";
 
-  let messageRepository = new MessageRepository();
+  let nodeRepository = new NodeRepository();
+  let node: OutlineNode | null;
+  let children: OutlineNode[] = [];
+
+  onMount(async () => {
+    node = await nodeRepository.load();
+    children = node.children;
+  });
+
+  let unlisten = listen("sent_message", async () => {
+    if (node) {
+      await nodeRepository.save(node);
+      children = node.children;
+    }
+  });
+  onDestroy(async () => {
+    if (unlisten) {
+      (await unlisten)();
+    }
+  });
 </script>
 
 <main class="container">
-  <div class="input-box">
-    <InputBox replyTo={null} messageRepository={messageRepository} />
-  </div>
   <div class="log-view">
-    <LogView messageRepository={messageRepository} />
+    {#if node && children}
+      {#each children as child}
+        <MessageItem parent={node} node={child} />
+      {/each}
+    {/if}
   </div>
 </main>
 

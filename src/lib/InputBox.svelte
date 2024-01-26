@@ -1,11 +1,11 @@
 <script lang="ts">
 
     import {emit} from "@tauri-apps/api/event";
-    import type {MessageRepository} from "./repository/MessageRepository";
-    import type {Message} from "./Message";
+    import type {NodeRepository} from "./repository/NodeRepository";
+    import type {OutlineNode} from "./OutlineNode";
 
-    export let replyTo: Message | null;
-    export let messageRepository: MessageRepository;
+    export let replyTo: OutlineNode | null;
+    export let messageRepository: NodeRepository;
 
     let body="";
     let inserted = true;
