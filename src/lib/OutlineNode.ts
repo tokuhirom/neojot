@@ -29,6 +29,7 @@ export function generateTimestampId() {
 export function insertNewNodeAfter(parentNode: OutlineNode, node: OutlineNode): OutlineNode | undefined {
     const index = parentNode.children.findIndex(child => child.id === node.id);
     if (index === -1) {
+        console.log("Missing node");
         return;
     }
 

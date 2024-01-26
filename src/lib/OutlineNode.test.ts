@@ -18,6 +18,39 @@ test('insertNewNodeAfter', () => {
     ])
 })
 
+test('insertNewNodeAfter again', () => {
+    let root: OutlineNode = {
+        id: "**ROOT**",
+        body: "**ROOT**",
+        children: [
+            {
+                id: "ohogehoge",
+                body: "ohogehoge",
+                children: [
+                    {
+                        id: "aaaa",
+                        body: "test",
+                        children: [],
+                    }
+                ]
+            }
+        ],
+    };
+    let parent = root.children[0];
+    let target = root.children[0].children[0];
+    expect(target.body).toBe("test")
+
+    insertNewNodeAfter(parent, target);
+
+    console.log(JSON.stringify(root, null, 4));
+    expect(stringify(root)).toStrictEqual([
+        "**ROOT**",
+        " ohogehoge",
+        "  test",
+        "  ",
+    ])
+})
+
 function buildRootNodeEx(): OutlineNode {
     return {
         id: "**ROOT**",
