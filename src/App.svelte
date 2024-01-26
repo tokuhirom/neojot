@@ -8,7 +8,7 @@
   import FileListItem from "./lib/FileListItem.svelte";
 
   let nodeRepository = new NodeRepository();
-  let node: OutlineNode | null;
+  let rootNode: OutlineNode | null;
   let children: OutlineNode[] = [];
 
   let entries: FileEntry[];
@@ -31,32 +31,32 @@
     }
 
     selectedEntry = entries[0];
-    node = await nodeRepository.load(selectedEntry.name!!);
-    console.log(`Node ready: ${node}`);
+    rootNode = await nodeRepository.load(selectedEntry.name!!);
+    console.log(`Node ready: ${rootNode}`);
   });
 
   $: if (selectedEntry) {
     nodeRepository.load(selectedEntry.name!!).then((targetNode) => {
-      node = targetNode;
+      rootNode = targetNode;
     });
   }
-  $: if (node) {
-    children = node.children;
+  $: if (rootNode) {
+    children = rootNode.children;
   }
 
   onMount(async () => {
   });
 
   let unlistenSave = listen("save", async () => {
-    if (node) {
-      await nodeRepository.save(selectedEntry!!.name!!, node);
-      children = node.children;
+    if (rootNode) {
+      await nodeRepository.save(selectedEntry!!.name!!, rootNode);
+      children = rootNode.children;
     }
   });
   let unlistenRenderNodes = listen("render-nodes", () => {
     console.log("render-nodes");
-    node = node;
-    children = node?.children || [];
+    rootNode = rootNode;
+    children = rootNode?.children || [];
   });
   onDestroy(async () => {
     if (unlistenSave) {
@@ -69,24 +69,25 @@
 
   async function openEntry(fileEntry: FileEntry) {
     console.log(`open: ${fileEntry.path}`)
-    node = await nodeRepository.load(fileEntry.name!!);
-    children = node.children;
+    selectedEntry = fileEntry;
+    rootNode = await nodeRepository.load(fileEntry.name!!);
+    children = rootNode.children;
   }
 </script>
 
 <main class="container">
   <div class="file-list">
     <!-- TODO: create new entry -->
-    {#if entries}
+    {#if entries && selectedEntry}
       {#each entries as entry}
-        <FileListItem openEntry={openEntry} entry={entry} />
+        <FileListItem openEntry={openEntry} entry={entry} selectedEntry={selectedEntry} />
       {/each}
     {/if}
   </div>
   <div class="log-view">
-    {#if node && children}
+    {#if rootNode && children}
       {#each children as child}
-        <MessageItem root={node} parent={node} node={child} />
+        <MessageItem root={rootNode} parent={rootNode} node={child} />
       {/each}
     {/if}
   </div>
@@ -102,7 +103,13 @@
   }
 
   .file-list {
-    width: 300px;
+    flex: 0 0 30%;
+    overflow-y: auto;
+    padding-right: 9px;
+    padding-left: 4px;
+    overflow-x: hidden;
+    word-break: break-word;
+    white-space: normal;
   }
 
   .log-view {

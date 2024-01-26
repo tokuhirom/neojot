@@ -9,7 +9,7 @@ export class NodeRepository {
         const data = JSON.stringify(node, null, 1);
 
         // TODO atomic write
-        await writeTextFile(name,
+        await writeTextFile(`data/${name}`,
             data,
             { dir: BaseDirectory.AppData });
     }
