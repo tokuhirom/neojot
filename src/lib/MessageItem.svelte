@@ -158,10 +158,6 @@
         padding-top: 8px;
         margin-bottom: 9px;
         padding-right: 8px;
-        border-bottom: darkgrey 1px solid;
-    }
-    .message:hover {
-        border-left: yellowgreen 3px solid;
     }
 
     .ops > button {
@@ -176,5 +172,10 @@
 
     .reply-container {
         margin-left: 30px;
+    }
+
+
+    [contenteditable]:focus {
+        outline: none;
     }
 </style>
