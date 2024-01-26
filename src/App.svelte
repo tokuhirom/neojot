@@ -44,14 +44,17 @@
     });
   }
 
-  listen("save", async () => {
+  let unlistenSave = listen("save", async (event) => {
+    let payload = event.payload as boolean;
     if (rootNode) {
-      console.log(`SAVING: ${stringifyNode(rootNode)}`);
+      console.log(`SAVING: ${selectedEntry!!.name!!}, ${stringifyNode(rootNode)} ${payload}`);
       await nodeRepository.save(selectedEntry!!.name!!, rootNode);
-      rootNode = rootNode;
+      if (payload) {
+        rootNode = rootNode;
+      }
     }
   });
-  listen("do_new_file", async () => {
+  let unlistenDoNewFile = listen("do_new_file", async () => {
     function getFormattedDate() {
       const now = new Date();
 
@@ -70,6 +73,11 @@
     await nodeRepository.save(filename, buildRootNode());
     await loadFileList();
   })
+  onDestroy(async () => {
+    for (let unlisten of [unlistenSave, unlistenDoNewFile]) {
+      (await unlisten)();
+    }
+  });
 
   async function openEntry(fileEntry: FileEntry) {
     console.log(`open: ${fileEntry.path}`)
@@ -92,7 +100,7 @@
       {#each rootNode.children as child}
         <MessageItem root={rootNode} parent={rootNode} node={child} />
       {/each}
-<!--      <pre>{stringifyNode(rootNode)}</pre>-->
+      <pre>{JSON.stringify(rootNode, null, 4)}</pre>
     {/if}
   </div>
 </main>

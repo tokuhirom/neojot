@@ -22,11 +22,12 @@
             setTimeout(() => {
                 let el = document.getElementById(target.id);
                 if (el) {
+                    console.log(`newFocus: Select ${target.id}`)
                     el.focus();
                 } else {
-                    console.log("The element is not ready...");
+                    console.log(`The element is not ready...: ${target.id}`);
                 }
-            }, 0);
+            }, 1);
         }
     }
 
@@ -35,7 +36,7 @@
             if (node.body === "" || node.body === "<br>") {
                 let newTarget = removeNode(parent, node);
 
-                await emit("save");
+                await emit("save", true);
 
                 newFocus(newTarget); // TODO focus した上で、末尾にカーソル合わせたいかも。。
                 return;
@@ -48,7 +49,7 @@
             } else {
                 moveNodeDown(parent, node);
             }
-            await emit("save");
+            await emit("save", true);
             newFocus(node);
             return false;
         }
@@ -70,7 +71,7 @@
             console.log(`BEFORFE:ENTER, insertNewNodeAfter:: ${stringifyNode(root)}`);
             let inserted = insertNewNodeAfter(parent, node);
             console.log(`AFTER:ENTER, insertNewNodeAfter:: ${stringifyNode(root)}`);
-            await emit("save");
+            await emit("save", true);
 
             newFocus(inserted);
 
@@ -95,7 +96,7 @@
                 console.log("parent would be null");
             //     await messageRepository.post("");
             }
-            await emit("save");
+            await emit("save", true);
 
             return;
         }
@@ -108,7 +109,11 @@
         if (node.body.startsWith("TODO:")) {
             node.body = node.body.replace(/^TODO:/, "<span class='todo'>TODO:</span>");
         }
-        await emit("save");
+        await emit("save", false);
+    }
+
+    function focus(node: HTMLElement) {
+        node.focus();
     }
 </script>
 
@@ -120,7 +125,8 @@
              on:input={handleInput}
              on:keydown={handleKeyPress}
              bind:innerHTML={node.body}
-             id={node.id}></div>
+             id={node.id}
+            use:focus></div>
         <div class="reply-container">
             {#if node.children}
                 {#each node.children as child}
