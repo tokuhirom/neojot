@@ -133,12 +133,18 @@
             inserted = true;
             return;
         }
+
+        if (node.body.startsWith("TODO:")) {
+            node.body = node.body.replace(/^TODO:/, "<span class='todo'>TODO:</span>");
+        }
     }
 </script>
 
 <div>
     <div class="message">
-        <div contenteditable
+        <div
+            class="editable-with-bullet"
+            contenteditable
              on:input={handleInput}
              on:keydown={handleKeyPress}
              bind:innerHTML={node.body}
@@ -178,4 +184,20 @@
     [contenteditable]:focus {
         outline: none;
     }
+
+    .editable-with-bullet {
+        position: relative; /* 位置の基準点として設定 */
+        padding-left: 20px; /* バレットとテキストの間にスペースを作る */
+    }
+
+    .editable-with-bullet:before {
+        content: '•'; /* バレットの記号 */
+        position: absolute; /* 絶対位置指定 */
+        left: 0; /* 左端に配置 */
+        top: 50%; /* 上下中央に配置 */
+        transform: translateY(-50%); /* Y軸方向の中心を合わせる */
+        color: wheat; /* バレットの色 */
+        font-size: 20px; /* バレットのサイズ */
+    }
+
 </style>
