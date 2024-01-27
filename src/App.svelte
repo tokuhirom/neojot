@@ -100,7 +100,7 @@
       {#each rootNode.children as child}
         <MessageItem root={rootNode} parent={rootNode} node={child} />
       {/each}
-      <pre>{JSON.stringify(rootNode, null, 4)}</pre>
+<!--      <pre>{JSON.stringify(rootNode, null, 4)}</pre>-->
     {/if}
   </div>
 </main>
@@ -125,10 +125,11 @@
   }
 
   .log-view {
+    flex: 0 0 68%;
+    /*overflow-x: hidden;*/
     padding-inline-start: 0;
     flex-grow: 1;
     margin-block-start: 0;
     margin-block-end: 0;
-    max-height: 80vh;
   }
 </style>

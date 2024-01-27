@@ -127,7 +127,7 @@
              bind:innerHTML={node.body}
              id={node.id}
             use:focus></div>
-        <div class="reply-container">
+        <div class="children">
             {#if node.children}
                 {#each node.children as child}
                     <MessageItem root={root} parent={node} node={child} />
@@ -139,9 +139,10 @@
 
 <style>
     .message {
-        padding-top: 8px;
-        margin-bottom: 9px;
+        /*padding-top: 8px;*/
+        /*margin-bottom: 9px;*/
         padding-right: 8px;
+        word-break: break-all;
     }
 
     .ops > button {
@@ -154,8 +155,8 @@
         margin: 0; /* Removes margin */
     }
 
-    .reply-container {
-        margin-left: 30px;
+    .children {
+        margin-left: 20px;
     }
 
 
