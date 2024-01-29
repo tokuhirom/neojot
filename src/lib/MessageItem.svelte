@@ -48,7 +48,8 @@
 
     export async function handleKeyPress(event: KeyboardEvent) {
         if ((event.key === "h" && event.ctrlKey) || event.key === "Backspace") {
-            if (line.body === "" || line.body === "<br>") {
+            if (content === "" || content === "<br>") {
+                console.log("remove line");
                 let newTarget: Line = removeLine(entry, line);
 
                 await emit("save", true);
@@ -72,7 +73,6 @@
             inserted = false; // ignore the insertFromComposition event.
             return;
         }
-
 
         if (event.key == "Enter") {
             // enter key was already handled by handleInput.
