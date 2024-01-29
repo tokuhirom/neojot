@@ -1,9 +1,7 @@
 <script lang="ts">
 
-import MessageItem from "./MessageItem.svelte";
 import {type Entry, insertNewLineAfter, type Line, removeLine} from "./Line";
 import {NodeRepository} from "./repository/NodeRepository";
-import {emit} from "@tauri-apps/api/event";
 
 export let entry: Entry;
 export let fileName: string;
@@ -107,15 +105,11 @@ async function handleInput(event: InputEvent, line: Line) {
         event.preventDefault();
         event.stopPropagation();
 
-        if (parent) {
-            console.log("insert new sibling node");
-            let newLine = insertNewLineAfter(entry, line);
-            newFocus(newLine);
-        } else {
-            console.log("parent would be null");
-            //     await messageRepository.post("");
-        }
-        await emit("save");
+        console.log("insert new sibling node");
+        let newLine = insertNewLineAfter(entry, line);
+        newFocus(newLine);
+
+        await save();
 
         return;
     }
