@@ -1,6 +1,6 @@
 <script lang="ts">
     import {
-        createOutlineNode, type Line, type Entry, removeLine, insertNewLineAfter
+        type Line, type Entry, removeLine, insertNewLineAfter
     } from "./Line";
     import MessageItem from "./MessageItem.svelte";
     import {emit} from "@tauri-apps/api/event";
@@ -8,7 +8,8 @@
 
     export let entry: Entry;
     export let line: Line;
-    let content = "";
+    console.log("Initialize MessageItem")
+    let content = line.body;
 
     onMount(() => {
        content = line.body;
@@ -21,13 +22,22 @@
     }
 
     function handleFocus() {
+        console.log(`handleFocus ${line.id}, body=${line.body}, content=${content}, entry=${JSON.stringify(entry)}`);
         isFocused = true;
         content = line.body;
     }
 
     function handleBlur() {
         isFocused = false;
+        for (let i = 0; i < entry.lines.length; i++) {
+            if (entry.lines[i].id == line.id) {
+                console.log("Updating entry...")
+                entry.lines[i].body = content;
+            }
+        }
+        line.body = content;
         content = marked(line.body);
+        console.log(`handleBlur body=${line.body}, content=${content}, entry=${JSON.stringify(entry)}`);
     }
 
     let inserted = false;
@@ -52,7 +62,7 @@
                 console.log("remove line");
                 let newTarget: Line = removeLine(entry, line);
 
-                await emit("save", true);
+                await emit("save");
 
                 newFocus(newTarget); // TODO focus した上で、末尾にカーソル合わせたいかも。。
                 return;
@@ -60,9 +70,10 @@
         } else if (event.key === "Tab") {
             event.preventDefault();
             event.stopPropagation();
+            console.log("Adjusting indent");
             line.indent = Math.max(line.indent + (event.shiftKey ? -1 : 1), 0);
-            await emit("save", true);
-            newFocus(line);
+            await emit("save");
+            // newFocus(line);
             return false;
         }
 
@@ -77,10 +88,11 @@
         if (event.key == "Enter") {
             // enter key was already handled by handleInput.
             event.preventDefault();
+            console.log(`insertNewLineAfter: body=${line.body},entry=${JSON.stringify(entry)}`)
 
             // 現行行に対して、直後に行を追加する
             let inserted: Line = insertNewLineAfter(entry, line);
-            await emit("save", true);
+            await emit("save");
 
             newFocus(inserted);
 
@@ -91,8 +103,8 @@
     }
 
     async function handleInput(event: InputEvent) {
-        console.log(`handleInput: ${line.body},${JSON.stringify(line)},${JSON.stringify(entry)}  ${entry} ${event.inputType}`)
-        line.body = content;
+        console.log(`handleInput: body=${line.body},content=${content},entry=${JSON.stringify(entry)}  ${entry} ${event.inputType}`)
+        // line.body = content;
 
         if (event.inputType == "insertParagraph") {
             // When the user push the "Enter" key.
@@ -107,7 +119,7 @@
                 console.log("parent would be null");
             //     await messageRepository.post("");
             }
-            await emit("save", true);
+            await emit("save");
 
             return;
         }
@@ -117,7 +129,7 @@
             inserted = true;
         }
 
-        await emit("save", false);
+        await emit("save");
     }
 
     function focus(node: HTMLElement) {

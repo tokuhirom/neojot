@@ -50,13 +50,9 @@
   }
 
   let unlistenSave = listen("save", async (event) => {
-    let payload = event.payload as boolean;
     if (entry) {
-      console.log(`SAVING: ${selectedItem!!.name!!}, ${entry} ${payload}`);
+      console.log(`SAVING: ${selectedItem!!.name!!}, ${entry}`);
       await nodeRepository.save(selectedItem!!.name!!, entry);
-      if (payload) {
-        entry = entry;
-      }
     }
   });
   let unlistenDoNewFile = listen("do_new_file", async () => {
@@ -77,6 +73,7 @@
     console.log(`Added new file: ${filename}`)
     await nodeRepository.save(filename, buildRootNode());
     await loadFileList();
+    selectedItem = fileItems[0];
   })
   onDestroy(async () => {
     for (let unlisten of [unlistenSave, unlistenDoNewFile]) {

@@ -64,8 +64,10 @@ export function insertNewLineAfter(entry: Entry, referenceLine: Line): Line {
 
     const index = entry.lines.findIndex(line => line.id === referenceLine.id);
     if (index !== -1) {
+        console.log("insertNewLineAfter: insert by splice");
         entry.lines.splice(index + 1, 0, newLine);
     } else {
+        console.log("insertNewLineAfter: insert by push");
         entry.lines.push(newLine);
     }
 
