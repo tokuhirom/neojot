@@ -1,8 +1,54 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::fs;
+use std::time::SystemTime;
+use serde::{Deserialize, Serialize};
 use simplelog::ColorChoice;
 use tauri::{AboutMetadata, CustomMenuItem, Menu, MenuItem, Submenu};
+
+
+#[derive(Serialize, Deserialize)]
+struct FileItem {
+    name: String,
+    mtime: u64,
+}
+
+#[tauri::command]
+fn get_files() -> Result<Vec<FileItem>, String> {
+    let datadir = dirs::data_dir().ok_or("Data directory not found")?;
+    let data_path = datadir.join("com.github.tokuhirom.reflect-ai2/data");
+
+    let mut file_items = Vec::new();
+
+    if let Ok(entries) = fs::read_dir(data_path) {
+        for entry in entries.filter_map(Result::ok) {
+            let path = entry.path();
+            if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("json") {
+                let metadata = fs::metadata(&path)
+                    .map_err(|e| format!("Failed to read file metadata: {}", e))?;
+
+                let mtime = metadata.modified()
+                    .map_err(|_| "Failed to get modification time".to_string())?
+                    .duration_since(SystemTime::UNIX_EPOCH)
+                    .map_err(|_| "Time conversion error".to_string())?
+                    .as_secs();
+
+                let filename = path.file_name()
+                    .and_then(|s| s.to_str())
+                    .ok_or("Failed to get filename".to_string())?
+                    .to_string();
+
+                file_items.push(FileItem { name: filename, mtime });
+            }
+        }
+    }
+
+    // mtime で降順にソート
+    file_items.sort_by(|a, b| b.mtime.cmp(&a.mtime));
+
+    Ok(file_items)
+}
 
 fn main() -> anyhow::Result<()> {
     let config = simplelog::ConfigBuilder::new()
@@ -63,7 +109,7 @@ fn main() -> anyhow::Result<()> {
             }
         })
         .invoke_handler(tauri::generate_handler![
-            // TODO handlers
+            get_files,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

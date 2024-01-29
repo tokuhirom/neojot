@@ -6,40 +6,45 @@
   import {listen} from "@tauri-apps/api/event";
   import {BaseDirectory, createDir, exists, type FileEntry, readDir, writeTextFile} from "@tauri-apps/api/fs";
   import FileListItem from "./lib/FileListItem.svelte";
+  import {invoke} from "@tauri-apps/api";
+  import type {FileItem} from "./lib/FileItem";
 
   let nodeRepository = new NodeRepository();
   let rootNode: OutlineNode | null;
 
-  let entries: FileEntry[];
-  let selectedEntry: FileEntry | undefined;
+  let fileItems: FileItem[];
+  let selectedItem: FileItem | undefined;
 
   async function loadFileList() {
     if (!await exists("data", {dir: BaseDirectory.AppData})) {
       await createDir("data", {dir: BaseDirectory.AppData});
     }
 
-    // TODO: sort by file modified timestamp
-    // but, tauri doesn't support it in fs module..
-    entries = await readDir("data", {
-      dir: BaseDirectory.AppData
-    });
+    let newFileItems = await invoke('get_files') as FileItem[];
 
-    if (entries.length == 0) {
+    console.log(newFileItems);
+
+    fileItems = newFileItems;
+
+    if (newFileItems.length == 0) {
       // 最初の1ファイルを作成する
       await nodeRepository.save("init.json", buildRootNode());
+
+      console.log("Created init.json... so, i need to reload");
+      await loadFileList();
     }
   }
 
   onMount(async () => {
     await loadFileList();
 
-    selectedEntry = entries[0];
-    rootNode = await nodeRepository.load(selectedEntry.name!!);
+    selectedItem = fileItems[0];
+    rootNode = await nodeRepository.load(selectedItem.name!!);
     console.log(`Node ready: ${rootNode}`);
   });
 
-  $: if (selectedEntry) {
-    nodeRepository.load(selectedEntry.name!!).then((targetNode) => {
+  $: if (selectedItem) {
+    nodeRepository.load(selectedItem.name!!).then((targetNode) => {
       rootNode = targetNode;
     });
   }
@@ -47,8 +52,8 @@
   let unlistenSave = listen("save", async (event) => {
     let payload = event.payload as boolean;
     if (rootNode) {
-      console.log(`SAVING: ${selectedEntry!!.name!!}, ${stringifyNode(rootNode)} ${payload}`);
-      await nodeRepository.save(selectedEntry!!.name!!, rootNode);
+      console.log(`SAVING: ${selectedItem!!.name!!}, ${stringifyNode(rootNode)} ${payload}`);
+      await nodeRepository.save(selectedItem!!.name!!, rootNode);
       if (payload) {
         rootNode = rootNode;
       }
@@ -79,19 +84,21 @@
     }
   });
 
-  async function openEntry(fileEntry: FileEntry) {
-    console.log(`open: ${fileEntry.path}`)
-    selectedEntry = fileEntry;
-    rootNode = await nodeRepository.load(fileEntry.name!!);
+  async function openEntry(fileItem: FileItem) {
+    console.log(`open: ${fileItem.name}`)
+    selectedItem = fileItem;
+    rootNode = await nodeRepository.load(fileItem.name);
   }
 </script>
 
 <main class="container">
   <div class="file-list">
     <!-- TODO: create new entry -->
-    {#if entries && selectedEntry}
-      {#each entries as entry}
-        <FileListItem openEntry={openEntry} entry={entry} selectedEntry={selectedEntry} />
+    {#if fileItems && selectedItem}
+      {#each fileItems as fileItem}
+        <FileListItem openEntry={openEntry}
+                      fileItem={fileItem}
+                      selectedItem={selectedItem} />
       {/each}
     {/if}
   </div>
