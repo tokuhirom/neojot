@@ -1,12 +1,12 @@
 import {BaseDirectory, createDir, exists, readTextFile, writeTextFile} from "@tauri-apps/api/fs";
-import {generateTimestampId, type OutlineNode} from "../OutlineNode";
+import {type Entry, generateTimestampId, type Line} from "../Line";
 
 export class NodeRepository {
     constructor() {
     }
 
-    async save(name: string, node: OutlineNode) {
-        const data = JSON.stringify(node, null, 1);
+    async save(name: string, entry: Entry) {
+        const data = JSON.stringify(entry, null, 1);
 
         // TODO atomic write
         await writeTextFile(`data/${name}`,
@@ -14,24 +14,23 @@ export class NodeRepository {
             { dir: BaseDirectory.AppData });
     }
 
-    async load(name: string): Promise<OutlineNode> {
+    async load(name: string): Promise<Entry> {
         const json = await readTextFile(`data/${name}`, {
             dir: BaseDirectory.AppData
         });
-        return JSON.parse(json) as OutlineNode;
+        return JSON.parse(json) as Entry;
     }
 }
 
-export function buildRootNode(): OutlineNode {
+export function buildRootNode(): Entry {
     return {
-        id: "**ROOT**",
-        body: "**ROOT**",
-        children: [
+        title: "",
+        lines: [
             {
                 id: generateTimestampId(),
                 body: "",
-                children: []
+                indent: 0,
             }
-        ],
+        ]
     }
 }

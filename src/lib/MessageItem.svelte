@@ -1,23 +1,38 @@
 <script lang="ts">
     import {
-        createOutlineNode,
-        insertNewNodeAfter,
-        moveNodeDown,
-        moveNodeUp,
-        type OutlineNode,
-        removeNode, stringifyNode
-    } from "./OutlineNode";
+        createOutlineNode, type Line, type Entry, removeLine, insertNewLineAfter
+    } from "./Line";
     import MessageItem from "./MessageItem.svelte";
-    import {emit, listen} from "@tauri-apps/api/event";
-    import {onDestroy, onMount} from "svelte";
+    import {emit} from "@tauri-apps/api/event";
+    import {onMount} from "svelte";
 
-    export let root: OutlineNode;
-    export let parent: OutlineNode;
-    export let node: OutlineNode;
+    export let entry: Entry;
+    export let line: Line;
+    let content = "";
+
+    onMount(() => {
+       content = line.body;
+    });
+
+    let isFocused = false;
+
+    function marked(src: string): string {
+        return src.replace(/\*\*(.+?)\*\*/, "<B>$1</B>");
+    }
+
+    function handleFocus() {
+        isFocused = true;
+        content = line.body;
+    }
+
+    function handleBlur() {
+        isFocused = false;
+        content = marked(line.body);
+    }
 
     let inserted = false;
 
-    function newFocus(target: OutlineNode | undefined) {
+    function newFocus(target: Line | undefined) {
         if (target) {
             setTimeout(() => {
                 let el = document.getElementById(target.id);
@@ -33,8 +48,8 @@
 
     export async function handleKeyPress(event: KeyboardEvent) {
         if ((event.key === "h" && event.ctrlKey) || event.key === "Backspace") {
-            if (node.body === "" || node.body === "<br>") {
-                let newTarget = removeNode(parent, node);
+            if (line.body === "" || line.body === "<br>") {
+                let newTarget: Line = removeLine(entry, line);
 
                 await emit("save", true);
 
@@ -44,13 +59,9 @@
         } else if (event.key === "Tab") {
             event.preventDefault();
             event.stopPropagation();
-            if (event.shiftKey) {
-                moveNodeUp(root, parent, node);
-            } else {
-                moveNodeDown(parent, node);
-            }
+            line.indent = Math.max(line.indent + (event.shiftKey ? -1 : 1), 0);
             await emit("save", true);
-            newFocus(node);
+            newFocus(line);
             return false;
         }
 
@@ -67,10 +78,8 @@
             // enter key was already handled by handleInput.
             event.preventDefault();
 
-            // 現行ノードに対して、直後にノードを追加する
-            console.log(`BEFORFE:ENTER, insertNewNodeAfter:: ${stringifyNode(root)}`);
-            let inserted = insertNewNodeAfter(parent, node);
-            console.log(`AFTER:ENTER, insertNewNodeAfter:: ${stringifyNode(root)}`);
+            // 現行行に対して、直後に行を追加する
+            let inserted: Line = insertNewLineAfter(entry, line);
             await emit("save", true);
 
             newFocus(inserted);
@@ -78,11 +87,12 @@
             return;
         }
 
-        console.log(`keypress: ${event.key} ${event.keyCode}`)
+        console.log(`keypress: ${event.key}`)
     }
 
     async function handleInput(event: InputEvent) {
-        console.log(`handleInput: ${node.body},${JSON.stringify(node)},${JSON.stringify(root)}  ${stringifyNode(root)} ${event.inputType}`)
+        console.log(`handleInput: ${line.body},${JSON.stringify(line)},${JSON.stringify(entry)}  ${entry} ${event.inputType}`)
+        line.body = content;
 
         if (event.inputType == "insertParagraph") {
             // When the user push the "Enter" key.
@@ -91,7 +101,8 @@
 
             if (parent) {
                  console.log("insert new sibling node");
-                 parent.children.push(createOutlineNode());
+                 let newLine = insertNewLineAfter(entry, line);
+                 newFocus(newLine);
             } else {
                 console.log("parent would be null");
             //     await messageRepository.post("");
@@ -106,9 +117,6 @@
             inserted = true;
         }
 
-        if (node.body.startsWith("TODO:")) {
-            node.body = node.body.replace(/^TODO:/, "<span class='todo'>TODO:</span>");
-        }
         await emit("save", false);
     }
 
@@ -122,18 +130,14 @@
         <div
             class="editable-with-bullet"
             contenteditable
+            on:focus={handleFocus}
+            on:blur={handleBlur}
              on:input={handleInput}
              on:keydown={handleKeyPress}
-             bind:innerHTML={node.body}
-             id={node.id}
+             bind:innerHTML={content}
+             id={line.id}
+            style="margin-left: {8 * line.indent}px"
             use:focus></div>
-        <div class="children">
-            {#if node.children}
-                {#each node.children as child}
-                    <MessageItem root={root} parent={node} node={child} />
-                {/each}
-            {/if}
-        </div>
     </div>
 </div>
 
@@ -154,11 +158,6 @@
         padding: 0; /* Removes padding */
         margin: 0; /* Removes margin */
     }
-
-    .children {
-        margin-left: 20px;
-    }
-
 
     [contenteditable]:focus {
         outline: none;

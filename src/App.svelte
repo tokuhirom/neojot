@@ -2,7 +2,7 @@
   import {buildRootNode, NodeRepository} from "./lib/repository/NodeRepository";
   import MessageItem from "./lib/MessageItem.svelte";
   import {onDestroy, onMount} from "svelte";
-  import {type OutlineNode, stringifyNode} from "./lib/OutlineNode";
+  import {type Entry, type Line} from "./lib/Line";
   import {listen} from "@tauri-apps/api/event";
   import {BaseDirectory, createDir, exists, type FileEntry, readDir, writeTextFile} from "@tauri-apps/api/fs";
   import FileListItem from "./lib/FileListItem.svelte";
@@ -10,7 +10,7 @@
   import type {FileItem} from "./lib/FileItem";
 
   let nodeRepository = new NodeRepository();
-  let rootNode: OutlineNode | null;
+  let entry: Entry | null;
 
   let fileItems: FileItem[];
   let selectedItem: FileItem | undefined;
@@ -39,23 +39,23 @@
     await loadFileList();
 
     selectedItem = fileItems[0];
-    rootNode = await nodeRepository.load(selectedItem.name!!);
-    console.log(`Node ready: ${rootNode}`);
+    entry = await nodeRepository.load(selectedItem.name!!);
+    console.log(`Node ready: ${entry}`);
   });
 
   $: if (selectedItem) {
     nodeRepository.load(selectedItem.name!!).then((targetNode) => {
-      rootNode = targetNode;
+      entry = targetNode;
     });
   }
 
   let unlistenSave = listen("save", async (event) => {
     let payload = event.payload as boolean;
-    if (rootNode) {
-      console.log(`SAVING: ${selectedItem!!.name!!}, ${stringifyNode(rootNode)} ${payload}`);
-      await nodeRepository.save(selectedItem!!.name!!, rootNode);
+    if (entry) {
+      console.log(`SAVING: ${selectedItem!!.name!!}, ${entry} ${payload}`);
+      await nodeRepository.save(selectedItem!!.name!!, entry);
       if (payload) {
-        rootNode = rootNode;
+        entry = entry;
       }
     }
   });
@@ -87,7 +87,7 @@
   async function openEntry(fileItem: FileItem) {
     console.log(`open: ${fileItem.name}`)
     selectedItem = fileItem;
-    rootNode = await nodeRepository.load(fileItem.name);
+    entry = await nodeRepository.load(fileItem.name);
   }
 </script>
 
@@ -103,9 +103,9 @@
     {/if}
   </div>
   <div class="log-view">
-    {#if rootNode}
-      {#each rootNode.children as child}
-        <MessageItem root={rootNode} parent={rootNode} node={child} />
+    {#if entry}
+      {#each entry.lines as line}
+        <MessageItem entry={entry} line={line} />
       {/each}
 <!--      <pre>{JSON.stringify(rootNode, null, 4)}</pre>-->
     {/if}

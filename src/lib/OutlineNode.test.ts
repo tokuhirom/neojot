@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import {createOutlineNode, insertNewNodeAfter, type OutlineNode, stringifyNode} from "./OutlineNode";
+import {createOutlineNode, insertNewNodeAfter, type Line, stringifyNode} from "./Line";
 
 test('insertNewNodeAfter', () => {
     let root = buildRootNodeEx();
@@ -19,7 +19,7 @@ test('insertNewNodeAfter', () => {
 })
 
 test('insertNewNodeAfter again', () => {
-    let root: OutlineNode = {
+    let root: Line = {
         id: "**ROOT**",
         body: "**ROOT**",
         children: [
@@ -51,7 +51,7 @@ test('insertNewNodeAfter again', () => {
     ])
 })
 
-function buildRootNodeEx(): OutlineNode {
+function buildRootNodeEx(): Line {
     return {
         id: "**ROOT**",
         body: "**ROOT**",
