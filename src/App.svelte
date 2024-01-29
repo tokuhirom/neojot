@@ -8,6 +8,7 @@
   import FileListItem from "./lib/FileListItem.svelte";
   import {invoke} from "@tauri-apps/api";
   import type {FileItem} from "./lib/FileItem";
+  import EntryView from "./lib/EntryView.svelte";
 
   let nodeRepository = new NodeRepository();
   let entry: Entry | null;
@@ -49,12 +50,6 @@
     });
   }
 
-  let unlistenSave = listen("save", async (event) => {
-    if (entry) {
-      console.log(`SAVING: ${selectedItem!!.name!!}, ${entry}`);
-      await nodeRepository.save(selectedItem!!.name!!, entry);
-    }
-  });
   let unlistenDoNewFile = listen("do_new_file", async () => {
     function getFormattedDate() {
       const now = new Date();
@@ -101,9 +96,8 @@
   </div>
   <div class="log-view">
     {#if entry}
-      {#each entry.lines as line}
-        <MessageItem entry={entry} line={line} />
-      {/each}
+      <EntryView entry={entry} nodeRepository={nodeRepository}
+                 fileName={selectedItem.name} />
 <!--      <pre>{JSON.stringify(rootNode, null, 4)}</pre>-->
     {/if}
   </div>
