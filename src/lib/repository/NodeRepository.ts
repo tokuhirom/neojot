@@ -1,5 +1,4 @@
-import {BaseDirectory, createDir, exists, readTextFile, writeTextFile} from "@tauri-apps/api/fs";
-import {type Entry, generateTimestampId, type Line} from "../Line";
+import {BaseDirectory, readTextFile, writeTextFile} from "@tauri-apps/api/fs";
 
 export class NodeRepository {
     constructor() {

@@ -1,6 +1,5 @@
 <script lang="ts">
 
-import {type Entry, insertNewLineAfter, type Line, removeLine} from "./Line";
 import {NodeRepository} from "./repository/NodeRepository";
 
 export let md: string;
