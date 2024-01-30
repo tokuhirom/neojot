@@ -5,32 +5,16 @@ export class NodeRepository {
     constructor() {
     }
 
-    async save(name: string, entry: Entry) {
-        const data = JSON.stringify(entry, null, 1);
-
+    async save(name: string, src: string) {
         // TODO atomic write
         await writeTextFile(`data/${name}`,
-            data,
+            src,
             { dir: BaseDirectory.AppData });
     }
 
-    async load(name: string): Promise<Entry> {
-        const json = await readTextFile(`data/${name}`, {
+    async load(name: string): Promise<string> {
+        return await readTextFile(`data/${name}`, {
             dir: BaseDirectory.AppData
         });
-        return JSON.parse(json) as Entry;
-    }
-}
-
-export function buildRootNode(): Entry {
-    return {
-        title: "",
-        lines: [
-            {
-                id: generateTimestampId(),
-                body: "",
-                indent: 0,
-            }
-        ]
     }
 }

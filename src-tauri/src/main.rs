@@ -24,7 +24,7 @@ fn get_files() -> Result<Vec<FileItem>, String> {
     if let Ok(entries) = fs::read_dir(data_path) {
         for entry in entries.filter_map(Result::ok) {
             let path = entry.path();
-            if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("json") {
+            if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("md") {
                 let metadata = fs::metadata(&path)
                     .map_err(|e| format!("Failed to read file metadata: {}", e))?;
 

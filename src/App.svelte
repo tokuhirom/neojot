@@ -1,17 +1,15 @@
 <script lang="ts">
-  import {buildRootNode, NodeRepository} from "./lib/repository/NodeRepository";
-  import MessageItem from "./lib/MessageItem.svelte";
+  import {NodeRepository} from "./lib/repository/NodeRepository";
   import {onDestroy, onMount} from "svelte";
-  import {type Entry, type Line} from "./lib/Line";
   import {listen} from "@tauri-apps/api/event";
-  import {BaseDirectory, createDir, exists, type FileEntry, readDir, writeTextFile} from "@tauri-apps/api/fs";
+  import {BaseDirectory, createDir, exists} from "@tauri-apps/api/fs";
   import FileListItem from "./lib/FileListItem.svelte";
   import {invoke} from "@tauri-apps/api";
   import type {FileItem} from "./lib/FileItem";
   import EntryView from "./lib/EntryView.svelte";
 
   let nodeRepository = new NodeRepository();
-  let entry: Entry | null;
+  let md: string | null;
 
   let fileItems: FileItem[];
   let selectedItem: FileItem | undefined;
@@ -21,17 +19,14 @@
       await createDir("data", {dir: BaseDirectory.AppData});
     }
 
-    let newFileItems = await invoke('get_files') as FileItem[];
+    fileItems = await invoke('get_files') as FileItem[];
 
-    console.log(newFileItems);
-
-    fileItems = newFileItems;
-
-    if (newFileItems.length == 0) {
+    if (fileItems.length == 0) {
       // 最初の1ファイルを作成する
-      await nodeRepository.save("init.json", buildRootNode());
+      const newFileName = createNewFileName();
+      await nodeRepository.save(newFileName, "");
 
-      console.log("Created init.json... so, i need to reload");
+      console.log(`Created new file ${newFileName}... so, i need to reload`);
       await loadFileList();
     }
   }
@@ -40,38 +35,37 @@
     await loadFileList();
 
     selectedItem = fileItems[0];
-    entry = await nodeRepository.load(selectedItem.name!!);
-    console.log(`Node ready: ${entry}`);
+    md = await nodeRepository.load(selectedItem.name!!);
+    console.log(`Node ready: ${md}`);
   });
 
   $: if (selectedItem) {
     nodeRepository.load(selectedItem.name!!).then((targetNode) => {
-      entry = targetNode;
+      md = targetNode;
     });
+  }
+  function createNewFileName() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+
+    return `${year}${month}${day}${hours}${minutes}${seconds}.md`;
   }
 
   let unlistenDoNewFile = listen("do_new_file", async () => {
-    function getFormattedDate() {
-      const now = new Date();
-
-      const year = now.getFullYear();
-      const month = (now.getMonth() + 1).toString().padStart(2, '0');
-      const day = now.getDate().toString().padStart(2, '0');
-      const hours = now.getHours().toString().padStart(2, '0');
-      const minutes = now.getMinutes().toString().padStart(2, '0');
-      const seconds = now.getSeconds().toString().padStart(2, '0');
-
-      return `${year}${month}${day}${hours}${minutes}${seconds}.json`;
-    }
-
-    const filename = getFormattedDate();
+    const filename = createNewFileName();
     console.log(`Added new file: ${filename}`)
-    await nodeRepository.save(filename, buildRootNode());
+    await nodeRepository.save(filename, "");
     await loadFileList();
     selectedItem = fileItems[0];
   })
   onDestroy(async () => {
-    for (let unlisten of [unlistenSave, unlistenDoNewFile]) {
+    for (let unlisten of [unlistenDoNewFile]) {
       (await unlisten)();
     }
   });
@@ -79,13 +73,12 @@
   async function openEntry(fileItem: FileItem) {
     console.log(`open: ${fileItem.name}`)
     selectedItem = fileItem;
-    entry = await nodeRepository.load(fileItem.name);
+    md = await nodeRepository.load(fileItem.name);
   }
 </script>
 
 <main class="container">
   <div class="file-list">
-    <!-- TODO: create new entry -->
     {#if fileItems && selectedItem}
       {#each fileItems as fileItem}
         <FileListItem openEntry={openEntry}
@@ -95,10 +88,9 @@
     {/if}
   </div>
   <div class="log-view">
-    {#if entry}
-      <EntryView entry={entry} nodeRepository={nodeRepository}
+    {#if md !== undefined}
+      <EntryView md={md} nodeRepository={nodeRepository}
                  fileName={selectedItem.name} />
-<!--      <pre>{JSON.stringify(rootNode, null, 4)}</pre>-->
     {/if}
   </div>
 </main>
