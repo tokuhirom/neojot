@@ -12,7 +12,14 @@
   let md: string | null;
 
   let fileItems: FileItem[];
+  let filteredFileItems: FileItem[];
   let selectedItem: FileItem | undefined;
+
+  let searchWord = "";
+
+  $: if (fileItems || searchWord) {
+    filteredFileItems = fileItems.filter(it => shouldShowFileListItem(it));
+  }
 
   async function loadFileList(retry: boolean) {
     if (!await exists("data", {dir: BaseDirectory.AppData})) {
@@ -81,15 +88,37 @@
     fileItem.content = await nodeRepository.load(fileItem.filename);
     selectedItem = fileItem;
   }
+
+  function shouldShowFileListItem(fileItem: FileItem): boolean {
+    if (searchWord.length == 0) {
+      return true;
+    }
+
+    const lowerCaseSearchWord = searchWord.toLowerCase();
+    const lowerCaseTitle = fileItem.title.toLowerCase();
+    const lowerCaseContent = fileItem.content.toLowerCase();
+
+    let words = lowerCaseSearchWord.split(/\s+/).filter(it => it.length>0);
+    let result = true;
+    for (let word of words) {
+      if (!lowerCaseTitle.includes(word) && !lowerCaseContent.includes(word)) {
+        result = false;
+        break;
+      }
+    }
+    return result;
+  }
 </script>
 
 <main class="container">
   <div class="file-list">
-    {#if fileItems && selectedItem}
-      {#each fileItems as fileItem}
+    <input type="text" class="search-box" bind:value={searchWord} />
+    {#if filteredFileItems && selectedItem}
+      {#each filteredFileItems as fileItem}
         <FileListItem openEntry={openEntry}
                       fileItem={fileItem}
-                      selectedItem={selectedItem} />
+                      selectedItem={selectedItem}
+                      searchWord={searchWord} />
       {/each}
     {/if}
   </div>
@@ -104,6 +133,14 @@
 </main>
 
 <style>
+  .search-box {
+    width: 100%;
+    font-size: 120%;
+    display: block;
+    margin-top: 9px;
+    margin-bottom: 9px;
+  }
+
   .container {
     display: flex; /* Enables Flexbox */
     flex-direction: row; /* Stack children vertically */
