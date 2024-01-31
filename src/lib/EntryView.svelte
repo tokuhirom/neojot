@@ -9,8 +9,12 @@ import {EditorView, keymap} from "@codemirror/view";
 import {extractTitle, type FileItem} from "./FileItem";
 import {emit} from "@tauri-apps/api/event";
 import {oneDark, oneDarkHighlightStyle} from "@codemirror/theme-one-dark";
-import {syntaxHighlighting} from "@codemirror/language";
+import {LanguageDescription, syntaxHighlighting} from "@codemirror/language";
 import {autocompletion, type CompletionContext} from "@codemirror/autocomplete";
+import {styleTags} from "@lezer/highlight";
+import {javascript, javascriptLanguage} from "@codemirror/lang-javascript";
+import {python} from "@codemirror/lang-python";
+import {java} from "@codemirror/lang-java";
 
 export let file: FileItem;
 export let nodeRepository: NodeRepository;
@@ -92,7 +96,30 @@ onMount(() => {
         doc: file.content,
         extensions: [
             keymap.of(customKeymap),
-            markdown(),
+            markdown({
+                codeLanguages: [
+                    LanguageDescription.of({
+                        name: "javascript",
+                        support: javascript(),
+                    }),
+                    LanguageDescription.of({
+                        name: "python",
+                        support: python(),
+                    }),
+                    LanguageDescription.of({
+                        name: "java",
+                        support: java(),
+                    }),
+                    LanguageDescription.of({
+                        name: "json",
+                        support: javascript(),
+                    }),
+                    LanguageDescription.of({
+                        name: "typescript",
+                        support: javascript({typescript: true}),
+                    }),
+                ],
+            }),
             autocompletion({ override: [myCompletion] }),
             oneDark,
             syntaxHighlighting(oneDarkHighlightStyle),
