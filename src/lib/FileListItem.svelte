@@ -66,6 +66,7 @@
 
     .title {
         overflow-y: hidden;
+        min-height: 1em;
     }
 
     button.active {

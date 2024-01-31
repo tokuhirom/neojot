@@ -10,9 +10,11 @@ import {extractTitle, type FileItem} from "./FileItem";
 import {emit} from "@tauri-apps/api/event";
 import {oneDark, oneDarkHighlightStyle} from "@codemirror/theme-one-dark";
 import {syntaxHighlighting} from "@codemirror/language";
+import {autocompletion, type CompletionContext} from "@codemirror/autocomplete";
 
 export let file: FileItem;
 export let nodeRepository: NodeRepository;
+export let fileItems: FileItem[];
 
 let myElement;
 
@@ -35,11 +37,28 @@ let view: EditorView;
 onMount(() => {
     let container = myElement;
 
+    const myCompletion = (context: CompletionContext) => {
+        const word = context.matchBefore(/\[\[\w*/);
+        // const word = context.matchBefore(/\[\[[^\]]*\]?$/);
+        if (word) {
+            console.log("Return links")
+            const options = fileItems.map(fileItem => {
+                return {label: `[[${fileItem.title}]]`, type: 'keyword'};
+            });
+            return {
+                from: word.from,
+                options: options,
+            };
+        }
+        return null;
+    };
+
     let startState = EditorState.create({
         doc: file.content,
         extensions: [
             keymap.of(defaultKeymap),
             markdown(),
+            autocompletion({ override: [myCompletion] }),
             oneDark,
             syntaxHighlighting(oneDarkHighlightStyle),
             EditorView.lineWrapping,

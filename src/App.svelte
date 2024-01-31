@@ -93,7 +93,8 @@
   <div class="log-view">
     {#if md !== undefined}
       <EntryView nodeRepository={nodeRepository}
-                 file={selectedItem} />
+                 file={selectedItem}
+                 fileItems={fileItems} />
     {/if}
   </div>
 </main>
