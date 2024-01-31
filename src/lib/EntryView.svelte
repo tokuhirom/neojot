@@ -42,18 +42,60 @@ let view: EditorView;
 onMount(() => {
     let container = myElement;
 
+
+    const codeLangauages = [
+        LanguageDescription.of({
+            name: "javascript",
+            support: javascript(),
+        }),
+        LanguageDescription.of({
+            name: "python",
+            support: python(),
+        }),
+        LanguageDescription.of({
+            name: "java",
+            support: java(),
+        }),
+        LanguageDescription.of({
+            name: "json",
+            support: javascript(),
+        }),
+        LanguageDescription.of({
+            name: "typescript",
+            support: javascript({typescript: true}),
+        }),
+    ];
+
     const myCompletion = (context: CompletionContext) => {
-        const word = context.matchBefore(/\[\[\w*/);
-        // const word = context.matchBefore(/\[\[[^\]]*\]?$/);
-        if (word) {
-            console.log("Return links")
-            const options = fileItems.map(fileItem => {
-                return {label: `[[${fileItem.title}]]`, type: 'keyword'};
-            });
-            return {
-                from: word.from,
-                options: options,
-            };
+        {
+            // `[[foobar]]` style notation
+            const word = context.matchBefore(/\[\[\w*/);
+            if (word) {
+                console.log("Return links")
+                const options = fileItems.map(fileItem => {
+                    return {label: `[[${fileItem.title}]]`, type: 'keyword'};
+                });
+                return {
+                    from: word.from,
+                    options: options,
+                };
+            }
+        }
+        {
+            // Code block's language completion
+            // ```typescript auto completion
+            const word = context.matchBefore(/```\w*/);
+            if (word) {
+                return {
+                    from: word.from,
+                    // can I get the list from EditorView or something?
+                    options: codeLangauages.map(lang => {
+                        return {
+                            label: "```" + lang.name, type: 'keyword'
+                        }
+                    })
+                }
+            }
         }
         return null;
     };
@@ -97,28 +139,7 @@ onMount(() => {
         extensions: [
             keymap.of(customKeymap),
             markdown({
-                codeLanguages: [
-                    LanguageDescription.of({
-                        name: "javascript",
-                        support: javascript(),
-                    }),
-                    LanguageDescription.of({
-                        name: "python",
-                        support: python(),
-                    }),
-                    LanguageDescription.of({
-                        name: "java",
-                        support: java(),
-                    }),
-                    LanguageDescription.of({
-                        name: "json",
-                        support: javascript(),
-                    }),
-                    LanguageDescription.of({
-                        name: "typescript",
-                        support: javascript({typescript: true}),
-                    }),
-                ],
+                codeLanguages: codeLangauages,
             }),
             autocompletion({ override: [myCompletion] }),
             oneDark,
