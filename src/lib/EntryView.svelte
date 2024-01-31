@@ -3,7 +3,7 @@
 import {NodeRepository} from "./repository/NodeRepository";
 import {onMount} from "svelte";
 import {defaultKeymap, indentLess, indentMore} from "@codemirror/commands";
-import {markdown} from "@codemirror/lang-markdown";
+import {markdown, markdownLanguage} from "@codemirror/lang-markdown";
 import {EditorState, Transaction} from "@codemirror/state";
 import {EditorView, keymap} from "@codemirror/view";
 import {extractTitle, type FileItem} from "./FileItem";
@@ -149,6 +149,7 @@ onMount(() => {
         extensions: [
             keymap.of(customKeymap),
             markdown({
+                base: markdownLanguage, // enable github flavored markdown
                 codeLanguages: codeLangauages,
             }),
             autocompletion({ override: [myCompletion] }),
