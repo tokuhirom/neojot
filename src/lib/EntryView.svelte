@@ -2,7 +2,7 @@
 
 import {NodeRepository} from "./repository/NodeRepository";
 import {onMount} from "svelte";
-import {defaultKeymap} from "@codemirror/commands";
+import {defaultKeymap, indentLess, indentMore} from "@codemirror/commands";
 import {markdown} from "@codemirror/lang-markdown";
 import {EditorState, Transaction} from "@codemirror/state";
 import {EditorView, keymap} from "@codemirror/view";
@@ -89,11 +89,11 @@ onMount(() => {
                 return {
                     from: word.from,
                     // can I get the list from EditorView or something?
-                    options: codeLangauages.map(lang => {
+                    options: [...(codeLangauages.map(lang => {
                         return {
                             label: "```" + lang.name, type: 'keyword'
                         }
-                    })
+                    })), {label: '```', type: 'keyword'}]
                 }
             }
         }
@@ -130,6 +130,16 @@ onMount(() => {
         {
             key: "Mod-b",
             run: openInternalLink,
+        },
+        {
+            key: "Tab",
+            preventDefault: true,
+            run: indentMore,
+        },
+        {
+            key: "Shift-Tab",
+            preventDefault: true,
+            run: indentLess,
         },
         ...defaultKeymap // 標準のキーマップを含める
     ];
