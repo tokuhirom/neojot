@@ -15,6 +15,7 @@ import {autocompletion, type CompletionContext} from "@codemirror/autocomplete";
 export let file: FileItem;
 export let nodeRepository: NodeRepository;
 export let fileItems: FileItem[];
+export let openEntry: (fileItem: FileItem) => void;
 
 let myElement;
 
@@ -53,10 +54,44 @@ onMount(() => {
         return null;
     };
 
+    function openInternalLink(view: EditorView) {
+        const { from, to } = view.state.selection.main;
+        if (from === to) { // カーソル位置のみをチェック
+            const line = view.state.doc.lineAt(from);
+            const lineText = line.text;
+            const lineOffset = from - line.from; // 行内オフセットを計算
+
+            // カーソル位置から内部リンクを探す
+            const linkRegex = /\[\[.*?]]/g;
+            let match: RegExpExecArray | null;
+            while ((match = linkRegex.exec(lineText)) !== null) {
+                if (match.index <= lineOffset && match.index + match[0].length >= lineOffset) {
+                    const pageName = match[0].slice(2, -2); // リンク名の取得
+
+                    for (let fileItem of fileItems) {
+                        if (fileItem.title == pageName) {
+                            openEntry(fileItem);
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    const customKeymap = [
+        {
+            key: "Mod-b",
+            run: openInternalLink,
+        },
+        ...defaultKeymap // 標準のキーマップを含める
+    ];
+
     let startState = EditorState.create({
         doc: file.content,
         extensions: [
-            keymap.of(defaultKeymap),
+            keymap.of(customKeymap),
             markdown(),
             autocompletion({ override: [myCompletion] }),
             oneDark,

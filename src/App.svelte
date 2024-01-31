@@ -94,7 +94,8 @@
     {#if md !== undefined}
       <EntryView nodeRepository={nodeRepository}
                  file={selectedItem}
-                 fileItems={fileItems} />
+                 fileItems={fileItems}
+                 openEntry={openEntry} />
     {/if}
   </div>
 </main>
