@@ -6,6 +6,7 @@ use std::time::SystemTime;
 use serde::{Deserialize, Serialize};
 use simplelog::ColorChoice;
 use tauri::{AboutMetadata, CustomMenuItem, Menu, MenuItem, Submenu};
+use url::Url;
 use tauri::regex::Regex;
 
 
@@ -27,6 +28,21 @@ fn get_title(content: &str) -> String {
         let mut lines = content.lines().clone();
         lines.next().unwrap_or("").to_string()
     };
+}
+
+#[tauri::command]
+fn open_url(url: String) -> Result<(), String> {
+    let valid_url = Url::parse(&url.clone())
+        .map_err(|_| format!("Invalid URL: {}", url))?;
+
+    // httpsかhttpで始まるかチェック
+    match valid_url.scheme() {
+        "http" | "https" => {
+            open::that(url.clone())
+                .map_err(|err| format!("Cannot open '{}': {:?}", url, err))
+        },
+        _ => Err(format!("URL must start with 'http://' or 'https://': {}", url))
+    }
 }
 
 #[tauri::command]
@@ -140,6 +156,7 @@ fn main() -> anyhow::Result<()> {
         })
         .invoke_handler(tauri::generate_handler![
             get_files,
+            open_url,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -15,6 +15,7 @@ import {styleTags} from "@lezer/highlight";
 import {javascript, javascriptLanguage} from "@codemirror/lang-javascript";
 import {python} from "@codemirror/lang-python";
 import {java} from "@codemirror/lang-java";
+import {invoke} from "@tauri-apps/api";
 
 export let file: FileItem;
 export let nodeRepository: NodeRepository;
@@ -172,6 +173,19 @@ onMount(() => {
         state: startState,
         parent: container
     })
+
+    view.dom.addEventListener("click", async (event) => {
+        const target = event.target;
+
+        if (target instanceof HTMLSpanElement) {
+            const url = target.innerHTML;
+            if (url.match(/^https?:\/\//)) {
+                console.log(`opening url: ${url}`)
+                await invoke("open_url", {url});
+                event.preventDefault();
+            }
+        }
+    });
 });
 
 let prevFileName = "";

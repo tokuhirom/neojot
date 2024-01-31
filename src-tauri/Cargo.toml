@@ -20,6 +20,8 @@ log = "0.4.20"
 simplelog = "0.12.1"
 anyhow = "1.0.79"
 dirs = "5.0.1"
+open = "5.0.1"
+url = "2.5.0"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
