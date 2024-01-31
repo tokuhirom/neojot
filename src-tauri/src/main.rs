@@ -6,12 +6,27 @@ use std::time::SystemTime;
 use serde::{Deserialize, Serialize};
 use simplelog::ColorChoice;
 use tauri::{AboutMetadata, CustomMenuItem, Menu, MenuItem, Submenu};
+use tauri::regex::Regex;
 
 
 #[derive(Serialize, Deserialize)]
 struct FileItem {
-    name: String,
+    filename: String,
     mtime: u64,
+    title: String,
+    content: String,
+}
+
+fn get_title(content: &str) -> String {
+    let re = Regex::new(r"^#+\s+(.*)").unwrap(); // cache?
+
+    return if let Some(captures) = re.captures(content) {
+        captures.get(1).map_or_else(|| "", |m| m.as_str()).to_string()
+    } else {
+        // タイトルが見つからない場合は、最初の行を返す
+        let mut lines = content.lines().clone();
+        lines.next().unwrap_or("").to_string()
+    };
 }
 
 #[tauri::command]
@@ -23,6 +38,7 @@ fn get_files() -> Result<Vec<FileItem>, String> {
 
     if let Ok(entries) = fs::read_dir(data_path) {
         for entry in entries.filter_map(Result::ok) {
+            log::info!("entry: {:?}", entry);
             let path = entry.path();
             if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("md") {
                 let metadata = fs::metadata(&path)
@@ -39,7 +55,21 @@ fn get_files() -> Result<Vec<FileItem>, String> {
                     .ok_or("Failed to get filename".to_string())?
                     .to_string();
 
-                file_items.push(FileItem { name: filename, mtime });
+                match fs::read_to_string(&path) {
+                    Ok(content) => {
+                        let title = get_title(content.as_str());
+
+                        file_items.push(FileItem {
+                            filename,
+                            mtime,
+                            content,
+                            title: title.to_string()
+                        });
+                    }
+                    Err(err) => {
+                        log::warn!("Cannot load {}: {:?}", filename, err);
+                    }
+                };
             }
         }
     }

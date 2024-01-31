@@ -1,9 +1,21 @@
 <script lang="ts">
     import type {FileItem} from "./FileItem";
+    import {listen} from "@tauri-apps/api/event";
+    import {onDestroy} from "svelte";
 
     export let openEntry: (fileItem: FileItem) => void;
     export let fileItem: FileItem;
     export let selectedItem: FileItem;
+
+    const unlisten = listen("change_title", e => {
+        const payload = e.payload as {filename: string};
+        if (payload.filename === fileItem.filename) {
+            fileItem = fileItem;
+        }
+    });
+    onDestroy(async () => {
+        (await unlisten)();
+    })
 
     function handleOnClick() {
         openEntry(fileItem);
@@ -25,8 +37,8 @@
 <div>
     <button
             on:click={handleOnClick}
-          class:active={selectedItem.name === fileItem.name}
-    >{fileItem.name}
+          class:active={selectedItem.filename === fileItem.filename}
+    ><div class="title">{fileItem.title}</div>
         <span class="mtime">{formatEpochSeconds()}</span>
     </button>
 </div>
@@ -47,6 +59,13 @@
         font: inherit;
         cursor: pointer;
         border-bottom: darkslategrey 1px solid;
+
+        text-align: left;
+        overflow-x: hidden;
+    }
+
+    .title {
+        overflow-y: hidden;
     }
 
     button.active {

@@ -14,7 +14,7 @@
   let fileItems: FileItem[];
   let selectedItem: FileItem | undefined;
 
-  async function loadFileList() {
+  async function loadFileList(retry: boolean) {
     if (!await exists("data", {dir: BaseDirectory.AppData})) {
       await createDir("data", {dir: BaseDirectory.AppData});
     }
@@ -27,20 +27,22 @@
       await nodeRepository.save(newFileName, "");
 
       console.log(`Created new file ${newFileName}... so, i need to reload`);
-      await loadFileList();
+      if (retry) {
+        await loadFileList(false);
+      }
     }
   }
 
   onMount(async () => {
-    await loadFileList();
+    await loadFileList(true);
 
     selectedItem = fileItems[0];
-    md = await nodeRepository.load(selectedItem.name!!);
+    md = await nodeRepository.load(selectedItem.filename!!);
     console.log(`Node ready: ${md}`);
   });
 
   $: if (selectedItem) {
-    nodeRepository.load(selectedItem.name!!).then((targetNode) => {
+    nodeRepository.load(selectedItem.filename!!).then((targetNode) => {
       md = targetNode;
     });
   }
@@ -61,7 +63,7 @@
     const filename = createNewFileName();
     console.log(`Added new file: ${filename}`)
     await nodeRepository.save(filename, "");
-    await loadFileList();
+    await loadFileList(true);
     selectedItem = fileItems[0];
   })
   onDestroy(async () => {
@@ -71,9 +73,10 @@
   });
 
   async function openEntry(fileItem: FileItem) {
-    console.log(`open: ${fileItem.name}`)
+    console.log(`open: ${fileItem.filename}`)
+    // reload content from file system
+    fileItem.content = await nodeRepository.load(fileItem.filename);
     selectedItem = fileItem;
-    md = await nodeRepository.load(fileItem.name);
   }
 </script>
 
@@ -89,8 +92,8 @@
   </div>
   <div class="log-view">
     {#if md !== undefined}
-      <EntryView md={md} nodeRepository={nodeRepository}
-                 fileName={selectedItem.name} />
+      <EntryView nodeRepository={nodeRepository}
+                 file={selectedItem} />
     {/if}
   </div>
 </main>
