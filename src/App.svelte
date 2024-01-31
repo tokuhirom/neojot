@@ -23,11 +23,9 @@
 
     if (fileItems.length == 0) {
       // 最初の1ファイルを作成する
-      const newFileName = createNewFileName();
-      await nodeRepository.save(newFileName, "");
-
-      console.log(`Created new file ${newFileName}... so, i need to reload`);
+      const newFileName = createNewFile();
       if (retry) {
+        console.log(`Created new file ${newFileName}... so, i need to reload`);
         await loadFileList(false);
       }
     }
@@ -59,10 +57,15 @@
     return `${year}${month}${day}${hours}${minutes}${seconds}.md`;
   }
 
-  let unlistenDoNewFile = listen("do_new_file", async () => {
+  async function createNewFile(): Promise<string> {
     const filename = createNewFileName();
-    console.log(`Added new file: ${filename}`)
-    await nodeRepository.save(filename, "");
+    console.log(`Adding new file: ${filename}`)
+    await nodeRepository.save(filename, "# ");
+    return filename;
+  }
+
+  let unlistenDoNewFile = listen("do_new_file", async () => {
+    await createNewFile();
     await loadFileList(true);
     selectedItem = fileItems[0];
   })
