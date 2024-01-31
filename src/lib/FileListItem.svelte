@@ -38,7 +38,7 @@
     <button
             on:click={handleOnClick}
           class:active={selectedItem.filename === fileItem.filename}
-    ><div class="title">{fileItem.title}</div>
+    ><span class="title">{fileItem.title}</span>
         <span class="mtime">{formatEpochSeconds()}</span>
     </button>
 </div>
@@ -46,6 +46,8 @@
 <style>
     .mtime {
         display: block;
+        font-size: 60%;
+        color: darkgrey;
     }
 
     button {
@@ -65,6 +67,7 @@
     }
 
     .title {
+        display: block;
         overflow-y: hidden;
         min-height: 1em;
     }

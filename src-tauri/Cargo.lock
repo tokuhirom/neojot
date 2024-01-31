@@ -1638,6 +1638,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "neojot"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "dirs",
+ "log",
+ "serde",
+ "serde_json",
+ "simplelog",
+ "tauri",
+ "tauri-build",
+]
+
+[[package]]
 name = "new_debug_unreachable"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2225,20 +2239,6 @@ dependencies = [
  "getrandom 0.2.12",
  "libredox",
  "thiserror",
-]
-
-[[package]]
-name = "neojot"
-version = "0.0.0"
-dependencies = [
- "anyhow",
- "dirs",
- "log",
- "serde",
- "serde_json",
- "simplelog",
- "tauri",
- "tauri-build",
 ]
 
 [[package]]
