@@ -32,7 +32,7 @@ fn get_title(content: &str) -> String {
 #[tauri::command]
 fn get_files() -> Result<Vec<FileItem>, String> {
     let datadir = dirs::data_dir().ok_or("Data directory not found")?;
-    let data_path = datadir.join("com.github.tokuhirom.reflect-ai2/data");
+    let data_path = datadir.join("com.github.tokuhirom.neojot/data");
 
     let mut file_items = Vec::new();
 
@@ -113,10 +113,10 @@ fn main() -> anyhow::Result<()> {
 
     let menu = Menu::new()
         .add_submenu(Submenu::new(
-            "ReflectAI2",
+            "NeoJot",
             Menu::new()
                 .add_native_item(MenuItem::About(
-                    "ReflectAI2".to_string(),
+                    "NeoJot".to_string(),
                     AboutMetadata::default(),
                 ))
                 .add_native_item(MenuItem::Quit)
