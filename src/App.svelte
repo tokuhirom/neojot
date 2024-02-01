@@ -117,8 +117,7 @@
       {#each filteredFileItems as fileItem}
         <FileListItem openEntry={openEntry}
                       fileItem={fileItem}
-                      selectedItem={selectedItem}
-                      searchWord={searchWord} />
+                      selectedItem={selectedItem} />
       {/each}
     {/if}
   </div>
