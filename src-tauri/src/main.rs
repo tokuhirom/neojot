@@ -6,25 +6,57 @@ use std::time::SystemTime;
 use serde::{Deserialize, Serialize};
 use simplelog::ColorChoice;
 use tauri::{AboutMetadata, CustomMenuItem, Menu, MenuItem, Submenu};
+use url::Url;
+use tauri::regex::Regex;
 
 
 #[derive(Serialize, Deserialize)]
 struct FileItem {
-    name: String,
+    filename: String,
     mtime: u64,
+    title: String,
+    content: String,
+}
+
+fn get_title(content: &str) -> String {
+    let re = Regex::new(r"^#+\s+(.*)").unwrap(); // cache?
+
+    return if let Some(captures) = re.captures(content) {
+        captures.get(1).map_or_else(|| "", |m| m.as_str()).to_string()
+    } else {
+        // タイトルが見つからない場合は、最初の行を返す
+        let mut lines = content.lines().clone();
+        lines.next().unwrap_or("").to_string()
+    };
+}
+
+#[tauri::command]
+fn open_url(url: String) -> Result<(), String> {
+    let valid_url = Url::parse(&url.clone())
+        .map_err(|_| format!("Invalid URL: {}", url))?;
+
+    // httpsかhttpで始まるかチェック
+    match valid_url.scheme() {
+        "http" | "https" => {
+            open::that(url.clone())
+                .map_err(|err| format!("Cannot open '{}': {:?}", url, err))
+        },
+        _ => Err(format!("URL must start with 'http://' or 'https://': {}", url))
+    }
 }
 
 #[tauri::command]
 fn get_files() -> Result<Vec<FileItem>, String> {
     let datadir = dirs::data_dir().ok_or("Data directory not found")?;
-    let data_path = datadir.join("com.github.tokuhirom.reflect-ai2/data");
+    let data_path = datadir.join("com.github.tokuhirom.neojot/data");
 
     let mut file_items = Vec::new();
 
     if let Ok(entries) = fs::read_dir(data_path) {
         for entry in entries.filter_map(Result::ok) {
+            log::info!("entry: {:?}", entry);
             let path = entry.path();
-            if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("json") {
+            if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("md") {
                 let metadata = fs::metadata(&path)
                     .map_err(|e| format!("Failed to read file metadata: {}", e))?;
 
@@ -39,7 +71,21 @@ fn get_files() -> Result<Vec<FileItem>, String> {
                     .ok_or("Failed to get filename".to_string())?
                     .to_string();
 
-                file_items.push(FileItem { name: filename, mtime });
+                match fs::read_to_string(&path) {
+                    Ok(content) => {
+                        let title = get_title(content.as_str());
+
+                        file_items.push(FileItem {
+                            filename,
+                            mtime,
+                            content,
+                            title: title.to_string()
+                        });
+                    }
+                    Err(err) => {
+                        log::warn!("Cannot load {}: {:?}", filename, err);
+                    }
+                };
             }
         }
     }
@@ -83,10 +129,10 @@ fn main() -> anyhow::Result<()> {
 
     let menu = Menu::new()
         .add_submenu(Submenu::new(
-            "ReflectAI2",
+            "NeoJot",
             Menu::new()
                 .add_native_item(MenuItem::About(
-                    "ReflectAI2".to_string(),
+                    "NeoJot".to_string(),
                     AboutMetadata::default(),
                 ))
                 .add_native_item(MenuItem::Quit)
@@ -110,6 +156,7 @@ fn main() -> anyhow::Result<()> {
         })
         .invoke_handler(tauri::generate_handler![
             get_files,
+            open_url,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

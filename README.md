@@ -1,6 +1,6 @@
-# ReflectAI2
+# NeoJot
 
-This is a free and open source personal assistant software based on AI technology.
+This is a my own note taking app.
 
 Based on : `Tauri + Svelte + Typescript`.
 
