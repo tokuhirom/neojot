@@ -1,7 +1,7 @@
 <script lang="ts">
   import {NodeRepository} from "./lib/repository/NodeRepository";
   import {onDestroy, onMount} from "svelte";
-  import {listen} from "@tauri-apps/api/event";
+  import {emit, listen} from "@tauri-apps/api/event";
   import {BaseDirectory, createDir, exists} from "@tauri-apps/api/fs";
   import FileListItem from "./lib/FileListItem.svelte";
   import {invoke} from "@tauri-apps/api";
@@ -71,13 +71,17 @@
     return filename;
   }
 
+  let unlistenSortFileList = listen("sort_file_list", async () => {
+    fileItems.sort((a, b) => b.mtime - a.mtime);
+    fileItems = fileItems;
+  });
   let unlistenDoNewFile = listen("do_new_file", async () => {
     await createNewFile();
     await loadFileList(true);
     selectedItem = fileItems[0];
   })
   onDestroy(async () => {
-    for (let unlisten of [unlistenDoNewFile]) {
+    for (let unlisten of [unlistenDoNewFile, unlistenSortFileList]) {
       (await unlisten)();
     }
   });

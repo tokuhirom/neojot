@@ -35,6 +35,8 @@ async function save() {
         await emit("change_title", {filename: file.filename});
     }
     await nodeRepository.save(file.filename, text);
+    file.mtime = Math.floor(Date.now() / 1000);
+    await emit("sort_file_list");
 }
 
 let view: EditorView;
