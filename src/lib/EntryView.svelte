@@ -201,6 +201,16 @@ $: if (file) {
             });
             view.dispatch(transaction);
 
+            if (file.content === "# ") {
+                // カーソルをドキュメントの末尾に移動
+                let state = view.state;
+                let endPos = state.doc.length;
+                let moveCursor = state.update({
+                    selection: {anchor: endPos, head: endPos}
+                });
+                view.dispatch(moveCursor);
+            }
+
             prevFileName = file.filename;
         }
     }
