@@ -7,6 +7,7 @@
   import {invoke} from "@tauri-apps/api";
   import type {FileItem} from "./lib/FileItem";
   import EntryView from "./lib/EntryView.svelte";
+  import CardView from "./lib/CardView.svelte";
 
   let nodeRepository = new NodeRepository();
   let md: string | null;
@@ -14,6 +15,8 @@
   let fileItems: FileItem[];
   let filteredFileItems: FileItem[];
   let selectedItem: FileItem | undefined;
+
+  let tabPane = "list";
 
   let searchWord = "";
 
@@ -115,24 +118,34 @@
 </script>
 
 <main class="container">
-  <div class="file-list">
-    <input type="text" class="search-box" bind:value={searchWord} />
-    {#if filteredFileItems && selectedItem}
-      {#each filteredFileItems as fileItem}
-        <FileListItem openEntry={openEntry}
-                      fileItem={fileItem}
-                      selectedItem={selectedItem} />
-      {/each}
-    {/if}
+  <div class="sidemenu">
+    <button on:click={() => tabPane = "card"} class:active={tabPane === "card"}>🎴</button>
+    <button on:click={() => tabPane = "list"} class:active={tabPane === "list"}>☀</button>
   </div>
-  <div class="log-view">
-    {#if md !== undefined}
-      <EntryView nodeRepository={nodeRepository}
-                 file={selectedItem}
-                 fileItems={fileItems}
-                 openEntry={openEntry} />
-    {/if}
-  </div>
+  {#if tabPane==="list"}
+    <div class="file-list">
+      <input type="text" class="search-box" bind:value={searchWord} />
+      {#if filteredFileItems && selectedItem}
+        {#each filteredFileItems as fileItem}
+          <FileListItem openEntry={openEntry}
+                        fileItem={fileItem}
+                        selectedItem={selectedItem} />
+        {/each}
+      {/if}
+    </div>
+    <div class="log-view">
+      {#if md !== undefined}
+        <EntryView nodeRepository={nodeRepository}
+                   file={selectedItem}
+                   fileItems={fileItems}
+                   openEntry={openEntry} />
+      {/if}
+    </div>
+  {:else}
+    <CardView nodeRepository={nodeRepository}
+              fileItems={fileItems}
+    />
+  {/if}
 </main>
 
 <style>
@@ -150,6 +163,26 @@
     height: 100vh;
     padding-left: 8px;
     padding-right: 8px;
+  }
+
+  .sidemenu {
+    flex: 0 0 20px;
+    padding-right: 9px;
+    padding-left: 4px;
+  }
+  .sidemenu button.active {
+    background-color: #646cff;
+  }
+  .sidemenu button {
+    width: 40px;
+    background-color: darkslategrey;
+    color: inherit;
+    border: none;
+    padding: 8px;
+    margin: 2px;
+    font: inherit;
+    cursor: pointer;
+    border-bottom: darkslategrey 1px solid;
   }
 
   .file-list {
