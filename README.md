@@ -2,6 +2,8 @@
 
 This is a my own note taking app.
 
+![img.png](img.png)
+
 Based on : `Tauri + Svelte + Typescript`.
 
 ## Supported platforms
