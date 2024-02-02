@@ -1,22 +1,37 @@
 <script lang="ts">
-import {onMount} from "svelte";
-import {loadFileList} from "./repository/NodeRepository";
-import {type FileItem, shouldShowFileItem} from "./FileItem";
+    import {onDestroy, onMount} from "svelte";
+import {archiveFile, loadFileList} from "./repository/NodeRepository";
+import {type FileItem} from "./FileItem";
 import EntryView from "./EntryView.svelte";
+    import {listen} from "@tauri-apps/api/event";
 
-let fileItems: FileItem[] = [];
 let filteredFileItems: FileItem[] = [];
 let selectedItem: FileItem | undefined = undefined;
 
 onMount(async () => {
-    fileItems = await loadFileList("data", true);
+    const fileItems = await loadFileList("data", true);
     filteredFileItems = fileItems.filter(it => it.title.includes("TODO:"));
-    selectedItem = fileItems[0];
+    selectedItem = filteredFileItems[0];
 });
 
 async function openFile(fileItem: FileItem) {
     selectedItem = fileItem;
 }
+
+    let unlistenArchive = listen("do_archive", async () => {
+        if (selectedItem) {
+            console.log(`Archiving: ${selectedItem.filename}`)
+            await archiveFile(selectedItem);
+            const fileItems = await loadFileList("data", true);
+            filteredFileItems = fileItems.filter(it => it.title.includes("TODO:"));
+            selectedItem = filteredFileItems[0];
+        }
+    })
+    onDestroy(async () => {
+        for (let unlisten of [unlistenArchive]) {
+            (await unlisten)();
+        }
+    });
 </script>
 
 <div class="task-view">
@@ -29,7 +44,7 @@ async function openFile(fileItem: FileItem) {
         {#if selectedItem !== undefined}
             <EntryView
                     file={selectedItem}
-                    fileItems={fileItems}
+                    fileItems={filteredFileItems}
                     openEntry={openFile} />
         {/if}
     </div>
