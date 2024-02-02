@@ -1,6 +1,6 @@
 <script lang="ts">
 
-import {NodeRepository} from "./repository/NodeRepository";
+import {saveMarkdownFile} from "./repository/NodeRepository";
 import {onMount} from "svelte";
 import {defaultKeymap, indentLess, indentMore} from "@codemirror/commands";
 import {markdown, markdownLanguage} from "@codemirror/lang-markdown";
@@ -17,7 +17,6 @@ import {java} from "@codemirror/lang-java";
 import {invoke} from "@tauri-apps/api";
 
 export let file: FileItem;
-export let nodeRepository: NodeRepository;
 export let fileItems: FileItem[];
 export let openEntry: (fileItem: FileItem) => void;
 
@@ -34,7 +33,7 @@ async function save() {
         file.title = newTitle;
         await emit("change_title", {filename: file.filename});
     }
-    await nodeRepository.save(file.filename, text);
+    await saveMarkdownFile(file.filename, text);
     file.mtime = Math.floor(Date.now() / 1000);
     await emit("sort_file_list");
 }

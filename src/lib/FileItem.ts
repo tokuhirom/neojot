@@ -14,3 +14,23 @@ export function extractTitle(content: string) {
         return "";
     }
 }
+
+export function shouldShowFileItem(fileItem: FileItem, searchWord: string): boolean {
+    if (searchWord.length == 0) {
+        return true;
+    }
+
+    const lowerCaseSearchWord = searchWord.toLowerCase();
+    const lowerCaseTitle = fileItem.title.toLowerCase();
+    const lowerCaseContent = fileItem.content.toLowerCase();
+
+    let words = lowerCaseSearchWord.split(/\s+/).filter(it => it.length>0);
+    let result = true;
+    for (let word of words) {
+        if (!lowerCaseTitle.includes(word) && !lowerCaseContent.includes(word)) {
+            result = false;
+            break;
+        }
+    }
+    return result;
+}
