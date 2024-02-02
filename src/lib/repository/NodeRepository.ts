@@ -10,11 +10,56 @@ import {
 import {invoke} from "@tauri-apps/api";
 import type {FileItem} from "../FileItem";
 
+export type CalendarData = Record<number, string[]>;
+
 export async function saveMarkdownFile(name: string, src: string) {
     // TODO atomic write
     await writeTextFile(`data/${name}`,
         src,
         { dir: BaseDirectory.AppData });
+
+    await writeCalendarFile(name);
+}
+
+async function writeCalendarFile(filename: string) {
+    const date = new Date();
+    const calendarFileName = generateCalendarFileNameByDate(date);
+
+    if (!await exists("calendar", {dir: BaseDirectory.AppData})) {
+        await createDir("calendar", {dir: BaseDirectory.AppData});
+    }
+
+    console.log("HAHA")
+    const data = await readCalendarFile(date.getFullYear(), date.getMonth() + 1);
+    const ary = data[date.getDay()] || [];
+    if (!ary.includes(filename)) {
+        ary.push(filename);
+        data[date.getDay()] = ary;
+    }
+    await writeTextFile(calendarFileName, JSON.stringify(data), {dir: BaseDirectory.AppData});
+}
+
+export async function readCalendarFile(year: number, month: number) : Promise<CalendarData> {
+    const filename = generateCalendarFileName(year, month);
+    console.log(`readCalendarFile: ${filename}`)
+    if (await exists(filename, {dir: BaseDirectory.AppData})) {
+        const json = await readTextFile(filename, {dir: BaseDirectory.AppData});
+        return JSON.parse(json) as CalendarData;
+    } else {
+        console.log(`missing file: ${filename}`)
+        return {}
+    }
+}
+
+function generateCalendarFileNameByDate(date: Date) {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    return generateCalendarFileName(year, month);
+}
+
+function generateCalendarFileName(year: number, month: number): string {
+    const formattedMonth = month < 10 ? `0${month}` : month.toString();
+    return `calendar/${year}-${formattedMonth}.json`;
 }
 
 export async function loadMarkdownFile(name: string): Promise<string> {
@@ -22,7 +67,6 @@ export async function loadMarkdownFile(name: string): Promise<string> {
         dir: BaseDirectory.AppData
     });
 }
-
 
 export async function loadFileList(prefix: string, retry: boolean) : Promise<FileItem[]> {
     if (!await exists(prefix, {dir: BaseDirectory.AppData})) {

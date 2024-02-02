@@ -3,6 +3,7 @@
   import ListView from "./lib/ListView.svelte";
   import ArchiveView from "./lib/ArchiveView.svelte";
   import TaskView from "./lib/TaskView.svelte";
+  import CalendarView from "./lib/CalendarView.svelte";
 
   let tabPane = "list";
 </script>
@@ -12,6 +13,7 @@
     <button on:click={() => tabPane = "card"} class:active={tabPane === "card"}>🗃️</button>
     <button on:click={() => tabPane = "list"} class:active={tabPane === "list"}>📝</button>
     <button on:click={() => tabPane = "task"} class:active={tabPane === "task"}>✅</button>
+    <button on:click={() => tabPane = "calendar"} class:active={tabPane === "calendar"}>📆</button>
     <button on:click={() => tabPane = "archive"} class:active={tabPane === "archive"}>♻️</button>
   </div>
   {#if tabPane === "list"}
@@ -20,6 +22,8 @@
     <ArchiveView />
   {:else if tabPane === "task"}
     <TaskView />
+  {:else if tabPane === "calendar"}
+    <CalendarView />
   {:else}
     <CardView />
   {/if}
