@@ -29,7 +29,6 @@ async function writeCalendarFile(filename: string) {
         await createDir("calendar", {dir: BaseDirectory.AppData});
     }
 
-    console.log("HAHA")
     const data = await readCalendarFile(date.getFullYear(), date.getMonth() + 1);
     const ary = data[date.getDay()] || [];
     if (!ary.includes(filename)) {
