@@ -1,4 +1,4 @@
-import {BaseDirectory, createDir, exists, readTextFile, writeTextFile} from "@tauri-apps/api/fs";
+import {BaseDirectory, createDir, exists, readTextFile, renameFile, writeTextFile} from "@tauri-apps/api/fs";
 import {invoke} from "@tauri-apps/api";
 import type {FileItem} from "../FileItem";
 
@@ -16,25 +16,24 @@ export async function loadMarkdownFile(name: string): Promise<string> {
 }
 
 
-export async function loadFileList(retry: boolean) {
-    if (!await exists("data", {dir: BaseDirectory.AppData})) {
-        await createDir("data", {dir: BaseDirectory.AppData});
+export async function loadFileList(prefix: string, retry: boolean) : Promise<FileItem[]> {
+    if (!await exists(prefix, {dir: BaseDirectory.AppData})) {
+        await createDir(prefix, {dir: BaseDirectory.AppData});
     }
 
-    let fileItems = await invoke('get_files') as FileItem[];
+    let fileItems = await invoke('get_files', {prefix}) as FileItem[];
 
     if (fileItems.length == 0) {
         // 最初の1ファイルを作成する
         const newFileName = createNewFile();
         if (retry) {
             console.log(`Created new file ${newFileName}... so, i need to reload`);
-            return await loadFileList(false);
+            return await loadFileList(prefix, false);
         }
     }
 
     return fileItems;
 }
-
 
 function createNewFileName() {
     const now = new Date();
@@ -56,3 +55,14 @@ export async function createNewFile(): Promise<string> {
     return filename;
 }
 
+export async function archiveFile(fileItem: FileItem) {
+    console.log(`Archive file: ${fileItem.filename}`)
+    if (!await exists("archived", {dir: BaseDirectory.AppData})) {
+        await createDir("archived", {dir: BaseDirectory.AppData});
+    }
+
+    await renameFile(
+        `data/${fileItem.filename}`,
+        `archived/${fileItem.filename}`,
+        { dir: BaseDirectory.AppData });
+}

@@ -46,15 +46,16 @@ fn open_url(url: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn get_files() -> Result<Vec<FileItem>, String> {
+fn get_files(prefix: String) -> Result<Vec<FileItem>, String> {
+    log::info!("get_files: {}", prefix);
     let datadir = dirs::data_dir().ok_or("Data directory not found")?;
-    let data_path = datadir.join("com.github.tokuhirom.neojot/data");
+    let data_path = datadir.join("com.github.tokuhirom.neojot").join(prefix);
 
     let mut file_items = Vec::new();
 
     if let Ok(entries) = fs::read_dir(data_path) {
         for entry in entries.filter_map(Result::ok) {
-            log::info!("entry: {:?}", entry);
+            // log::info!("entry: {:?}", entry);
             let path = entry.path();
             if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("md") {
                 let metadata = fs::metadata(&path)
@@ -125,6 +126,8 @@ fn main() -> anyhow::Result<()> {
         Menu::new()
             .add_item(CustomMenuItem::new("new_file", "New File")
                 .accelerator("Command+n"))
+            .add_item(CustomMenuItem::new("archive", "Archive")
+                .accelerator("Command+d"))
     );
 
     let menu = Menu::new()
@@ -148,6 +151,11 @@ fn main() -> anyhow::Result<()> {
                 "new_file" => {
                     log::info!("Create new entry");
                     if let Err(err) = event.window().emit("do_new_file", "DUMMY".to_string()) {
+                        log::error!("Cannot emit message: {:?}", err);
+                    }
+                }
+                "archive" => {
+                    if let Err(err) = event.window().emit("do_archive", "DUMMY".to_string()) {
                         log::error!("Cannot emit message: {:?}", err);
                     }
                 }

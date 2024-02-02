@@ -1,13 +1,13 @@
 <script lang="ts">
 
-import EntryView from "./EntryView.svelte";
-import FileListItem from "./FileListItem.svelte";
-import {type FileItem, shouldShowFileItem} from "./FileItem";
-import {createNewFile, loadFileList, loadMarkdownFile} from "./repository/NodeRepository";
-import {onDestroy, onMount} from "svelte";
-import {listen} from "@tauri-apps/api/event";
+    import EntryView from "./EntryView.svelte";
+    import FileListItem from "./FileListItem.svelte";
+    import {type FileItem, shouldShowFileItem} from "./FileItem";
+    import {archiveFile, createNewFile, loadFileList, loadMarkdownFile} from "./repository/NodeRepository";
+    import {onDestroy, onMount} from "svelte";
+    import {listen} from "@tauri-apps/api/event";
 
-let fileItems: FileItem[] = [];
+    let fileItems: FileItem[] = [];
 
 let filteredFileItems: FileItem[];
 let selectedItem: FileItem | undefined;
@@ -19,7 +19,7 @@ $: if (fileItems || searchWord) {
 }
 
 onMount(async () => {
-    fileItems = await loadFileList(true);
+    fileItems = await loadFileList("data", true);
 
     selectedItem = fileItems[0];
 });
@@ -37,11 +37,19 @@ let unlistenSortFileList = listen("sort_file_list", async () => {
 });
 let unlistenDoNewFile = listen("do_new_file", async () => {
     await createNewFile();
-    await loadFileList(true);
+    fileItems = await loadFileList("data", true);
     selectedItem = fileItems[0];
 })
+let unlistenArchive = listen("do_archive", async () => {
+    if (selectedItem) {
+        console.log(`Archiving: ${selectedItem.filename}`)
+        await archiveFile(selectedItem);
+        fileItems = await loadFileList("data", true);
+        selectedItem = fileItems[0];
+    }
+})
 onDestroy(async () => {
-    for (let unlisten of [unlistenDoNewFile, unlistenSortFileList]) {
+    for (let unlisten of [unlistenDoNewFile, unlistenSortFileList, unlistenArchive]) {
         (await unlisten)();
     }
 });

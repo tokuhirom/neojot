@@ -26,12 +26,14 @@
         "readFile": true,
         "writeFile": true,
         "readDir": true,
+        "renameFile": true,
         "createDir": true,
         "exists": true,
         "scope": [
           "$APPDATA",
           "$APPDATA/*",
-          "$APPDATA/data/*"
+          "$APPDATA/data/*",
+          "$APPDATA/archived/*"
         ]
       }
     },

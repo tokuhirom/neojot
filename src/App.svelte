@@ -1,17 +1,21 @@
 <script lang="ts">
   import CardView from "./lib/CardView.svelte";
   import ListView from "./lib/ListView.svelte";
+  import ArchiveView from "./lib/ArchiveView.svelte";
 
   let tabPane = "list";
 </script>
 
 <main class="container">
   <div class="sidemenu">
-    <button on:click={() => tabPane = "card"} class:active={tabPane === "card"}>🎴</button>
+    <button on:click={() => tabPane = "card"} class:active={tabPane === "card"}>🗃️</button>
     <button on:click={() => tabPane = "list"} class:active={tabPane === "list"}>☀</button>
+    <button on:click={() => tabPane = "archive"} class:active={tabPane === "archive"}>♻️</button>
   </div>
-  {#if tabPane==="list"}
+  {#if tabPane === "list"}
     <ListView />
+  {:else if tabPane === "archive"}
+    <ArchiveView />
   {:else}
     <CardView />
   {/if}
