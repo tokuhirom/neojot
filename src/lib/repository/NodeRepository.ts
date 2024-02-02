@@ -30,10 +30,10 @@ async function writeCalendarFile(filename: string) {
     }
 
     const data = await readCalendarFile(date.getFullYear(), date.getMonth() + 1);
-    const ary = data[date.getDay()] || [];
+    const ary = data[date.getDate()] || [];
     if (!ary.includes(filename)) {
         ary.push(filename);
-        data[date.getDay()] = ary;
+        data[date.getDate()] = ary;
     }
     await writeTextFile(calendarFileName, JSON.stringify(data), {dir: BaseDirectory.AppData});
 }
