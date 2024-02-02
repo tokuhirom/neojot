@@ -25,6 +25,7 @@
     let unlistenArchive = listen("do_archive", async () => {
         if (selectedItem) {
             await archiveFile(selectedItem);
+            fileItems = await loadFileList("data", true);
             selectedItem = undefined;
         }
     })

@@ -27,6 +27,7 @@
         "writeFile": true,
         "readDir": true,
         "renameFile": true,
+        "removeFile": true,
         "createDir": true,
         "exists": true,
         "scope": [

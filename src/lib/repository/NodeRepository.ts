@@ -1,4 +1,12 @@
-import {BaseDirectory, createDir, exists, readTextFile, renameFile, writeTextFile} from "@tauri-apps/api/fs";
+import {
+    BaseDirectory,
+    createDir,
+    exists,
+    readTextFile,
+    removeFile,
+    renameFile,
+    writeTextFile
+} from "@tauri-apps/api/fs";
 import {invoke} from "@tauri-apps/api";
 import type {FileItem} from "../FileItem";
 
@@ -23,8 +31,10 @@ export async function loadFileList(prefix: string, retry: boolean) : Promise<Fil
 
     let fileItems = await invoke('get_files', {prefix}) as FileItem[];
 
-    if (fileItems.length == 0) {
+    if (fileItems.length == 0 && prefix == "data") {
         // 最初の1ファイルを作成する
+        console.log(`There's no files in ${prefix}. Create new file...`);
+
         const newFileName = createNewFile();
         if (retry) {
             console.log(`Created new file ${newFileName}... so, i need to reload`);
@@ -65,4 +75,10 @@ export async function archiveFile(fileItem: FileItem) {
         `data/${fileItem.filename}`,
         `archived/${fileItem.filename}`,
         { dir: BaseDirectory.AppData });
+}
+
+export async function deleteArchivedFile(fileItem: FileItem) {
+    await removeFile(`archived/${fileItem.filename}`, {
+        dir: BaseDirectory.AppData
+    });
 }
