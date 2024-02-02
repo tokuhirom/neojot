@@ -36,7 +36,7 @@
 
 </script>
 
-<div>
+<div class="container">
     {#if selectedItem}
         <button class="back-to-list" on:click={() => selectedItem=undefined}>Back to List</button>
 
@@ -55,6 +55,10 @@
 </div>
 
 <style>
+    .container {
+        width: 100%;
+    }
+
     .card {
         display: flex; /* Flexboxを有効にします */
         flex-direction: column; /* アイテムを縦方向に並べます */
