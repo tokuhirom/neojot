@@ -46,9 +46,9 @@ fn open_url(url: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn get_mtime(filename: String) -> Result<u64, String> {
+fn load_file_item(filename: String) -> Result<FileItem, String> {
     let datadir = dirs::data_dir().ok_or("Data directory not found")?;
-    let path = datadir.join("com.github.tokuhirom.neojot").join("data");
+    let path = datadir.join("com.github.tokuhirom.neojot").join(filename.clone());
 
     let metadata = fs::metadata(&path)
         .map_err(|e| format!("Failed to read file metadata: {}", e))?;
@@ -59,14 +59,29 @@ fn get_mtime(filename: String) -> Result<u64, String> {
         .map_err(|_| "Time conversion error".to_string())?
         .as_secs();
 
-    Ok(mtime)
+    match fs::read_to_string(&path) {
+        Ok(content) => {
+            let title = get_title(content.as_str());
+
+            Ok(FileItem {
+                filename,
+                mtime,
+                content,
+                title: title.to_string()
+            })
+        }
+        Err(err) => {
+            log::warn!("Cannot load {}: {:?}", filename, err);
+            Err(format!("Cannot load {}: {:?}", filename, err))
+        }
+    }
 }
 
 #[tauri::command]
 fn get_files(prefix: String) -> Result<Vec<FileItem>, String> {
     log::info!("get_files: {}", prefix);
     let datadir = dirs::data_dir().ok_or("Data directory not found")?;
-    let data_path = datadir.join("com.github.tokuhirom.neojot").join(prefix);
+    let data_path = datadir.join("com.github.tokuhirom.neojot").join(prefix.clone());
 
     let mut file_items = Vec::new();
 
@@ -75,35 +90,19 @@ fn get_files(prefix: String) -> Result<Vec<FileItem>, String> {
             // log::info!("entry: {:?}", entry);
             let path = entry.path();
             if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("md") {
-                let metadata = fs::metadata(&path)
-                    .map_err(|e| format!("Failed to read file metadata: {}", e))?;
-
-                let mtime = metadata.modified()
-                    .map_err(|_| "Failed to get modification time".to_string())?
-                    .duration_since(SystemTime::UNIX_EPOCH)
-                    .map_err(|_| "Time conversion error".to_string())?
-                    .as_secs();
-
                 let filename = path.file_name()
                     .and_then(|s| s.to_str())
                     .ok_or("Failed to get filename".to_string())?
                     .to_string();
 
-                match fs::read_to_string(&path) {
-                    Ok(content) => {
-                        let title = get_title(content.as_str());
-
-                        file_items.push(FileItem {
-                            filename,
-                            mtime,
-                            content,
-                            title: title.to_string()
-                        });
+                match load_file_item(format!("{}/{}", prefix, filename)) {
+                    Ok(file_item) => {
+                        file_items.push(file_item);
                     }
                     Err(err) => {
                         log::warn!("Cannot load {}: {:?}", filename, err);
                     }
-                };
+                }
             }
         }
     }
@@ -188,7 +187,7 @@ fn main() -> anyhow::Result<()> {
         .invoke_handler(tauri::generate_handler![
             get_files,
             open_url,
-            get_mtime,
+            load_file_item,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

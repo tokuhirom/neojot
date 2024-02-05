@@ -3,7 +3,12 @@
     import EntryView from "./EntryView.svelte";
     import FileListItem from "./FileListItem.svelte";
     import {type FileItem, shouldShowFileItem} from "./FileItem";
-    import {archiveFile, createNewFile, loadFileList, loadMarkdownFile} from "./repository/NodeRepository";
+    import {
+        archiveFile,
+        createNewFileWithContent,
+        loadFileList,
+        loadMarkdownFile
+    } from "./repository/NodeRepository";
     import {onDestroy, onMount} from "svelte";
     import {listen} from "@tauri-apps/api/event";
     import LinkCards from "./LinkCards.svelte";
@@ -37,9 +42,9 @@ let unlistenSortFileList = listen("sort_file_list", async () => {
     fileItems = fileItems;
 });
 let unlistenDoNewFile = listen("do_new_file", async () => {
-    await createNewFile();
-    fileItems = await loadFileList("data", true);
-    selectedItem = fileItems[0];
+    const fileItem = await createNewFileWithContent("# ");
+    fileItems.unshift(fileItem);
+    selectedItem = fileItem;
 })
 let unlistenArchive = listen("do_archive", async () => {
     if (selectedItem) {

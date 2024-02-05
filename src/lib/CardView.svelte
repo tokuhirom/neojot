@@ -1,5 +1,11 @@
 <script lang="ts">
-    import {archiveFile, createNewFile, loadFileList, loadMarkdownFile} from "./repository/NodeRepository";
+    import {
+        archiveFile,
+        createNewFile,
+        createNewFileWithContent,
+        loadFileList,
+        loadMarkdownFile
+    } from "./repository/NodeRepository";
     import type {FileItem} from "./FileItem";
     import EntryView from "./EntryView.svelte";
     import {onDestroy, onMount} from "svelte";
@@ -19,9 +25,9 @@
         fileItems = fileItems;
     });
     let unlistenDoNewFile = listen("do_new_file", async () => {
-        await createNewFile();
-        fileItems = await loadFileList("data", true);
-        selectedItem = fileItems[0];
+        const fileItem = await createNewFileWithContent("# ");
+        fileItems.unshift(fileItem);
+        selectedItem = fileItem;
     })
     let unlistenArchive = listen("do_archive", async () => {
         if (selectedItem) {

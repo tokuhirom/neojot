@@ -12,16 +12,16 @@ import {extractTitle, type FileItem} from "../FileItem";
 
 export type CalendarData = Record<number, string[]>;
 
-export async function saveMarkdownFile(name: string, src: string) {
+export async function saveMarkdownFile(filename: string, src: string) {
     // TODO atomic write
-    await writeTextFile(`data/${name}`,
+    await writeTextFile(filename,
         src,
         { dir: BaseDirectory.AppData });
 
-    await writeCalendarFile(name);
+    await writeCalendarFile(filename.replace(/.+\//, ''));
 }
 
-async function writeCalendarFile(filename: string) {
+async function writeCalendarFile(basename: string) {
     const date = new Date();
     const calendarFileName = generateCalendarFileNameByDate(date);
 
@@ -31,8 +31,8 @@ async function writeCalendarFile(filename: string) {
 
     const data = await readCalendarFile(date.getFullYear(), date.getMonth() + 1);
     const ary = data[date.getDate()] || [];
-    if (!ary.includes(filename)) {
-        ary.push(filename);
+    if (!ary.includes(basename)) {
+        ary.push(basename);
         data[date.getDate()] = ary;
     }
     await writeTextFile(calendarFileName, JSON.stringify(data), {dir: BaseDirectory.AppData});
@@ -62,19 +62,9 @@ function generateCalendarFileName(year: number, month: number): string {
 }
 
 export async function loadMarkdownFile(name: string): Promise<string> {
-    return await readTextFile(`data/${name}`, {
+    return await readTextFile(name, {
         dir: BaseDirectory.AppData
     });
-}
-
-export async function loadFileItem(name: string): Promise<FileItem> {
-    const markdown = await loadMarkdownFile(`data/${name}`);
-    return {
-        filename: name,
-        mtime: await invoke("get_mtime", {filename: name}),
-        title: extractTitle(markdown),
-        content: markdown,
-    }
 }
 
 export async function loadFileList(prefix: string, retry: boolean) : Promise<FileItem[]> {
@@ -83,14 +73,16 @@ export async function loadFileList(prefix: string, retry: boolean) : Promise<Fil
     }
 
     let fileItems = await invoke('get_files', {prefix}) as FileItem[];
+    console.log("loaded fileitems")
+    console.log(fileItems)
 
     if (fileItems.length == 0 && prefix == "data") {
         // 最初の1ファイルを作成する
         console.log(`There's no files in ${prefix}. Create new file...`);
 
-        const newFileName = createNewFile();
+        const newFileItem = await createNewFileWithContent("# ");
         if (retry) {
-            console.log(`Created new file ${newFileName}... so, i need to reload`);
+            console.log(`Created new file ${newFileItem.filename}... so, i need to reload`);
             return await loadFileList(prefix, false);
         }
     }
@@ -108,7 +100,7 @@ function createNewFileName() {
     const minutes = now.getMinutes().toString().padStart(2, '0');
     const seconds = now.getSeconds().toString().padStart(2, '0');
 
-    return `${year}${month}${day}${hours}${minutes}${seconds}.md`;
+    return `data/${year}${month}${day}${hours}${minutes}${seconds}.md`;
 }
 
 export async function createNewFile(): Promise<string> {
@@ -120,12 +112,8 @@ export async function createNewFileWithContent(src: string): Promise<FileItem> {
     const filename = createNewFileName();
     console.log(`Adding new file: ${filename}`)
     await saveMarkdownFile(filename, src);
-    return {
-        filename,
-        content: src,
-        mtime: await invoke("get_mtime", {filename}),
-        title: extractTitle(src),
-    };
+
+    return await invoke("load_file_item", {filename});
 }
 
 export async function archiveFile(fileItem: FileItem) {

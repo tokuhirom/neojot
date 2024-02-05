@@ -36,7 +36,7 @@ export function shouldShowFileItem(fileItem: FileItem, searchWord: string): bool
 }
 
 export function extractBrackets(content: string): string[] {
-    const pattern = /\[\[(.*?)\]\]/g;
+    const pattern = /\[\[(.*?)]]/g;
     const matches = [];
     let match;
 

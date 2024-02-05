@@ -8,7 +8,7 @@
 
     let forwardLinks: Record<string, FileItem[]> = {};
 
-    $: if (fileItems) {
+    $: if (fileItems || file) {
         for (let fileItem of fileItems) {
             const links = extractBrackets(fileItem.content);
             for (let link of links) {
