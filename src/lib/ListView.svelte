@@ -94,7 +94,7 @@ onDestroy(async () => {
     }
 
     .file-list {
-        flex: 0 0 30%;
+        flex: 0 0 250px;
         overflow-y: auto;
         padding-right: 9px;
         padding-left: 4px;
