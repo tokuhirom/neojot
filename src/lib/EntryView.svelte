@@ -1,6 +1,6 @@
 <script lang="ts">
 
-import {saveMarkdownFile} from "./repository/NodeRepository";
+    import {createNewFile, createNewFileWithContent, saveMarkdownFile} from "./repository/NodeRepository";
 import {onMount} from "svelte";
 import {defaultKeymap, indentLess, indentMore} from "@codemirror/commands";
 import {markdown, markdownLanguage} from "@codemirror/lang-markdown";
@@ -101,7 +101,7 @@ onMount(() => {
         return null;
     };
 
-    function openInternalLink(view: EditorView) {
+    async function openInternalLink(view: EditorView) {
         const { from, to } = view.state.selection.main;
         if (from === to) { // カーソル位置のみをチェック
             const line = view.state.doc.lineAt(from);
@@ -121,6 +121,12 @@ onMount(() => {
                             return true;
                         }
                     }
+
+                    // create new entry
+                    const fileItem = await createNewFileWithContent(`# ${pageName}`);
+                    fileItems.unshift(fileItem);
+                    openEntry(fileItem);
+                    return true;
                 }
             }
         }

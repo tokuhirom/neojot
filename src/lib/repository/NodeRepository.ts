@@ -8,7 +8,7 @@ import {
     writeTextFile
 } from "@tauri-apps/api/fs";
 import {invoke} from "@tauri-apps/api";
-import type {FileItem} from "../FileItem";
+import {extractTitle, type FileItem} from "../FileItem";
 
 export type CalendarData = Record<number, string[]>;
 
@@ -67,6 +67,16 @@ export async function loadMarkdownFile(name: string): Promise<string> {
     });
 }
 
+export async function loadFileItem(name: string): Promise<FileItem> {
+    const markdown = await loadMarkdownFile(`data/${name}`);
+    return {
+        filename: name,
+        mtime: await invoke("get_mtime", {filename: name}),
+        title: extractTitle(markdown),
+        content: markdown,
+    }
+}
+
 export async function loadFileList(prefix: string, retry: boolean) : Promise<FileItem[]> {
     if (!await exists(prefix, {dir: BaseDirectory.AppData})) {
         await createDir(prefix, {dir: BaseDirectory.AppData});
@@ -102,10 +112,20 @@ function createNewFileName() {
 }
 
 export async function createNewFile(): Promise<string> {
+    const fileItem = await createNewFileWithContent("# ");
+    return fileItem.filename;
+}
+
+export async function createNewFileWithContent(src: string): Promise<FileItem> {
     const filename = createNewFileName();
     console.log(`Adding new file: ${filename}`)
-    await saveMarkdownFile(filename, "# ");
-    return filename;
+    await saveMarkdownFile(filename, src);
+    return {
+        filename,
+        content: src,
+        mtime: await invoke("get_mtime", {filename}),
+        title: extractTitle(src),
+    };
 }
 
 export async function archiveFile(fileItem: FileItem) {

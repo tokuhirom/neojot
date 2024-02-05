@@ -46,6 +46,23 @@ fn open_url(url: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn get_mtime(filename: String) -> Result<u64, String> {
+    let datadir = dirs::data_dir().ok_or("Data directory not found")?;
+    let path = datadir.join("com.github.tokuhirom.neojot").join("data");
+
+    let metadata = fs::metadata(&path)
+        .map_err(|e| format!("Failed to read file metadata: {}", e))?;
+
+    let mtime = metadata.modified()
+        .map_err(|_| "Failed to get modification time".to_string())?
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .map_err(|_| "Time conversion error".to_string())?
+        .as_secs();
+
+    Ok(mtime)
+}
+
+#[tauri::command]
 fn get_files(prefix: String) -> Result<Vec<FileItem>, String> {
     log::info!("get_files: {}", prefix);
     let datadir = dirs::data_dir().ok_or("Data directory not found")?;
@@ -171,6 +188,7 @@ fn main() -> anyhow::Result<()> {
         .invoke_handler(tauri::generate_handler![
             get_files,
             open_url,
+            get_mtime,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
