@@ -6,6 +6,7 @@
     import {archiveFile, createNewFile, loadFileList, loadMarkdownFile} from "./repository/NodeRepository";
     import {onDestroy, onMount} from "svelte";
     import {listen} from "@tauri-apps/api/event";
+    import LinkCards from "./LinkCards.svelte";
 
     let fileItems: FileItem[] = [];
 
@@ -72,6 +73,8 @@ onDestroy(async () => {
                        file={selectedItem}
                        fileItems={fileItems}
                        openEntry={openEntry} />
+
+            <LinkCards file={selectedItem} fileItems={fileItems} openEntry={openEntry} />
         {/if}
     </div>
 </div>

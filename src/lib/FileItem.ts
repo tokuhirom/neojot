@@ -34,3 +34,15 @@ export function shouldShowFileItem(fileItem: FileItem, searchWord: string): bool
     }
     return result;
 }
+
+export function extractBrackets(content: string): string[] {
+    const pattern = /\[\[(.*?)\]\]/g;
+    const matches = [];
+    let match;
+
+    while ((match = pattern.exec(content)) !== null) {
+        matches.push(match[1]);
+    }
+
+    return matches;
+}

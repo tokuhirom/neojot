@@ -5,6 +5,7 @@
     import {onDestroy, onMount} from "svelte";
     import {listen} from "@tauri-apps/api/event";
     import CardItem from "./CardItem.svelte";
+    import LinkCards from "./LinkCards.svelte";
 
     export let fileItems: FileItem[] = [];
     let selectedItem: FileItem | undefined = undefined;
@@ -51,6 +52,7 @@
                    file={selectedItem}
                    fileItems={fileItems}
                    openEntry={openEntry} />
+        <LinkCards file={selectedItem} fileItems={fileItems} openEntry={openEntry} />
     {:else}
         {#each fileItems as file}
             <CardItem onSelect={openEntry} file={file} />

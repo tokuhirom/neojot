@@ -6,7 +6,7 @@ import {defaultKeymap, indentLess, indentMore} from "@codemirror/commands";
 import {markdown, markdownLanguage} from "@codemirror/lang-markdown";
 import {EditorState, Transaction} from "@codemirror/state";
 import {EditorView, keymap} from "@codemirror/view";
-import {extractTitle, type FileItem} from "./FileItem";
+import {extractBrackets, extractTitle, type FileItem} from "./FileItem";
 import {emit} from "@tauri-apps/api/event";
 import {oneDark, oneDarkHighlightStyle} from "@codemirror/theme-one-dark";
 import {LanguageDescription, syntaxHighlighting} from "@codemirror/language";
