@@ -130,6 +130,21 @@ fn main() -> anyhow::Result<()> {
                 .accelerator("Command+d"))
     );
 
+    let view_menu = Submenu::new(
+        "View",
+        Menu::new()
+            .add_item(CustomMenuItem::new("card_view", "Card View")
+                .accelerator("Command+1"))
+            .add_item(CustomMenuItem::new("list_view", "List View")
+                .accelerator("Command+2"))
+            .add_item(CustomMenuItem::new("task_view", "Task View")
+                .accelerator("Command+3"))
+            .add_item(CustomMenuItem::new("calendar_view", "Calendar View")
+                .accelerator("Command+4"))
+            .add_item(CustomMenuItem::new("archive_view", "Archive View")
+                .accelerator("Command+5"))
+    );
+
     let menu = Menu::new()
         .add_submenu(Submenu::new(
             "NeoJot",
@@ -141,25 +156,16 @@ fn main() -> anyhow::Result<()> {
                 .add_native_item(MenuItem::Quit)
         ))
         .add_submenu(file_menu)
+        .add_submenu(view_menu)
         .add_submenu(Submenu::new("Edit", edit_menu));
 
 
     tauri::Builder::default()
         .menu(menu)
         .on_menu_event(|event| {
-            match event.menu_item_id() {
-                "new_file" => {
-                    log::info!("Create new entry");
-                    if let Err(err) = event.window().emit("do_new_file", "DUMMY".to_string()) {
-                        log::error!("Cannot emit message: {:?}", err);
-                    }
-                }
-                "archive" => {
-                    if let Err(err) = event.window().emit("do_archive", "DUMMY".to_string()) {
-                        log::error!("Cannot emit message: {:?}", err);
-                    }
-                }
-                _ => {}
+            let action_name = format!("do_{}", event.menu_item_id());
+            if let Err(err) = event.window().emit(&action_name, "DUMMY".to_string()) {
+                log::error!("Cannot emit message for action '{}': {:?}", action_name, err);
             }
         })
         .invoke_handler(tauri::generate_handler![

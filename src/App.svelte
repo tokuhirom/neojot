@@ -4,8 +4,24 @@
   import ArchiveView from "./lib/ArchiveView.svelte";
   import TaskView from "./lib/TaskView.svelte";
   import CalendarView from "./lib/CalendarView.svelte";
+  import {listen} from "@tauri-apps/api/event";
+  import type {UnlistenFn} from "@tauri-apps/api/helpers/event";
+  import {onDestroy} from "svelte";
 
   let tabPane = "list";
+
+  let unlistenCallbackPromises: Promise<UnlistenFn>[] = [];
+  for (let p of ["card", "list", "task", "calendar", "archive"]) {
+    unlistenCallbackPromises.push(listen(`do_${p}_view`, () => {
+      console.log(`${p}_view`)
+      tabPane = `${p}`;
+    }));
+  }
+  onDestroy(async () => {
+    for (let unlistenCallbackPromise of unlistenCallbackPromises) {
+      (await unlistenCallbackPromise)();
+    }
+  });
 </script>
 
 <main class="container">
