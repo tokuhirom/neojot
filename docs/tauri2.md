@@ -22,7 +22,7 @@ tauri-plugin-fs = "2.0.0-beta.0"
 
 というふうに依存追加。
 
-↓のようにして有効化。 `src-tauri/src/main.rs`:
+`src-tauri/src/main.rs` に以下のように書いて、プラグインを有効化する必要がある。
 
 ```rust
 fn main() {
@@ -43,6 +43,24 @@ migration すると以下のような内容が src-tauri/capabilities/migrated.j
 しかし、このままではぶっ壊れている。例えば、 `"fs:allow-read-file"` という permission は消えたので、`Permission fs:allow-read-file not found, expected one of app:default, app:allow-app-hide, ...` というような
 エラーになる。
 
+```json
+{
+  "fs:allow-appdata-write-recursive",
+  "fs:allow-appdata-read-recursive"
+}
+```
+
+というような感じで書いたら良くなった気がする。
+
 ## メニューが便利
 
 Menu が rust ではなく JS 側でできるっぽいがドキュメントがまだなさそう。
+情報が全く見当たらないので困る
+
+## SQL が使える
+
+sqlite が組み込みになっている。便利。
+
+## まとめ
+
+わりと簡単に移行できる。

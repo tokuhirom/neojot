@@ -3,6 +3,7 @@
     import {type CalendarData, loadFileList, readCalendarFile} from "./repository/NodeRepository";
     import type {FileItem} from "./FileItem";
     import EntryView from "./EntryView.svelte";
+    import LinkCards from "./LinkCards.svelte";
 
     let year: number;
     let month: number;
@@ -79,14 +80,14 @@
         fileItems = dataFileList;
         dataFileMap = {};
         for (let fileItem of dataFileList) {
-            fileMap[fileItem.filename] = {
+            fileMap[fileItem.filename.replace(/.+\//, '')] = {
                 fileItem: fileItem,
                 prefix: "data",
             };
         }
         const archivedFileList = await loadFileList("archived", false);
         for (let fileItem of archivedFileList) {
-            fileMap[fileItem.filename] = {
+            fileMap[fileItem.filename.replace(/.+\//, '')] = {
                 fileItem: fileItem,
                 prefix: "archived",
             };
@@ -130,6 +131,9 @@
                     file={selectedItem}
                     fileItems={fileItems}
                     openEntry={openFile} />
+            <LinkCards file={selectedItem}
+                       fileItems={fileItems}
+                       openEntry={openFile} />
         {/if}
     </div>
 </div>
@@ -143,7 +147,7 @@
         padding-right: 8px;
     }
     .calendar {
-        flex: 0 0 40%;
+        flex: 0 0 250px;
         overflow-y: auto;
         padding-right: 9px;
         padding-left: 4px;
