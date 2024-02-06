@@ -5,9 +5,10 @@ use std::fs;
 use std::time::SystemTime;
 use serde::{Deserialize, Serialize};
 use simplelog::ColorChoice;
-use tauri::{AboutMetadata, CustomMenuItem, Menu, MenuItem, Submenu};
 use url::Url;
-use tauri::regex::Regex;
+use regex::Regex;
+use tauri::{App, Manager, Wry};
+use tauri::menu::{Menu, MenuBuilder, MenuItemBuilder, SubmenuBuilder};
 
 
 #[derive(Serialize, Deserialize)]
@@ -113,7 +114,85 @@ fn get_files(prefix: String) -> Result<Vec<FileItem>, String> {
     Ok(file_items)
 }
 
+fn build_menu(app: &App) -> tauri::Result<Menu<Wry>> {
+    let file_menu = SubmenuBuilder::new(app, "File")
+        .item(
+            &MenuItemBuilder::new("New File")
+                .id("new_file")
+                .accelerator("Command+n")
+                .build(app)?
+        )
+        .item(
+            &MenuItemBuilder::new("Archive")
+                .id("archive")
+                .accelerator("Command+d")
+                .build(app)?,
+        )
+        .build()?;
+
+    let edit_menu = SubmenuBuilder::new(app, "Edit")
+        .undo()
+        .redo()
+        .separator()
+        .cut()
+        .copy()
+        .paste()
+        .separator()
+        .select_all()
+        .build()?;
+
+    /*
+        let edit_menu = Menu::new()
+        .add_native_item(MenuItem::Undo) // TODO implement by myself
+        .add_native_item(MenuItem::Redo)
+        .add_native_item(MenuItem::Separator)
+        .add_native_item(MenuItem::Cut)
+        .add_native_item(MenuItem::Copy)
+        .add_native_item(MenuItem::Paste)
+        .add_native_item(MenuItem::SelectAll);
+
+     */
+    let view_menu = SubmenuBuilder::new(app, "View")
+        .item(
+            &MenuItemBuilder::new("Card View")
+                .id("card_view")
+                .accelerator("Command+1")
+                .build(app)?
+        )
+        .item(
+            &MenuItemBuilder::new("List View")
+                .id("list_view")
+                .accelerator("Command+2")
+                .build(app)?
+        )
+        .item(
+            &MenuItemBuilder::new("Task View")
+                .id("task_view")
+                .accelerator("Command+3")
+                .build(app)?
+        )
+        .item(
+            &MenuItemBuilder::new("Calendar View")
+                .id("calendar_view")
+                .accelerator("Command+4")
+                .build(app)?
+        )
+        .item(
+            &MenuItemBuilder::new("Archive View")
+                .id("archive_view")
+                .accelerator("Command+5")
+                .build(app)?
+        ).build()?;
+
+    let menu = MenuBuilder::new(app)
+        .items(&[&file_menu, &edit_menu, &view_menu])
+        .build()?;
+
+    Ok(menu)
+}
+
 fn main() -> anyhow::Result<()> {
+    println!("Booting...");
     let config = simplelog::ConfigBuilder::new()
         .set_time_offset_to_local()
         .expect("Cannot get timezone")
@@ -128,61 +207,20 @@ fn main() -> anyhow::Result<()> {
         ),
     ])?;
 
-
-    let edit_menu = Menu::new()
-        .add_native_item(MenuItem::Undo) // TODO implement by myself
-        .add_native_item(MenuItem::Redo)
-        .add_native_item(MenuItem::Separator)
-        .add_native_item(MenuItem::Cut)
-        .add_native_item(MenuItem::Copy)
-        .add_native_item(MenuItem::Paste)
-        .add_native_item(MenuItem::SelectAll);
-    let file_menu = Submenu::new(
-        "File",
-        Menu::new()
-            .add_item(CustomMenuItem::new("new_file", "New File")
-                .accelerator("Command+n"))
-            .add_item(CustomMenuItem::new("archive", "Archive")
-                .accelerator("Command+d"))
-    );
-
-    let view_menu = Submenu::new(
-        "View",
-        Menu::new()
-            .add_item(CustomMenuItem::new("card_view", "Card View")
-                .accelerator("Command+1"))
-            .add_item(CustomMenuItem::new("list_view", "List View")
-                .accelerator("Command+2"))
-            .add_item(CustomMenuItem::new("task_view", "Task View")
-                .accelerator("Command+3"))
-            .add_item(CustomMenuItem::new("calendar_view", "Calendar View")
-                .accelerator("Command+4"))
-            .add_item(CustomMenuItem::new("archive_view", "Archive View")
-                .accelerator("Command+5"))
-    );
-
-    let menu = Menu::new()
-        .add_submenu(Submenu::new(
-            "NeoJot",
-            Menu::new()
-                .add_native_item(MenuItem::About(
-                    "NeoJot".to_string(),
-                    AboutMetadata::default(),
-                ))
-                .add_native_item(MenuItem::Quit)
-        ))
-        .add_submenu(file_menu)
-        .add_submenu(view_menu)
-        .add_submenu(Submenu::new("Edit", edit_menu));
-
+    println!("Ready to start");
 
     tauri::Builder::default()
-        .menu(menu)
-        .on_menu_event(|event| {
-            let action_name = format!("do_{}", event.menu_item_id());
-            if let Err(err) = event.window().emit(&action_name, "DUMMY".to_string()) {
-                log::error!("Cannot emit message for action '{}': {:?}", action_name, err);
-            }
+        .plugin(tauri_plugin_fs::init())
+        .setup(|app| {
+            let menu = build_menu(app)?;
+            app.set_menu(menu)?;
+            app.on_menu_event(move |app, event| {
+                let action_name = format!("do_{}", event.id().0);
+                if let Err(err) = app.emit(&action_name, "DUMMY".to_string()) {
+                    log::error!("Cannot emit message for action '{}': {:?}", action_name, err);
+                }
+            });
+            Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             get_files,

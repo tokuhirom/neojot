@@ -1,14 +1,12 @@
 import {
     BaseDirectory,
-    createDir,
-    exists,
-    readTextFile,
-    removeFile,
-    renameFile,
+    exists, mkdir,
+    readTextFile, remove,
+    rename,
     writeTextFile
-} from "@tauri-apps/api/fs";
-import {invoke} from "@tauri-apps/api";
-import {extractTitle, type FileItem} from "../FileItem";
+} from "@tauri-apps/plugin-fs";
+import { invoke } from "@tauri-apps/api/core";
+import {type FileItem} from "../FileItem";
 
 export type CalendarData = Record<number, string[]>;
 
@@ -16,7 +14,7 @@ export async function saveMarkdownFile(filename: string, src: string) {
     // TODO atomic write
     await writeTextFile(filename,
         src,
-        { dir: BaseDirectory.AppData });
+        { baseDir: BaseDirectory.AppData });
 
     await writeCalendarFile(filename.replace(/.+\//, ''));
 }
@@ -25,8 +23,8 @@ async function writeCalendarFile(basename: string) {
     const date = new Date();
     const calendarFileName = generateCalendarFileNameByDate(date);
 
-    if (!await exists("calendar", {dir: BaseDirectory.AppData})) {
-        await createDir("calendar", {dir: BaseDirectory.AppData});
+    if (!await exists("calendar", {baseDir: BaseDirectory.AppData})) {
+        await mkdir("calendar", {baseDir: BaseDirectory.AppData});
     }
 
     const data = await readCalendarFile(date.getFullYear(), date.getMonth() + 1);
@@ -35,14 +33,14 @@ async function writeCalendarFile(basename: string) {
         ary.push(basename);
         data[date.getDate()] = ary;
     }
-    await writeTextFile(calendarFileName, JSON.stringify(data), {dir: BaseDirectory.AppData});
+    await writeTextFile(calendarFileName, JSON.stringify(data), {baseDir: BaseDirectory.AppData});
 }
 
 export async function readCalendarFile(year: number, month: number) : Promise<CalendarData> {
     const filename = generateCalendarFileName(year, month);
     console.log(`readCalendarFile: ${filename}`)
-    if (await exists(filename, {dir: BaseDirectory.AppData})) {
-        const json = await readTextFile(filename, {dir: BaseDirectory.AppData});
+    if (await exists(filename, {baseDir: BaseDirectory.AppData})) {
+        const json = await readTextFile(filename, {baseDir: BaseDirectory.AppData});
         return JSON.parse(json) as CalendarData;
     } else {
         console.log(`missing file: ${filename}`)
@@ -63,13 +61,13 @@ function generateCalendarFileName(year: number, month: number): string {
 
 export async function loadMarkdownFile(name: string): Promise<string> {
     return await readTextFile(name, {
-        dir: BaseDirectory.AppData
+        baseDir: BaseDirectory.AppData
     });
 }
 
 export async function loadFileList(prefix: string, retry: boolean) : Promise<FileItem[]> {
-    if (!await exists(prefix, {dir: BaseDirectory.AppData})) {
-        await createDir(prefix, {dir: BaseDirectory.AppData});
+    if (!await exists(prefix, {baseDir: BaseDirectory.AppData})) {
+        await mkdir(prefix, {baseDir: BaseDirectory.AppData});
     }
 
     let fileItems = await invoke('get_files', {prefix}) as FileItem[];
@@ -118,18 +116,21 @@ export async function createNewFileWithContent(src: string): Promise<FileItem> {
 
 export async function archiveFile(fileItem: FileItem) {
     console.log(`Archive file: ${fileItem.filename}`)
-    if (!await exists("archived", {dir: BaseDirectory.AppData})) {
-        await createDir("archived", {dir: BaseDirectory.AppData});
+    if (!await exists("archived", {baseDir: BaseDirectory.AppData})) {
+        await mkdir("archived", {baseDir: BaseDirectory.AppData});
     }
 
-    await renameFile(
+    await rename(
         `data/${fileItem.filename}`,
         `archived/${fileItem.filename}`,
-        { dir: BaseDirectory.AppData });
+        {
+            oldPathBaseDir: BaseDirectory.AppData,
+            newPathBaseDir: BaseDirectory.AppData,
+        });
 }
 
 export async function deleteArchivedFile(fileItem: FileItem) {
-    await removeFile(`archived/${fileItem.filename}`, {
-        dir: BaseDirectory.AppData
+    await remove(`archived/${fileItem.filename}`, {
+        baseDir: BaseDirectory.AppData
     });
 }

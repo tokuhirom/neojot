@@ -14,7 +14,7 @@ import {autocompletion, type CompletionContext} from "@codemirror/autocomplete";
 import {javascript} from "@codemirror/lang-javascript";
 import {python} from "@codemirror/lang-python";
 import {java} from "@codemirror/lang-java";
-import {invoke} from "@tauri-apps/api";
+import {invoke} from "@tauri-apps/api/core";
 
 export let file: FileItem;
 export let fileItems: FileItem[];

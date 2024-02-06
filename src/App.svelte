@@ -4,8 +4,7 @@
   import ArchiveView from "./lib/ArchiveView.svelte";
   import TaskView from "./lib/TaskView.svelte";
   import CalendarView from "./lib/CalendarView.svelte";
-  import {listen} from "@tauri-apps/api/event";
-  import type {UnlistenFn} from "@tauri-apps/api/helpers/event";
+  import {listen, type UnlistenFn} from "@tauri-apps/api/event";
   import {onDestroy} from "svelte";
 
   let tabPane = "list";
