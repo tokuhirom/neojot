@@ -40,6 +40,7 @@
           class:active={selectedItem.filename === fileItem.filename}
     ><span class="title">{fileItem.title}</span>
         <span class="mtime">{formatEpochSeconds()}</span>
+        <span class="filename">{fileItem.filename.replace(/.+\//, '')}</span>
     </button>
 </div>
 
@@ -48,6 +49,7 @@
         display: block;
         font-size: 60%;
         color: darkgrey;
+        float: left;
     }
 
     button {
@@ -70,6 +72,12 @@
         display: block;
         overflow-y: hidden;
         min-height: 1em;
+    }
+
+    .filename {
+        color: darkgrey;
+        font-size: 80%;
+        float: right;
     }
 
     button.active {

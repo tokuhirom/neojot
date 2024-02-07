@@ -115,8 +115,8 @@ export async function archiveFile(fileItem: FileItem) {
     }
 
     await rename(
-        `data/${fileItem.filename}`,
-        `archived/${fileItem.filename}`,
+        fileItem.filename,
+        fileItem.filename.replace('data/', 'archived/'),
         {
             oldPathBaseDir: BaseDirectory.AppData,
             newPathBaseDir: BaseDirectory.AppData,
