@@ -1,7 +1,6 @@
 <script lang="ts">
     import {
         archiveFile,
-        createNewFile,
         createNewFileWithContent,
         loadFileList,
         loadMarkdownFile

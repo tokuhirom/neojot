@@ -71,7 +71,7 @@ export async function loadFileList(prefix: string, retry: boolean) : Promise<Fil
     }
 
     let fileItems = await invoke('get_files', {prefix}) as FileItem[];
-    console.log("loaded fileitems")
+    console.log("loaded file items")
     console.log(fileItems)
 
     if (fileItems.length == 0 && prefix == "data") {
@@ -100,12 +100,6 @@ function createNewFileName() {
 
     return `data/${year}${month}${day}${hours}${minutes}${seconds}.md`;
 }
-
-export async function createNewFile(): Promise<string> {
-    const fileItem = await createNewFileWithContent("# ");
-    return fileItem.filename;
-}
-
 export async function createNewFileWithContent(src: string): Promise<FileItem> {
     const filename = createNewFileName();
     console.log(`Adding new file: ${filename}`)
