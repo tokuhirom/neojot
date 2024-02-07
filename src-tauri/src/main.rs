@@ -216,6 +216,7 @@ fn main() -> anyhow::Result<()> {
             app.set_menu(menu)?;
             app.on_menu_event(move |app, event| {
                 let action_name = format!("do_{}", event.id().0);
+                log::info!("Forwarding menu item: {:?}", action_name);
                 if let Err(err) = app.emit(&action_name, "DUMMY".to_string()) {
                     log::error!("Cannot emit message for action '{}': {:?}", action_name, err);
                 }
