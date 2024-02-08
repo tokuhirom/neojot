@@ -229,9 +229,13 @@ onMount(() => {
     ];
 
     const handlePaste = async (event) => {
+        let handled = false;
+
         const items = (event.clipboardData || event.originalEvent.clipboardData).items;
         for (const item of items) {
             if (item.type.indexOf("image") === 0) {
+                handled = true;
+
                 const blob = item.getAsFile();
                 // Now you can handle the image file (blob)
                 const pathFromAppDir = await readAndSaveImage(blob);
@@ -243,6 +247,22 @@ onMount(() => {
                 });
                 view.dispatch(transaction);
             }
+        }
+
+        if (handled) {
+            event.preventDefault();
+            return true;
+        } else {
+            const text = (event.clipboardData || event.originalEvent.clipboardData).getData('text');
+            if (text) {
+                const transaction = view.state.update({
+                    changes: {from: view.state.selection.main.from, insert: text}
+                });
+                view.dispatch(transaction);
+                event.preventDefault();
+                return true;
+            }
+            return false;
         }
     };
 
