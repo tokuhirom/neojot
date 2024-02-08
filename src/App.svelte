@@ -6,6 +6,7 @@
   import CalendarView from "./lib/CalendarView.svelte";
   import {listen, type UnlistenFn} from "@tauri-apps/api/event";
   import {onDestroy} from "svelte";
+  import ConfigurationView from "./lib/ConfigurationView.svelte";
 
   let tabPane = "list";
 
@@ -30,6 +31,7 @@
     <button on:click={() => tabPane = "task"} class:active={tabPane === "task"}>✅</button>
     <button on:click={() => tabPane = "calendar"} class:active={tabPane === "calendar"}>📆</button>
     <button on:click={() => tabPane = "archive"} class:active={tabPane === "archive"}>♻️</button>
+    <button on:click={() => tabPane = "configuration"} class:active={tabPane === "configuration"}>⚙️</button>
   </div>
   {#if tabPane === "list"}
     <ListView />
@@ -39,6 +41,8 @@
     <TaskView />
   {:else if tabPane === "calendar"}
     <CalendarView />
+  {:else if tabPane === "configuration"}
+    <ConfigurationView />
   {:else}
     <CardView />
   {/if}

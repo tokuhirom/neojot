@@ -16,6 +16,8 @@
     "fs:allow-app-read",
     "fs:allow-appdata-write-recursive",
     "fs:allow-appdata-read-recursive",
+    "autostart:allow-is-enabled",
+    "autostart:allow-enable",
     {
       "identifier": "fs:scope",
       "allow": [

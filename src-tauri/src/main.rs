@@ -9,6 +9,7 @@ use url::Url;
 use regex::Regex;
 use tauri::{App, Manager, Wry};
 use tauri::menu::{Menu, MenuBuilder, MenuItemBuilder, SubmenuBuilder};
+use tauri_plugin_autostart::MacosLauncher;
 
 
 #[derive(Serialize, Deserialize)]
@@ -211,6 +212,7 @@ fn main() -> anyhow::Result<()> {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
         .setup(|app| {
             let menu = build_menu(app)?;
             app.set_menu(menu)?;
