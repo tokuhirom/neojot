@@ -1,35 +1,62 @@
 <script lang="ts">
-    import {extractBrackets, type FileItem} from "./FileItem";
+    import {type FileItem} from "./FileItem";
+    import FileCardItem from "./FileCardItem.svelte";
+    import {buildLinks, type Links} from "./Links";
     import CardItem from "./CardItem.svelte";
+    import {createNewFileWithContent} from "./repository/NodeRepository";
 
     export let file: FileItem;
     export let fileItems: FileItem[];
     export let openEntry: (fileItem: FileItem) => void;
 
-    let forwardLinks: Record<string, FileItem[]> = {};
+
+    let links: Links | undefined = undefined;
 
     $: if (fileItems || file) {
-        for (let fileItem of fileItems) {
-            const links = extractBrackets(fileItem.content);
-            for (let link of links) {
-                if (forwardLinks[link]) {
-                    const exists = forwardLinks[link].some(item => item.filename === fileItem.filename);
-                    if (!exists) {
-                        forwardLinks[link].push(fileItem);
-                    }
-                } else {
-                    forwardLinks[link] = [fileItem];
-                }
-            }
-        }
+        links = buildLinks(file, fileItems);
     }
 
+    async function createNewEntry(title: string) {
+        const fileItem = await createNewFileWithContent(`# ${title}`);
+        fileItems.unshift(fileItem);
+        openEntry(fileItem);
+    }
 </script>
 
 <div>
-    {#if forwardLinks[file.title]}
-        {#each forwardLinks[file.title] as file}
-            <CardItem onSelect={openEntry} file={file} />
+    {#if links}
+        <div class="row">
+            {#each links.links as file}
+                <FileCardItem onSelect={openEntry} file={file} />
+            {/each}
+        </div>
+        {#each links.twoHopLinks as twoHopLink}
+            <div class="row">
+            <FileCardItem onSelect={openEntry} file={twoHopLink.src}
+                          backgroundColor="yellowgreen" />
+            {#each twoHopLink.dst as dst}
+                <FileCardItem onSelect={openEntry} file={dst} />
+            {/each}
+            </div>
         {/each}
+        {#if links.newLinks.length>0}
+        <div class="row">
+            <CardItem title="New Link" content="" backgroundColor="darkgoldenrod" />
+            {#each links.newLinks as title}
+                <CardItem title={title} content=""
+                    color="gray" onClick={() => createNewEntry(title)} />
+            {/each}
+        </div>
+        {/if}
     {/if}
 </div>
+
+<style>
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: flex-start;
+        gap: 18px;
+    }
+</style>

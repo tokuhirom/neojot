@@ -1,17 +1,23 @@
 <script lang="ts">
-    export let title: string;
-    export let content: string;
-    export let onClick: () => void;
+    import type {FileItem} from "./FileItem";
+    import CardItem from "./CardItem.svelte";
+
+    export let file: FileItem;
+    export let onSelect: (fileItem: FileItem) => void;
     export let backgroundColor = "#f6f6f6";
     export let color = "#0f0f0f";
+
+    function onClick() {
+        onSelect(file);
+    }
 </script>
 
-<button class="card" style:background-color={backgroundColor}
-        style:color={color}
-        on:click|preventDefault={onClick}>
-    <span class="title">{title}</span>
-    <span class="content">{content}</span>
-</button>
+<CardItem onClick={onClick}
+          backgroundColor={backgroundColor}
+          color={color}
+          title={file.title.replace(/TODO: /, "☐️").replace(/DONE: /, "☑")}
+          content={file.content.split('\n').slice(1).join('\n')}
+/>
 
 <style>
     .card {
@@ -22,6 +28,8 @@
         float: left;
         width: 100px;
         margin: 9px;
+        background-color: #f6f6f6;
+        color: #0f0f0f;
         padding: 9px;
         height: 120px;
         overflow-y: hidden;;

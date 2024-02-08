@@ -2,7 +2,7 @@
     import {onMount} from "svelte";
     import {deleteArchivedFile, loadFileList} from "./repository/NodeRepository";
     import type {FileItem} from "./FileItem";
-    import CardItem from "./CardItem.svelte";
+    import FileCardItem from "./FileCardItem.svelte";
 
     export let fileItems: FileItem[] = [];
     let selectedItem: FileItem | undefined = undefined;
@@ -31,7 +31,7 @@
     {:else}
         {#if fileItems.length > 0}
             {#each fileItems as file}
-                <CardItem onSelect={onSelect} file={file} />
+                <FileCardItem onSelect={onSelect} file={file} />
             {/each}
         {:else}
             No archived items.

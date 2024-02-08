@@ -9,8 +9,8 @@
     import EntryView from "./EntryView.svelte";
     import {onDestroy, onMount} from "svelte";
     import {listen} from "@tauri-apps/api/event";
-    import CardItem from "./CardItem.svelte";
     import LinkCards from "./LinkCards.svelte";
+    import FileCardItem from "./FileCardItem.svelte";
 
     export let fileItems: FileItem[] = [];
     let selectedItem: FileItem | undefined = undefined;
@@ -60,7 +60,7 @@
         <LinkCards file={selectedItem} fileItems={fileItems} openEntry={openEntry} />
     {:else}
         {#each fileItems as file}
-            <CardItem onSelect={openEntry} file={file} />
+            <FileCardItem onSelect={openEntry} file={file} />
         {/each}
     {/if}
 </div>
