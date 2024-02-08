@@ -1,0 +1,29 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: rm package-lock.json
+      - run: npm install
+      - run: npm install --save-dev @tauri-apps/cli
+      - name: Build
+        run: npm run tauri build
+      - name: Run tests
+        run: cd src-tauri && cargo test --verbose
