@@ -14,7 +14,7 @@ function dumpLinks(links: Links) {
 
 const orig = {
     title: "orig",
-    content: `[[foo]] [[bar]] [[goo]] [[miso]] [[soup]]`,
+    content: `[[foo]] [[bar]] [[goo]] [[miso]] [[soup]] [[jot]]`,
     mtime: 0,
     filename: "",
 };
@@ -54,6 +54,18 @@ const soup = {
     mtime: 0,
     filename: "",
 };
+const jot = {
+    title: "jot",
+    content: ``,
+    mtime: 0,
+    filename: "",
+};
+const jotmisc = {
+    title: "jotmisc",
+    content: `[[jot]]`,
+    mtime: 0,
+    filename: "",
+};
 const fileItems: FileItem[] = [
     orig,
     foo,
@@ -62,16 +74,19 @@ const fileItems: FileItem[] = [
     boz,
     miso,
     soup,
+    jot,
+    jotmisc
 ];
 
 test('extractLinks', () => {
     const {forward, backward} = extractLinks(fileItems);
     expect(forward).toStrictEqual(
         new Map()
-            .set("orig", ["foo", "bar", "goo", "miso", "soup"])
+            .set("orig", ["foo", "bar", "goo", "miso", "soup", "jot"])
             .set("bar", ["boz"])
             .set("boo", ["orig"])
             .set("miso", ["soup"])
+            .set("jotmisc", ["jot"])
     );
     expect(backward).toStrictEqual(
         new Map()
@@ -82,6 +97,7 @@ test('extractLinks', () => {
             .set("goo", ["orig"])
             .set("miso", ["orig"])
             .set("soup", ["orig", "miso"])
+            .set("jot", ["orig", "jotmisc"])
     );
 });
 
@@ -102,6 +118,14 @@ test('buildLinks', () => {
         {
             "src": miso,
             "dst": [soup]
+        },
+        {
+            "src": soup,
+            "dst": [miso]
+        },
+        {
+            "src": jot,
+            "dst": [jotmisc]
         }
     ]);
 });

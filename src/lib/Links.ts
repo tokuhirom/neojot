@@ -56,10 +56,12 @@ export function buildLinks(selectedFileItem: FileItem, fileItems: FileItem[]) : 
     const twoHopLinksMap: Map<FileItem, FileItem[]> = new Map();
     const newLinks: string[] = [];
     (forward.get(selectedFileItem.title) || []).forEach(dest => {
-        if (forward.has(dest)) {
+        if ((forward.has(dest) || (backward.has(dest) && backward.get(dest)!!.length > 1)) && title2fileItem[dest]) {
             // two hop links
             const twoHopSrc = title2fileItem[dest];
-            const twoHopDst = forward.get(dest)!!.map(it => title2fileItem[it]).filter(it => it);
+            const forwardTwoHopDst = (forward.get(dest) || []).map(it => title2fileItem[it]).filter(it => it);
+            const backwardTwoHopDst = (backward.get(dest) || []).map(it => title2fileItem[it]).filter(it => it);
+            const twoHopDst = [...new Set([...forwardTwoHopDst, ...backwardTwoHopDst])].filter(it => it.title != selectedFileItem.title);
             twoHopLinksMap.set(twoHopSrc, twoHopDst);
         } else {
             if (title2fileItem.hasOwnProperty(dest)) {
