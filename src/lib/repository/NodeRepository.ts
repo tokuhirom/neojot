@@ -1,11 +1,14 @@
 import {
     BaseDirectory,
-    exists, mkdir,
-    readTextFile, remove,
+    exists,
+    mkdir,
+    readTextFile,
+    remove,
     rename,
+    writeFile,
     writeTextFile
 } from "@tauri-apps/plugin-fs";
-import { invoke } from "@tauri-apps/api/core";
+import {invoke} from "@tauri-apps/api/core";
 import {type FileItem} from "../FileItem";
 
 export type CalendarData = Record<number, string[]>;
@@ -23,9 +26,7 @@ async function writeCalendarFile(basename: string) {
     const date = new Date();
     const calendarFileName = generateCalendarFileNameByDate(date);
 
-    if (!await exists("calendar", {baseDir: BaseDirectory.AppData})) {
-        await mkdir("calendar", {baseDir: BaseDirectory.AppData});
-    }
+    await mkdir_p("calendar");
 
     const data = await readCalendarFile(date.getFullYear(), date.getMonth() + 1);
     const ary = data[date.getDate()] || [];
@@ -110,9 +111,7 @@ export async function createNewFileWithContent(src: string): Promise<FileItem> {
 
 export async function archiveFile(fileItem: FileItem) {
     console.log(`Archive file: ${fileItem.filename}`)
-    if (!await exists("archived", {baseDir: BaseDirectory.AppData})) {
-        await mkdir("archived", {baseDir: BaseDirectory.AppData});
-    }
+    await mkdir_p("archived");
 
     await rename(
         fileItem.filename,
@@ -127,4 +126,37 @@ export async function deleteArchivedFile(fileItem: FileItem) {
     await remove(`archived/${fileItem.filename}`, {
         baseDir: BaseDirectory.AppData
     });
+}
+
+function createImageFileName(ext: string) {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const day = now.getDate().toString().padStart(2, '0');
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+
+    return `images/${year}${month}${day}${hours}${minutes}${seconds}.${ext}`;
+}
+
+export async function readAndSaveImage(file: File): Promise<string> {
+    await mkdir_p('images');
+
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = new Uint8Array(arrayBuffer);
+
+    const ext = file.type.split('/')[1];
+
+    const path = createImageFileName(ext);
+
+    await writeFile(path, buffer, { baseDir: BaseDirectory.AppData });
+    return path;
+}
+
+async function mkdir_p(path: string) {
+    if (!await exists(path, {baseDir: BaseDirectory.AppData})) {
+        await mkdir(path, {baseDir: BaseDirectory.AppData});
+    }
 }

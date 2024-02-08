@@ -1,6 +1,6 @@
 <script lang="ts">
 
-import {createNewFileWithContent, saveMarkdownFile} from "./repository/NodeRepository";
+    import {createNewFileWithContent, readAndSaveImage, saveMarkdownFile} from "./repository/NodeRepository";
 import {onMount} from "svelte";
 import {defaultKeymap, indentLess, indentMore} from "@codemirror/commands";
 import {markdown, markdownLanguage} from "@codemirror/lang-markdown";
@@ -151,9 +151,28 @@ onMount(() => {
         ...defaultKeymap // 標準のキーマップを含める
     ];
 
+    const handlePaste = async (event) => {
+        const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+        for (const item of items) {
+            if (item.type.indexOf("image") === 0) {
+                const blob = item.getAsFile();
+                // Now you can handle the image file (blob)
+                const pathFromAppDir = await readAndSaveImage(blob);
+                const path = `../${pathFromAppDir}`;
+
+                const markdownImageText = `![image](${path})\n`;
+                const transaction = view.state.update({
+                    changes: {from: view.state.selection.main.from, insert: markdownImageText}
+                });
+                view.dispatch(transaction);
+            }
+        }
+    };
+
     let startState = EditorState.create({
         doc: file.content,
         extensions: [
+            EditorView.domEventHandlers({paste: handlePaste}),
             keymap.of(customKeymap),
             markdown({
                 base: markdownLanguage, // enable github flavored markdown
