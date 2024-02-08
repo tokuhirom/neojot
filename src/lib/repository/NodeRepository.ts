@@ -113,6 +113,15 @@ export async function archiveFile(fileItem: FileItem) {
     console.log(`Archive file: ${fileItem.filename}`)
     await mkdir_p("archived");
 
+    const content = await readTextFile(fileItem.filename, {
+        baseDir: BaseDirectory.AppData
+    });
+    if (content.match(/^#\s+$/)) {
+        console.log("EMPTY FILE");
+        await remove(fileItem.filename, {baseDir: BaseDirectory.AppData});
+        return;
+    }
+
     await rename(
         fileItem.filename,
         fileItem.filename.replace('data/', 'archived/'),
