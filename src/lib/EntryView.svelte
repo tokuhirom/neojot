@@ -1,26 +1,103 @@
 <script lang="ts">
 
     import {createNewFileWithContent, readAndSaveImage, saveMarkdownFile} from "./repository/NodeRepository";
-import {onMount} from "svelte";
-import {defaultKeymap, indentLess, indentMore} from "@codemirror/commands";
-import {markdown, markdownLanguage} from "@codemirror/lang-markdown";
-import {EditorState, Transaction} from "@codemirror/state";
-import {EditorView, keymap} from "@codemirror/view";
-import {extractTitle, type FileItem} from "./FileItem";
-import {emit} from "@tauri-apps/api/event";
-import {oneDark, oneDarkHighlightStyle} from "@codemirror/theme-one-dark";
-import {LanguageDescription, syntaxHighlighting} from "@codemirror/language";
-import {autocompletion, type CompletionContext} from "@codemirror/autocomplete";
-import {javascript} from "@codemirror/lang-javascript";
-import {python} from "@codemirror/lang-python";
-import {java} from "@codemirror/lang-java";
-import {invoke} from "@tauri-apps/api/core";
+    import {onMount} from "svelte";
+    import {defaultKeymap, indentLess, indentMore} from "@codemirror/commands";
+    import {markdown, markdownLanguage} from "@codemirror/lang-markdown";
+    import {EditorState, RangeSetBuilder, Transaction} from "@codemirror/state";
+    import {Decoration, EditorView, keymap, ViewPlugin, WidgetType} from "@codemirror/view";
+    import {extractTitle, type FileItem} from "./FileItem";
+    import {emit} from "@tauri-apps/api/event";
+    import {oneDark, oneDarkHighlightStyle} from "@codemirror/theme-one-dark";
+    import {LanguageDescription, syntaxHighlighting} from "@codemirror/language";
+    import {autocompletion, type CompletionContext} from "@codemirror/autocomplete";
+    import {javascript} from "@codemirror/lang-javascript";
+    import {python} from "@codemirror/lang-python";
+    import {java} from "@codemirror/lang-java";
+    import {invoke} from "@tauri-apps/api/core";
+    import {BaseDirectory, readFile} from "@tauri-apps/plugin-fs";
 
-export let file: FileItem;
+    export let file: FileItem;
 export let fileItems: FileItem[];
 export let openEntry: (fileItem: FileItem) => void;
 
 let myElement;
+
+function uint8ArrayToDataUrl(uint8Array, mediaType = 'image/png') {
+    const base64String = btoa(String.fromCharCode(...uint8Array));
+    return `data:${mediaType};base64,${base64String}`;
+}
+
+class ImageViewWidget extends WidgetType {
+    constructor(readonly src) {
+        super();
+    }
+
+    toDOM() {
+        const img = document.createElement('img');
+
+        if (this.src.startsWith("../")) {
+            console.log("Loading image source");
+            readFile(this.src.replace('../', ''), {baseDir: BaseDirectory.AppData})
+                .then(
+                    value => {
+                        img.src = uint8ArrayToDataUrl(value);
+                    }
+                );
+        } else {
+            img.src = this.src;
+        }
+        img.alt = this.src;
+        img.style.maxWidth = '100%';
+
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(img);
+        return wrapper;
+    }
+
+    eq(other: ImageViewWidget) {
+        // ソースが同じであれば、trueを返して再生成をスキップ
+        return this.src === other.src;
+    }
+
+    ignoreEvent() {
+        return false;
+    }
+}
+
+const imageDecorator = ViewPlugin.fromClass(class {
+    decorations;
+
+    constructor(view) {
+        this.decorations = this.buildDecorations(view);
+    }
+
+    update(update) {
+        if (update.docChanged || update.viewportChanged) {
+            this.decorations = this.buildDecorations(update.view);
+        }
+    }
+
+    buildDecorations(view) {
+        const builder = new RangeSetBuilder();
+        const re = /!\[.*?]\((.*?)\)/g;
+        for (let {from, to} of view.visibleRanges) {
+            const text = view.state.doc.sliceString(from, to);
+            let match;
+            while ((match = re.exec(text))) {
+                const imgSrc = match[1];
+                const widget = new ImageViewWidget(imgSrc);
+                const pos = from + match.index + match[0].length;
+                builder.add(pos, pos, Decoration.widget({widget, side: 1}));
+            }
+        }
+        return builder.finish();
+    }
+}, {
+    decorations: v => v.decorations
+});
+
+
 
 async function save() {
     console.log(`SAVING: ${file.filename}`);
@@ -172,6 +249,7 @@ onMount(() => {
     let startState = EditorState.create({
         doc: file.content,
         extensions: [
+            imageDecorator,
             EditorView.domEventHandlers({paste: handlePaste}),
             keymap.of(customKeymap),
             markdown({

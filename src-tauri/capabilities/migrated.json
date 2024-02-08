@@ -23,7 +23,8 @@
         {"path": "$APPDATA/*"},
         {"path": "$APPDATA/data/*"},
         {"path": "$APPDATA/calendar/*"},
-        {"path": "$APPDATA/archived/*"}
+        {"path": "$APPDATA/archived/*"},
+        {"path": "$APPDATA/images/*"}
       ]
     }
   ],
