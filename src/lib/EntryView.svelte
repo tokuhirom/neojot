@@ -16,6 +16,13 @@
     import {java} from "@codemirror/lang-java";
     import {invoke} from "@tauri-apps/api/core";
     import {BaseDirectory, readFile} from "@tauri-apps/plugin-fs";
+    import {cpp} from "@codemirror/lang-cpp";
+    import {css} from "@codemirror/lang-css";
+    import {html} from "@codemirror/lang-html";
+    import {php} from "@codemirror/lang-php";
+    import {sql} from "@codemirror/lang-sql";
+    import {xml} from "@codemirror/lang-xml";
+    import {yaml} from "@codemirror/lang-yaml";
 
     export let file: FileItem;
 export let fileItems: FileItem[];
@@ -152,6 +159,34 @@ onMount(() => {
         LanguageDescription.of({
             name: "typescript",
             support: javascript({typescript: true}),
+        }),
+        LanguageDescription.of({
+            name: "cpp",
+            support: cpp(),
+        }),
+        LanguageDescription.of({
+            name: "css",
+            support: css(),
+        }),
+        LanguageDescription.of({
+            name: "html",
+            support: html(),
+        }),
+        LanguageDescription.of({
+            name: "php",
+            support: php(),
+        }),
+        LanguageDescription.of({
+            name: "sql",
+            support: sql(),
+        }),
+        LanguageDescription.of({
+            name: "xml",
+            support: xml(),
+        }),
+        LanguageDescription.of({
+            name: "yaml",
+            support: yaml(),
         }),
     ];
 
