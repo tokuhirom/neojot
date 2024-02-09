@@ -4,12 +4,14 @@ import {archiveFile, loadFileList} from "./repository/NodeRepository";
 import {type FileItem} from "./FileItem";
 import EntryView from "./EntryView.svelte";
     import {listen} from "@tauri-apps/api/event";
+    import LinkCards from "./LinkCards.svelte";
 
+let fileItems: FileItem[] = [];
 let filteredFileItems: FileItem[] = [];
 let selectedItem: FileItem | undefined = undefined;
 
 onMount(async () => {
-    const fileItems = await loadFileList("data", true);
+    fileItems = await loadFileList("data", true);
     filteredFileItems = fileItems.filter(it => it.title.includes("TODO:"));
     selectedItem = filteredFileItems[0];
 });
@@ -46,6 +48,7 @@ async function openFile(fileItem: FileItem) {
                     file={selectedItem}
                     fileItems={filteredFileItems}
                     openEntry={openFile} />
+            <LinkCards file={selectedItem} fileItems={fileItems} openEntry={openFile} />
         {/if}
     </div>
 </div>
