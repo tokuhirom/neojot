@@ -33,8 +33,10 @@ export function extractLinks(fileItems: FileItem[]): {
     for (let srcFileItem of fileItems) {
         const links = extractBrackets(srcFileItem.content);
         for (let link of links) {
-            pushValue(forwardLinks, srcFileItem.title, link);
-            pushValue(backwardLinks, link, srcFileItem.title);
+            if (srcFileItem.title !== link) {
+                pushValue(forwardLinks, srcFileItem.title, link);
+                pushValue(backwardLinks, link, srcFileItem.title);
+            }
         }
     }
 
@@ -56,12 +58,15 @@ export function buildLinks(selectedFileItem: FileItem, fileItems: FileItem[]) : 
     const twoHopLinksMap: Map<FileItem, FileItem[]> = new Map();
     const newLinks: string[] = [];
     (forward.get(selectedFileItem.title) || []).forEach(dest => {
-        if ((forward.has(dest) || (backward.has(dest) && backward.get(dest)!!.length > 1)) && title2fileItem[dest]) {
+        if (dest === selectedFileItem.title) {
+            // do nothing
+        } else if ((forward.has(dest) || (backward.has(dest) && backward.get(dest)!!.length > 1)) && title2fileItem[dest]) {
             // two hop links
             const twoHopSrc = title2fileItem[dest];
             const forwardTwoHopDst = (forward.get(dest) || []).map(it => title2fileItem[it]).filter(it => it);
             const backwardTwoHopDst = (backward.get(dest) || []).map(it => title2fileItem[it]).filter(it => it);
-            const twoHopDst = [...new Set([...forwardTwoHopDst, ...backwardTwoHopDst])].filter(it => it.title != selectedFileItem.title);
+            const twoHopDst = [...new Set([...forwardTwoHopDst, ...backwardTwoHopDst])]
+                .filter(it => it.title != selectedFileItem.title);
             twoHopLinksMap.set(twoHopSrc, twoHopDst);
         } else {
             if (title2fileItem.hasOwnProperty(dest)) {
@@ -82,7 +87,8 @@ export function buildLinks(selectedFileItem: FileItem, fileItems: FileItem[]) : 
         twoHopItems.add(src.title); // src を追加
         dsts.forEach(dst => twoHopItems.add(dst.title)); // dst を追加
     });
-    const uniqueLinks = links.filter(item => !twoHopItems.has(item.title));
+    const uniqueLinks = links.filter(item => !twoHopItems.has(item.title))
+        .filter(it => it.title !== selectedFileItem.title);
 
 
     const twoHopLinks: TwoHopPair[] = Array.from(twoHopLinksMap).map(

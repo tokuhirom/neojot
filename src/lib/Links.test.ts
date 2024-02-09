@@ -14,7 +14,7 @@ function dumpLinks(links: Links) {
 
 const orig = {
     title: "orig",
-    content: `[[foo]] [[bar]] [[goo]] [[miso]] [[soup]] [[jot]]`,
+    content: `[[foo]] [[bar]] [[goo]] [[miso]] [[soup]] [[jot]] [[orig]]`,
     mtime: 0,
     filename: "",
 };
