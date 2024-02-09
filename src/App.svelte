@@ -33,19 +33,21 @@
     <button on:click={() => tabPane = "archive"} class:active={tabPane === "archive"}>♻️</button>
     <button on:click={() => tabPane = "configuration"} class:active={tabPane === "configuration"}>⚙️</button>
   </div>
-  {#if tabPane === "list"}
-    <ListView />
-  {:else if tabPane === "archive"}
-    <ArchiveView />
-  {:else if tabPane === "task"}
-    <TaskView />
-  {:else if tabPane === "calendar"}
-    <CalendarView />
-  {:else if tabPane === "configuration"}
-    <ConfigurationView />
-  {:else}
-    <CardView />
-  {/if}
+  <div class="main">
+    {#if tabPane === "list"}
+      <ListView />
+    {:else if tabPane === "archive"}
+      <ArchiveView />
+    {:else if tabPane === "task"}
+      <TaskView />
+    {:else if tabPane === "calendar"}
+      <CalendarView />
+    {:else if tabPane === "configuration"}
+      <ConfigurationView />
+    {:else}
+      <CardView />
+    {/if}
+  </div>
 </main>
 
 <style>
@@ -75,5 +77,9 @@
     font: inherit;
     cursor: pointer;
     border-bottom: darkslategrey 1px solid;
+  }
+
+  .main {
+    flex-grow: 1;
   }
 </style>
