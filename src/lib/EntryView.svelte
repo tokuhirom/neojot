@@ -389,8 +389,13 @@ $: if (file) {
 
 </script>
 
-<div bind:this={myElement}>
+<div class="wrapper">
+    <div bind:this={myElement}>
+    </div>
 </div>
 
 <style>
+    .wrapper {
+        width: 100%;
+    }
 </style>
