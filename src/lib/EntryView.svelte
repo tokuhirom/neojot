@@ -23,9 +23,17 @@ export let openEntry: (fileItem: FileItem) => void;
 
 let myElement;
 
-function uint8ArrayToDataUrl(uint8Array, mediaType = 'image/png') {
-    const base64String = btoa(String.fromCharCode(...uint8Array));
-    return `data:${mediaType};base64,${base64String}`;
+function uint8ArrayToDataUrl(uint8Array: Uint8Array, mediaType = 'image/png'): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const blob = new Blob([uint8Array], {type: mediaType});
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result;
+            resolve(base64String as string);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
 }
 
 class ImageViewWidget extends WidgetType {
@@ -41,7 +49,10 @@ class ImageViewWidget extends WidgetType {
             readFile(this.src.replace('../', ''), {baseDir: BaseDirectory.AppData})
                 .then(
                     value => {
-                        img.src = uint8ArrayToDataUrl(value);
+                        console.log("then!!")
+                        uint8ArrayToDataUrl(value).then(it => {
+                            img.src = it
+                        });
                     }
                 );
         } else {
