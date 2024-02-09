@@ -118,5 +118,7 @@ onDestroy(async () => {
         flex-grow: 1;
         margin-block-start: 0;
         margin-block-end: 0;
+        height: 100vh;
+        overflow-y: scroll;
     }
 </style>
