@@ -17,7 +17,7 @@
     }
 
     async function createNewEntry(title: string) {
-        const fileItem = await createNewFileWithContent(`# ${title}`);
+        const fileItem = await createNewFileWithContent(`# ${title}\n\n`);
         fileItems.unshift(fileItem);
         openEntry(fileItem);
     }
@@ -41,7 +41,8 @@
         {/each}
         {#if links.newLinks.length>0}
         <div class="row">
-            <CardItem title="New Link" content="" backgroundColor="darkgoldenrod" />
+            <CardItem title="New Link" content="" backgroundColor="darkgoldenrod"
+                onClick={() => false} />
             {#each links.newLinks as title}
                 <CardItem title={title} content=""
                     color="gray" onClick={() => createNewEntry(title)} />
