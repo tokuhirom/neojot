@@ -12,6 +12,7 @@
     import {onDestroy, onMount} from "svelte";
     import {listen} from "@tauri-apps/api/event";
     import LinkCards from "./LinkCards.svelte";
+    import ClearableSearchBox from "./ClearableSearchBox.svelte";
 
     let fileItems: FileItem[] = [];
 
@@ -63,7 +64,7 @@ onDestroy(async () => {
 
 <div class="list-view">
     <div class="file-list">
-        <input type="text" class="search-box" bind:value={searchWord} />
+        <ClearableSearchBox bind:searchWord={searchWord} />
         {#if filteredFileItems && selectedItem}
             {#each filteredFileItems as fileItem}
                 <FileListItem openEntry={openEntry}
@@ -91,14 +92,6 @@ onDestroy(async () => {
         height: 100vh;
         padding-left: 8px;
         padding-right: 8px;
-    }
-
-    .search-box {
-        width: 100%;
-        font-size: 120%;
-        display: block;
-        margin-top: 9px;
-        margin-bottom: 9px;
     }
 
     .file-list {
