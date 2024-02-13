@@ -79,7 +79,7 @@ export function buildLinks(
             ].filter((it) => it.title != selectedFileItem.title);
             twoHopLinksMap.set(twoHopSrc, twoHopDst);
         } else {
-            if (title2fileItem.hasOwnProperty(dest)) {
+            if (title2fileItem[dest]) {
                 // links block
                 links.push(title2fileItem[dest]);
             } else {
