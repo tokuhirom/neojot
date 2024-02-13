@@ -6,7 +6,7 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 1600,
+        "height": 1000,
         "resizable": true,
         "title": "NeoJot",
         "width": 1800
