@@ -1,16 +1,16 @@
 <script lang="ts">
-    import EntryView from './EntryView.svelte';
-    import FileListItem from './FileListItem.svelte';
-    import { type FileItem, shouldShowFileItem } from './FileItem';
+    import EntryView from '../markdown/EntryView.svelte';
+    import FileListItem from '../file_item/FileListItem.svelte';
+    import { type FileItem, shouldShowFileItem } from '../file_item/FileItem';
     import {
         archiveFile,
         loadFileList,
         loadMarkdownFile,
-    } from './repository/NodeRepository';
+    } from '../repository/NodeRepository';
     import { onDestroy, onMount } from 'svelte';
     import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-    import LinkCards from './LinkCards.svelte';
-    import ClearableSearchBox from './ClearableSearchBox.svelte';
+    import LinkCards from '../link/LinkCards.svelte';
+    import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
 
     let fileItems: FileItem[] = [];
 

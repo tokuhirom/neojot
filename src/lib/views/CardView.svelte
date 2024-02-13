@@ -3,13 +3,13 @@
         archiveFile,
         loadFileList,
         loadMarkdownFile,
-    } from './repository/NodeRepository';
-    import type { FileItem } from './FileItem';
-    import EntryView from './EntryView.svelte';
+    } from '../repository/NodeRepository';
+    import type { FileItem } from '../file_item/FileItem';
+    import EntryView from '../markdown/EntryView.svelte';
     import { onDestroy, onMount } from 'svelte';
     import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-    import LinkCards from './LinkCards.svelte';
-    import FileCardItem from './FileCardItem.svelte';
+    import LinkCards from '../link/LinkCards.svelte';
+    import FileCardItem from '../card/FileCardItem.svelte';
 
     export let fileItems: FileItem[] = [];
     let selectedItem: FileItem | undefined = undefined;

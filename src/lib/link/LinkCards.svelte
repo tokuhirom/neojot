@@ -1,9 +1,9 @@
 <script lang="ts">
-    import { type FileItem } from './FileItem';
-    import FileCardItem from './FileCardItem.svelte';
+    import { type FileItem } from '../file_item/FileItem';
+    import FileCardItem from '../card/FileCardItem.svelte';
     import { buildLinks, type Links } from './Links';
-    import CardItem from './CardItem.svelte';
-    import { createNewFileWithContent } from './repository/NodeRepository';
+    import CardItem from '../card/CardItem.svelte';
+    import { createNewFileWithContent } from '../repository/NodeRepository';
 
     export let file: FileItem;
     export let fileItems: FileItem[];

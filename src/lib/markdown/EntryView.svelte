@@ -3,7 +3,7 @@
         createNewFileWithContent,
         readAndSaveImage,
         saveMarkdownFile,
-    } from './repository/NodeRepository';
+    } from '../repository/NodeRepository';
     import { onMount } from 'svelte';
     import {
         defaultKeymap,
@@ -13,7 +13,7 @@
     import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
     import { EditorState, Transaction } from '@codemirror/state';
     import { EditorView, type KeyBinding, keymap } from '@codemirror/view';
-    import { extractTitle, type FileItem } from './FileItem';
+    import { extractTitle, type FileItem } from '../file_item/FileItem';
     import { emit } from '@tauri-apps/api/event';
     import { oneDark, oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
     import {
@@ -35,8 +35,8 @@
     import { sql } from '@codemirror/lang-sql';
     import { xml } from '@codemirror/lang-xml';
     import { yaml } from '@codemirror/lang-yaml';
-    import { internalLinkDecorator } from './markdown/InternalWikiLink';
-    import { imageDecorator } from './markdown/ImageViewWidget';
+    import { internalLinkDecorator } from './InternalWikiLink';
+    import { imageDecorator } from './ImageViewWidget';
 
     export let file: FileItem;
     export let fileItems: FileItem[];

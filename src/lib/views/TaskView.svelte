@@ -1,10 +1,10 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
-    import { archiveFile, loadFileList } from './repository/NodeRepository';
-    import { type FileItem } from './FileItem';
-    import EntryView from './EntryView.svelte';
+    import { archiveFile, loadFileList } from '../repository/NodeRepository';
+    import { type FileItem } from '../file_item/FileItem';
+    import EntryView from '../markdown/EntryView.svelte';
     import { listen } from '@tauri-apps/api/event';
-    import LinkCards from './LinkCards.svelte';
+    import LinkCards from '../link/LinkCards.svelte';
 
     let fileItems: FileItem[] = [];
     let filteredFileItems: FileItem[] = [];

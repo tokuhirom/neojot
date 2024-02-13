@@ -9,7 +9,7 @@ import {
     writeTextFile,
 } from '@tauri-apps/plugin-fs';
 import { invoke } from '@tauri-apps/api/core';
-import { type FileItem } from '../FileItem';
+import { type FileItem } from '../file_item/FileItem';
 
 export type CalendarData = Record<number, string[]>;
 

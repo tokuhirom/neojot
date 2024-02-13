@@ -1,12 +1,12 @@
 <script lang="ts">
-    import CardView from './lib/CardView.svelte';
-    import ListView from './lib/ListView.svelte';
-    import ArchiveView from './lib/ArchiveView.svelte';
-    import TaskView from './lib/TaskView.svelte';
-    import CalendarView from './lib/CalendarView.svelte';
+    import CardView from './lib/views/CardView.svelte';
+    import ListView from './lib/views/ListView.svelte';
+    import ArchiveView from './lib/views/ArchiveView.svelte';
+    import TaskView from './lib/views/TaskView.svelte';
+    import CalendarView from './lib/views/CalendarView.svelte';
     import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event';
     import { onDestroy } from 'svelte';
-    import ConfigurationView from './lib/ConfigurationView.svelte';
+    import ConfigurationView from './lib/views/ConfigurationView.svelte';
     import { createNewFileWithContent } from './lib/repository/NodeRepository';
 
     let tabPane = 'list';

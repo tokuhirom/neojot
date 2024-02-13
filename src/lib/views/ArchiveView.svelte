@@ -3,9 +3,9 @@
     import {
         deleteArchivedFile,
         loadFileList,
-    } from './repository/NodeRepository';
-    import type { FileItem } from './FileItem';
-    import FileCardItem from './FileCardItem.svelte';
+    } from '../repository/NodeRepository';
+    import type { FileItem } from '../file_item/FileItem';
+    import FileCardItem from '../card/FileCardItem.svelte';
 
     export let fileItems: FileItem[] = [];
     let selectedItem: FileItem | undefined = undefined;

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { FileItem } from './FileItem';
+    import type { FileItem } from '../file_item/FileItem';
     import CardItem from './CardItem.svelte';
 
     export let file: FileItem;
