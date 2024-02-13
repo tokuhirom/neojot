@@ -77,7 +77,12 @@ export function buildLinks(
             const twoHopDst = [
                 ...new Set([...forwardTwoHopDst, ...backwardTwoHopDst]),
             ].filter((it) => it.title != selectedFileItem.title);
-            twoHopLinksMap.set(twoHopSrc, twoHopDst);
+
+            if (twoHopDst.length > 0) {
+                twoHopLinksMap.set(twoHopSrc, twoHopDst);
+            } else {
+                links.push(twoHopSrc);
+            }
         } else {
             if (title2fileItem[dest]) {
                 // links block
