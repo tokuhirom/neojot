@@ -86,3 +86,9 @@ button {
 .todo {
   color: brown;
 }
+
+.internal-link {
+  cursor: pointer;
+  text-decoration: underline;
+  color: cornflowerblue;
+}

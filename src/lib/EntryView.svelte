@@ -23,6 +23,7 @@
     import {sql} from "@codemirror/lang-sql";
     import {xml} from "@codemirror/lang-xml";
     import {yaml} from "@codemirror/lang-yaml";
+    import {internalLinkDecorator} from "./markdown/InternalWikiLink";
 
     export let file: FileItem;
 export let fileItems: FileItem[];
@@ -114,8 +115,6 @@ const imageDecorator = ViewPlugin.fromClass(class {
 }, {
     decorations: v => v.decorations
 });
-
-
 
 async function save() {
     console.log(`SAVING: ${file.filename}`);
@@ -224,6 +223,20 @@ onMount(() => {
         return null;
     };
 
+    async function findOrCreateEntry(pageName: string) {
+        for (let fileItem of fileItems) {
+            if (fileItem.title == pageName) {
+                openEntry(fileItem);
+                return;
+            }
+        }
+
+        // create new entry
+        const fileItem = await createNewFileWithContent(`# ${pageName}`);
+        fileItems.unshift(fileItem);
+        openEntry(fileItem);
+    }
+
     async function openInternalLink(view: EditorView) {
         const { from, to } = view.state.selection.main;
         if (from === to) { // カーソル位置のみをチェック
@@ -237,18 +250,7 @@ onMount(() => {
             while ((match = linkRegex.exec(lineText)) !== null) {
                 if (match.index <= lineOffset && match.index + match[0].length >= lineOffset) {
                     const pageName = match[0].slice(2, -2); // リンク名の取得
-
-                    for (let fileItem of fileItems) {
-                        if (fileItem.title == pageName) {
-                            openEntry(fileItem);
-                            return true;
-                        }
-                    }
-
-                    // create new entry
-                    const fileItem = await createNewFileWithContent(`# ${pageName}`);
-                    fileItems.unshift(fileItem);
-                    openEntry(fileItem);
+                    await findOrCreateEntry(pageName);
                     return true;
                 }
             }
@@ -315,6 +317,7 @@ onMount(() => {
     let startState = EditorState.create({
         doc: file.content,
         extensions: [
+            internalLinkDecorator,
             imageDecorator,
             EditorView.domEventHandlers({paste: handlePaste}),
             keymap.of(customKeymap),
@@ -332,6 +335,17 @@ onMount(() => {
                     if (isUserInput) {
                         console.log(`テキストが変更されました ${isUserInput}`);
                         await save();
+                    }
+                }
+            }),
+            EditorView.domEventHandlers({
+                click: (event, _view) => {
+                    const {target} = event;
+                    if (target instanceof HTMLElement && target.closest('.internal-link')) {
+                        console.log(`Internal link clicked: ${target.innerText}`);
+
+                        event.preventDefault();
+                        findOrCreateEntry(target.innerText);
                     }
                 }
             })
