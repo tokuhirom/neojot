@@ -42,10 +42,13 @@ let unlistenSortFileList = listen("sort_file_list", async () => {
     fileItems.sort((a, b) => b.mtime - a.mtime);
     fileItems = fileItems;
 });
-let unlistenDoNewFile = listen("do_new_file", async () => {
-    const fileItem = await createNewFileWithContent("# ");
-    fileItems.unshift(fileItem);
-    selectedItem = fileItem;
+let unlistenDoNewFile = listen("do_created", async (event) => {
+    const fileItem = event.payload as FileItem;
+    console.log(`ListView.do_created: ${fileItem.filename}`)
+    if (!fileItems.some(item => item.filename === fileItem.filename)) {
+        fileItems.unshift(fileItem);
+        selectedItem = fileItem;
+    }
 })
 let unlistenArchive = listen("do_archive", async () => {
     if (selectedItem) {

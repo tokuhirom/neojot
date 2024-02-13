@@ -4,9 +4,10 @@
   import ArchiveView from "./lib/ArchiveView.svelte";
   import TaskView from "./lib/TaskView.svelte";
   import CalendarView from "./lib/CalendarView.svelte";
-  import {listen, type UnlistenFn} from "@tauri-apps/api/event";
+  import {emit, listen, type UnlistenFn} from "@tauri-apps/api/event";
   import {onDestroy} from "svelte";
   import ConfigurationView from "./lib/ConfigurationView.svelte";
+  import {createNewFileWithContent} from "./lib/repository/NodeRepository";
 
   let tabPane = "list";
 
@@ -17,6 +18,10 @@
       tabPane = `${p}`;
     }));
   }
+  unlistenCallbackPromises.push(listen("do_new_file", async () => {
+    const fileItem = await createNewFileWithContent("# ");
+    await emit("do_created", fileItem);
+  }));
   onDestroy(async () => {
     for (let unlistenCallbackPromise of unlistenCallbackPromises) {
       (await unlistenCallbackPromise)();
