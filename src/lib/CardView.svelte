@@ -8,7 +8,7 @@
     import type {FileItem} from "./FileItem";
     import EntryView from "./EntryView.svelte";
     import {onDestroy, onMount} from "svelte";
-    import {listen} from "@tauri-apps/api/event";
+    import {listen, type UnlistenFn} from "@tauri-apps/api/event";
     import LinkCards from "./LinkCards.svelte";
     import FileCardItem from "./FileCardItem.svelte";
 
@@ -19,28 +19,29 @@
         fileItems = await loadFileList("data", true);
     });
 
-    let unlistenSortFileList = listen("sort_file_list", async () => {
+    let unlistenCallbackPromises: Promise<UnlistenFn>[] = [];
+    unlistenCallbackPromises.push(listen("sort_file_list", async () => {
         fileItems.sort((a, b) => b.mtime - a.mtime);
         fileItems = fileItems;
-    });
-    let unlistenDoNewFile = listen("do_created", async (event) => {
+    }));
+    unlistenCallbackPromises.push(listen("do_created", async (event) => {
         const fileItem = event.payload as FileItem;
         console.log(`CardView.do_created: ${fileItem.filename}`)
         if (!fileItems.some(item => item.filename === fileItem.filename)) {
             fileItems.unshift(fileItem);
             selectedItem = fileItem;
         }
-    })
-    let unlistenArchive = listen("do_archive", async () => {
+    }));
+    unlistenCallbackPromises.push(listen("do_archive", async () => {
         if (selectedItem) {
             await archiveFile(selectedItem);
             fileItems = await loadFileList("data", true);
             selectedItem = undefined;
         }
-    })
+    }));
     onDestroy(async () => {
-        for (let unlisten of [unlistenDoNewFile, unlistenSortFileList, unlistenArchive]) {
-            (await unlisten)();
+        for (let unlistenCallbackPromise of unlistenCallbackPromises) {
+            (await unlistenCallbackPromise)();
         }
     });
 
