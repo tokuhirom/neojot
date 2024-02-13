@@ -128,6 +128,7 @@ async function save() {
         await emit("change_title", {filename: file.filename});
     }
     await saveMarkdownFile(file.filename, text);
+    file.title = extractTitle(file.content);
     file.mtime = Math.floor(Date.now() / 1000);
     await emit("sort_file_list");
 }
@@ -231,7 +232,8 @@ onMount(() => {
         }
 
         // create new entry
-        createNewFileWithContent(`# ${pageName}`).then((fileItem: FileItem) => {
+        console.log(`Page '${pageName}' is not found. Trying to create new entry...`)
+        createNewFileWithContent(`# ${pageName}\n\n`).then((fileItem: FileItem) => {
             fileItems.unshift(fileItem);
             openEntry(fileItem);
         });
