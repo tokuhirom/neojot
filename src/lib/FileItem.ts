@@ -24,9 +24,9 @@ export function shouldShowFileItem(fileItem: FileItem, searchWord: string): bool
     const lowerCaseTitle = fileItem.title.toLowerCase();
     const lowerCaseContent = fileItem.content.toLowerCase();
 
-    let words = lowerCaseSearchWord.split(/\s+/).filter(it => it.length>0);
+    const words = lowerCaseSearchWord.split(/\s+/).filter(it => it.length>0);
     let result = true;
-    for (let word of words) {
+    for (const word of words) {
         if (!lowerCaseTitle.includes(word) && !lowerCaseContent.includes(word)) {
             result = false;
             break;

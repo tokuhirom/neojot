@@ -75,7 +75,7 @@ export const imageDecorator: ViewPlugin<{
     buildDecorations(view: EditorView): RangeSet<RangeValue> {
         const builder = new RangeSetBuilder();
         const re = /!\[.*?]\((.*?)\)/g;
-        for (let {from, to} of view.visibleRanges) {
+        for (const {from, to} of view.visibleRanges) {
             const text = view.state.doc.sliceString(from, to);
             let match;
             while ((match = re.exec(text))) {

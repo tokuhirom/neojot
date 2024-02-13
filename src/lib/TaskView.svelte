@@ -1,8 +1,8 @@
 <script lang="ts">
     import {onDestroy, onMount} from "svelte";
-import {archiveFile, loadFileList} from "./repository/NodeRepository";
-import {type FileItem} from "./FileItem";
-import EntryView from "./EntryView.svelte";
+    import {archiveFile, loadFileList} from "./repository/NodeRepository";
+    import {type FileItem} from "./FileItem";
+    import EntryView from "./EntryView.svelte";
     import {listen} from "@tauri-apps/api/event";
     import LinkCards from "./LinkCards.svelte";
 

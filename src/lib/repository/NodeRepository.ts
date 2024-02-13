@@ -71,7 +71,7 @@ export async function loadFileList(prefix: string, retry: boolean) : Promise<Fil
         await mkdir(prefix, {baseDir: BaseDirectory.AppData});
     }
 
-    let fileItems = await invoke('get_files', {prefix}) as FileItem[];
+    const fileItems = await invoke('get_files', {prefix}) as FileItem[];
     console.log("loaded file items")
     console.log(fileItems)
 

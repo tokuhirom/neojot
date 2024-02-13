@@ -15,9 +15,9 @@ function pushValue<K, V>(map: Map<K, V[]>, src: K, dst: V) {
     // @ts-ignore
     if (map.get(src)) {
         // @ts-ignore
-        const exists: Map<K, V[]> = map.get(src)!!.some(item => item === dst);
+        const exists: Map<K, V[]> = map.get(src)!.some(item => item === dst);
         if (!exists) {
-            map.get(src)!!.push(dst);
+            map.get(src)!.push(dst);
         }
     } else {
         map.set(src, [dst]);
@@ -30,9 +30,9 @@ export function extractLinks(fileItems: FileItem[]): {
 } {
     const forwardLinks: Map<string, string[]> = new Map();
     const backwardLinks: Map<string, string[]> = new Map();
-    for (let srcFileItem of fileItems) {
+    for (const srcFileItem of fileItems) {
         const links = extractBrackets(srcFileItem.content);
-        for (let link of links) {
+        for (const link of links) {
             if (srcFileItem.title !== link) {
                 pushValue(forwardLinks, srcFileItem.title, link);
                 pushValue(backwardLinks, link, srcFileItem.title);
@@ -48,7 +48,7 @@ export function extractLinks(fileItems: FileItem[]): {
 
 export function buildLinks(selectedFileItem: FileItem, fileItems: FileItem[]) : Links {
     const title2fileItem: Record<string, FileItem> = {};
-    for (let fileItem of fileItems) {
+    for (const fileItem of fileItems) {
         title2fileItem[fileItem.title] = fileItem;
     }
 
@@ -60,7 +60,7 @@ export function buildLinks(selectedFileItem: FileItem, fileItems: FileItem[]) : 
     (forward.get(selectedFileItem.title) || []).forEach(dest => {
         if (dest === selectedFileItem.title) {
             // do nothing
-        } else if ((forward.has(dest) || (backward.has(dest) && backward.get(dest)!!.length > 1)) && title2fileItem[dest]) {
+        } else if ((forward.has(dest) || (backward.has(dest) && backward.get(dest)!.length > 1)) && title2fileItem[dest]) {
             // two hop links
             const twoHopSrc = title2fileItem[dest];
             const forwardTwoHopDst = (forward.get(dest) || []).map(it => title2fileItem[it]).filter(it => it);
