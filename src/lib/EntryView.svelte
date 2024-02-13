@@ -24,6 +24,7 @@
     import {xml} from "@codemirror/lang-xml";
     import {yaml} from "@codemirror/lang-yaml";
     import {internalLinkDecorator} from "./markdown/InternalWikiLink";
+    import {imageDecorator} from "./markdown/ImageViewWidget";
 
     export let file: FileItem;
 export let fileItems: FileItem[];
@@ -31,90 +32,7 @@ export let openEntry: (fileItem: FileItem) => void;
 
 let myElement;
 
-function uint8ArrayToDataUrl(uint8Array: Uint8Array, mediaType = 'image/png'): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const blob = new Blob([uint8Array], {type: mediaType});
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const base64String = reader.result;
-            resolve(base64String as string);
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-    });
-}
 
-class ImageViewWidget extends WidgetType {
-    constructor(readonly src) {
-        super();
-    }
-
-    toDOM() {
-        const img = document.createElement('img');
-
-        if (this.src.startsWith("../")) {
-            console.log("Loading image source");
-            readFile(this.src.replace('../', ''), {baseDir: BaseDirectory.AppData})
-                .then(
-                    value => {
-                        console.log("then!!")
-                        uint8ArrayToDataUrl(value).then(it => {
-                            img.src = it
-                        });
-                    }
-                );
-        } else {
-            img.src = this.src;
-        }
-        img.alt = this.src;
-        img.style.maxWidth = '100%';
-
-        const wrapper = document.createElement('div');
-        wrapper.appendChild(img);
-        return wrapper;
-    }
-
-    eq(other: ImageViewWidget) {
-        // ソースが同じであれば、trueを返して再生成をスキップ
-        return this.src === other.src;
-    }
-
-    ignoreEvent() {
-        return false;
-    }
-}
-
-const imageDecorator = ViewPlugin.fromClass(class {
-    decorations;
-
-    constructor(view) {
-        this.decorations = this.buildDecorations(view);
-    }
-
-    update(update) {
-        if (update.docChanged || update.viewportChanged) {
-            this.decorations = this.buildDecorations(update.view);
-        }
-    }
-
-    buildDecorations(view) {
-        const builder = new RangeSetBuilder();
-        const re = /!\[.*?]\((.*?)\)/g;
-        for (let {from, to} of view.visibleRanges) {
-            const text = view.state.doc.sliceString(from, to);
-            let match;
-            while ((match = re.exec(text))) {
-                const imgSrc = match[1];
-                const widget = new ImageViewWidget(imgSrc);
-                const pos = from + match.index + match[0].length;
-                builder.add(pos, pos, Decoration.widget({widget, side: 1}));
-            }
-        }
-        return builder.finish();
-    }
-}, {
-    decorations: v => v.decorations
-});
 
 async function save() {
     console.log(`SAVING: ${file.filename}`);
@@ -137,7 +55,6 @@ let view: EditorView;
 
 onMount(() => {
     let container = myElement;
-
 
     const codeLangauages = [
         LanguageDescription.of({
