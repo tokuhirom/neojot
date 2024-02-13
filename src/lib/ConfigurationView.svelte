@@ -1,22 +1,22 @@
 <script lang="ts">
     // https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/autostart/README.md
-    import { enable, isEnabled, disable } from '@tauri-apps/plugin-autostart'
-    import { onMount } from 'svelte'
+    import { enable, isEnabled, disable } from '@tauri-apps/plugin-autostart';
+    import { onMount } from 'svelte';
 
-    let isEnabledState: boolean = false
+    let isEnabledState: boolean = false;
 
     onMount(async () => {
-        isEnabledState = await isEnabled()
-    })
+        isEnabledState = await isEnabled();
+    });
 
     async function disableAutoStart() {
-        await disable()
-        isEnabledState = await isEnabled()
+        await disable();
+        isEnabledState = await isEnabled();
     }
 
     async function enableAutoStart() {
-        await enable()
-        isEnabledState = await isEnabled()
+        await enable();
+        isEnabledState = await isEnabled();
     }
 </script>
 

@@ -1,5 +1,5 @@
 <script>
-    export let searchWord = '' // 検索ボックスのテキストを保持する変数
+    export let searchWord = ''; // 検索ボックスのテキストを保持する変数
 </script>
 
 <div class="clearable-search-box">

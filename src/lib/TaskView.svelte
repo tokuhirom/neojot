@@ -1,41 +1,43 @@
 <script lang="ts">
-    import { onDestroy, onMount } from 'svelte'
-    import { archiveFile, loadFileList } from './repository/NodeRepository'
-    import { type FileItem } from './FileItem'
-    import EntryView from './EntryView.svelte'
-    import { listen } from '@tauri-apps/api/event'
-    import LinkCards from './LinkCards.svelte'
+    import { onDestroy, onMount } from 'svelte';
+    import { archiveFile, loadFileList } from './repository/NodeRepository';
+    import { type FileItem } from './FileItem';
+    import EntryView from './EntryView.svelte';
+    import { listen } from '@tauri-apps/api/event';
+    import LinkCards from './LinkCards.svelte';
 
-    let fileItems: FileItem[] = []
-    let filteredFileItems: FileItem[] = []
-    let selectedItem: FileItem | undefined = undefined
+    let fileItems: FileItem[] = [];
+    let filteredFileItems: FileItem[] = [];
+    let selectedItem: FileItem | undefined = undefined;
 
     onMount(async () => {
-        fileItems = await loadFileList('data', true)
-        filteredFileItems = fileItems.filter((it) => it.title.includes('TODO:'))
-        selectedItem = filteredFileItems[0]
-    })
+        fileItems = await loadFileList('data', true);
+        filteredFileItems = fileItems.filter((it) =>
+            it.title.includes('TODO:'),
+        );
+        selectedItem = filteredFileItems[0];
+    });
 
     async function openFile(fileItem: FileItem) {
-        selectedItem = fileItem
+        selectedItem = fileItem;
     }
 
     let unlistenArchive = listen('do_archive', async () => {
         if (selectedItem) {
-            console.log(`Archiving: ${selectedItem.filename}`)
-            await archiveFile(selectedItem)
-            const fileItems = await loadFileList('data', true)
+            console.log(`Archiving: ${selectedItem.filename}`);
+            await archiveFile(selectedItem);
+            const fileItems = await loadFileList('data', true);
             filteredFileItems = fileItems.filter((it) =>
                 it.title.includes('TODO:'),
-            )
-            selectedItem = filteredFileItems[0]
+            );
+            selectedItem = filteredFileItems[0];
         }
-    })
+    });
     onDestroy(async () => {
         for (let unlisten of [unlistenArchive]) {
-            ;(await unlisten)()
+            (await unlisten)();
         }
-    })
+    });
 </script>
 
 <div class="task-view">

@@ -1,9 +1,9 @@
 <script lang="ts">
-    export let title: string
-    export let content: string
-    export let onClick: () => void
-    export let backgroundColor = '#f6f6f6'
-    export let color = '#0f0f0f'
+    export let title: string;
+    export let content: string;
+    export let onClick: () => void;
+    export let backgroundColor = '#f6f6f6';
+    export let color = '#0f0f0f';
 </script>
 
 <button

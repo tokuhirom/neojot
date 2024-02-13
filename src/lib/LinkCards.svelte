@@ -1,24 +1,24 @@
 <script lang="ts">
-    import { type FileItem } from './FileItem'
-    import FileCardItem from './FileCardItem.svelte'
-    import { buildLinks, type Links } from './Links'
-    import CardItem from './CardItem.svelte'
-    import { createNewFileWithContent } from './repository/NodeRepository'
+    import { type FileItem } from './FileItem';
+    import FileCardItem from './FileCardItem.svelte';
+    import { buildLinks, type Links } from './Links';
+    import CardItem from './CardItem.svelte';
+    import { createNewFileWithContent } from './repository/NodeRepository';
 
-    export let file: FileItem
-    export let fileItems: FileItem[]
-    export let openEntry: (fileItem: FileItem) => void
+    export let file: FileItem;
+    export let fileItems: FileItem[];
+    export let openEntry: (fileItem: FileItem) => void;
 
-    let links: Links | undefined = undefined
+    let links: Links | undefined = undefined;
 
     $: if (fileItems || file) {
-        links = buildLinks(file, fileItems)
+        links = buildLinks(file, fileItems);
     }
 
     async function createNewEntry(title: string) {
-        const fileItem = await createNewFileWithContent(`# ${title}\n\n`)
-        fileItems.unshift(fileItem)
-        openEntry(fileItem)
+        const fileItem = await createNewFileWithContent(`# ${title}\n\n`);
+        fileItems.unshift(fileItem);
+        openEntry(fileItem);
     }
 </script>
 

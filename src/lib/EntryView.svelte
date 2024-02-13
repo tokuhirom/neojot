@@ -3,76 +3,68 @@
         createNewFileWithContent,
         readAndSaveImage,
         saveMarkdownFile,
-    } from './repository/NodeRepository'
-    import { onMount } from 'svelte'
-    import { defaultKeymap, indentLess, indentMore } from '@codemirror/commands'
-    import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
+    } from './repository/NodeRepository';
+    import { onMount } from 'svelte';
     import {
-        EditorState,
-        RangeSetBuilder,
-        Transaction,
-    } from '@codemirror/state'
-    import {
-        Decoration,
-        EditorView,
-        type KeyBinding,
-        keymap,
-        ViewPlugin,
-        WidgetType,
-    } from '@codemirror/view'
-    import { extractTitle, type FileItem } from './FileItem'
-    import { emit } from '@tauri-apps/api/event'
-    import { oneDark, oneDarkHighlightStyle } from '@codemirror/theme-one-dark'
+        defaultKeymap,
+        indentLess,
+        indentMore,
+    } from '@codemirror/commands';
+    import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
+    import { EditorState, Transaction } from '@codemirror/state';
+    import { EditorView, type KeyBinding, keymap } from '@codemirror/view';
+    import { extractTitle, type FileItem } from './FileItem';
+    import { emit } from '@tauri-apps/api/event';
+    import { oneDark, oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
     import {
         LanguageDescription,
         syntaxHighlighting,
-    } from '@codemirror/language'
+    } from '@codemirror/language';
     import {
         autocompletion,
         type CompletionContext,
-    } from '@codemirror/autocomplete'
-    import { javascript } from '@codemirror/lang-javascript'
-    import { python } from '@codemirror/lang-python'
-    import { java } from '@codemirror/lang-java'
-    import { invoke } from '@tauri-apps/api/core'
-    import { BaseDirectory, readFile } from '@tauri-apps/plugin-fs'
-    import { cpp } from '@codemirror/lang-cpp'
-    import { css } from '@codemirror/lang-css'
-    import { html } from '@codemirror/lang-html'
-    import { php } from '@codemirror/lang-php'
-    import { sql } from '@codemirror/lang-sql'
-    import { xml } from '@codemirror/lang-xml'
-    import { yaml } from '@codemirror/lang-yaml'
-    import { internalLinkDecorator } from './markdown/InternalWikiLink'
-    import { imageDecorator } from './markdown/ImageViewWidget'
+    } from '@codemirror/autocomplete';
+    import { javascript } from '@codemirror/lang-javascript';
+    import { python } from '@codemirror/lang-python';
+    import { java } from '@codemirror/lang-java';
+    import { invoke } from '@tauri-apps/api/core';
+    import { cpp } from '@codemirror/lang-cpp';
+    import { css } from '@codemirror/lang-css';
+    import { html } from '@codemirror/lang-html';
+    import { php } from '@codemirror/lang-php';
+    import { sql } from '@codemirror/lang-sql';
+    import { xml } from '@codemirror/lang-xml';
+    import { yaml } from '@codemirror/lang-yaml';
+    import { internalLinkDecorator } from './markdown/InternalWikiLink';
+    import { imageDecorator } from './markdown/ImageViewWidget';
 
-    export let file: FileItem
-    export let fileItems: FileItem[]
-    export let openEntry: (fileItem: FileItem) => void
+    export let file: FileItem;
+    export let fileItems: FileItem[];
+    export let openEntry: (fileItem: FileItem) => void;
 
-    let myElement
+    let myElement;
 
     async function save() {
-        console.log(`SAVING: ${file.filename}`)
-        let state = view.state
-        let doc = state.doc
-        let text = doc.toString()
-        file.content = text
-        const newTitle = extractTitle(text)
+        console.log(`SAVING: ${file.filename}`);
+        let state = view.state;
+        let doc = state.doc;
+        let text = doc.toString();
+        file.content = text;
+        const newTitle = extractTitle(text);
         if (file.title !== newTitle) {
-            file.title = newTitle
-            await emit('change_title', { filename: file.filename })
+            file.title = newTitle;
+            await emit('change_title', { filename: file.filename });
         }
-        await saveMarkdownFile(file.filename, text)
-        file.title = extractTitle(file.content)
-        file.mtime = Math.floor(Date.now() / 1000)
-        await emit('sort_file_list')
+        await saveMarkdownFile(file.filename, text);
+        file.title = extractTitle(file.content);
+        file.mtime = Math.floor(Date.now() / 1000);
+        await emit('sort_file_list');
     }
 
-    let view: EditorView
+    let view: EditorView;
 
     onMount(() => {
-        let container = myElement
+        let container = myElement;
 
         const codeLangauages = [
             LanguageDescription.of({
@@ -123,30 +115,30 @@
                 name: 'yaml',
                 support: yaml(),
             }),
-        ]
+        ];
 
         const myCompletion = (context: CompletionContext) => {
             {
                 // `[[foobar]]` style notation
-                const word = context.matchBefore(/\[\[\w*/)
+                const word = context.matchBefore(/\[\[\w*/);
                 if (word) {
-                    console.log('Return links')
+                    console.log('Return links');
                     const options = fileItems.map((fileItem) => {
                         return {
                             label: `[[${fileItem.title}]]`,
                             type: 'keyword',
-                        }
-                    })
+                        };
+                    });
                     return {
                         from: word.from,
                         options: options,
-                    }
+                    };
                 }
             }
             {
                 // Code block's language completion
                 // ```typescript auto completion
-                const word = context.matchBefore(/```\w*/)
+                const word = context.matchBefore(/```\w*/);
                 if (word) {
                     return {
                         from: word.from,
@@ -156,58 +148,58 @@
                                 return {
                                     label: '```' + lang.name,
                                     type: 'keyword',
-                                }
+                                };
                             }),
                             { label: '```', type: 'keyword' },
                         ],
-                    }
+                    };
                 }
             }
-            return null
-        }
+            return null;
+        };
 
         function findOrCreateEntry(pageName: string) {
             for (let fileItem of fileItems) {
                 if (fileItem.title == pageName) {
-                    openEntry(fileItem)
+                    openEntry(fileItem);
                 }
             }
 
             // create new entry
             console.log(
                 `Page '${pageName}' is not found. Trying to create new entry...`,
-            )
+            );
             createNewFileWithContent(`# ${pageName}\n\n`).then(
                 (fileItem: FileItem) => {
-                    fileItems.unshift(fileItem)
-                    openEntry(fileItem)
+                    fileItems.unshift(fileItem);
+                    openEntry(fileItem);
                 },
-            )
+            );
         }
 
         function openInternalLink(view: EditorView) {
-            const { from, to } = view.state.selection.main
+            const { from, to } = view.state.selection.main;
             if (from === to) {
                 // カーソル位置のみをチェック
-                const line = view.state.doc.lineAt(from)
-                const lineText = line.text
-                const lineOffset = from - line.from // 行内オフセットを計算
+                const line = view.state.doc.lineAt(from);
+                const lineText = line.text;
+                const lineOffset = from - line.from; // 行内オフセットを計算
 
                 // カーソル位置から内部リンクを探す
-                const linkRegex = /\[\[.*?]]/g
-                let match: RegExpExecArray | null
+                const linkRegex = /\[\[.*?]]/g;
+                let match: RegExpExecArray | null;
                 while ((match = linkRegex.exec(lineText)) !== null) {
                     if (
                         match.index <= lineOffset &&
                         match.index + match[0].length >= lineOffset
                     ) {
-                        const pageName = match[0].slice(2, -2) // リンク名の取得
-                        findOrCreateEntry(pageName)
-                        return true
+                        const pageName = match[0].slice(2, -2); // リンク名の取得
+                        findOrCreateEntry(pageName);
+                        return true;
                     }
                 }
             }
-            return false
+            return false;
         }
 
         const customKeymap: KeyBinding[] = [
@@ -226,56 +218,56 @@
                 run: indentLess,
             },
             ...defaultKeymap, // 標準のキーマップを含める
-        ]
+        ];
 
         const handlePaste = (event) => {
-            let handled = false
+            let handled = false;
 
             const items = (
                 event.clipboardData || event.originalEvent.clipboardData
-            ).items
+            ).items;
             for (const item of items) {
                 if (item.type.indexOf('image') === 0) {
-                    handled = true
+                    handled = true;
 
-                    const blob = item.getAsFile()
+                    const blob = item.getAsFile();
                     // Now you can handle the image file (blob)
                     readAndSaveImage(blob).then((pathFromAppDir) => {
-                        const path = `../${pathFromAppDir}`
+                        const path = `../${pathFromAppDir}`;
 
-                        const markdownImageText = `![image](${path})\n`
+                        const markdownImageText = `![image](${path})\n`;
                         const transaction = view.state.update({
                             changes: {
                                 from: view.state.selection.main.from,
                                 insert: markdownImageText,
                             },
-                        })
-                        view.dispatch(transaction)
-                    })
+                        });
+                        view.dispatch(transaction);
+                    });
                 }
             }
 
             if (handled) {
-                event.preventDefault()
-                return true
+                event.preventDefault();
+                return true;
             } else {
                 const text = (
                     event.clipboardData || event.originalEvent.clipboardData
-                ).getData('text')
+                ).getData('text');
                 if (text) {
                     const transaction = view.state.update({
                         changes: {
                             from: view.state.selection.main.from,
                             insert: text,
                         },
-                    })
-                    view.dispatch(transaction)
-                    event.preventDefault()
-                    return true
+                    });
+                    view.dispatch(transaction);
+                    event.preventDefault();
+                    return true;
                 }
-                return false
+                return false;
             }
-        }
+        };
 
         let startState = EditorState.create({
             doc: file.content,
@@ -298,61 +290,61 @@
                             (tr) =>
                                 tr.annotation(Transaction.userEvent) !==
                                 'program',
-                        )
+                        );
                         if (isUserInput) {
                             console.log(
                                 `テキストが変更されました ${isUserInput}`,
-                            )
-                            await save()
+                            );
+                            await save();
                         }
                     }
                 }),
                 EditorView.domEventHandlers({
-                    click: (event, _view) => {
-                        const { target } = event
+                    click: (event) => {
+                        const { target } = event;
                         if (
                             target instanceof HTMLElement &&
                             target.closest('.internal-link')
                         ) {
                             console.log(
                                 `Internal link clicked: ${target.innerText}`,
-                            )
+                            );
 
-                            event.preventDefault()
-                            findOrCreateEntry(target.innerText)
+                            event.preventDefault();
+                            findOrCreateEntry(target.innerText);
                         }
                     },
                 }),
             ],
-        })
+        });
 
         view = new EditorView({
             state: startState,
             parent: container,
-        })
+        });
 
         view.dom.addEventListener('click', async (event) => {
-            const target = event.target
+            const target = event.target;
 
             if (target instanceof HTMLSpanElement) {
-                const url = target.innerHTML
+                const url = target.innerHTML;
                 if (url.match(/^https?:\/\//)) {
-                    console.log(`opening url: ${url}`)
-                    await invoke('open_url', { url })
-                    event.preventDefault()
+                    console.log(`opening url: ${url}`);
+                    await invoke('open_url', { url });
+                    event.preventDefault();
                 }
             }
-        })
-    })
+        });
+    });
 
-    let prevFileName = ''
+    let prevFileName = '';
 
     $: if (file) {
         if (view) {
             if (prevFileName !== file.filename) {
-                console.log(`Loading entry: ${file.filename}`)
+                console.log(`Loading entry: ${file.filename}`);
 
-                let state = view.state
+                let state = view.state;
                 let transaction = state.update({
                     changes: {
                         from: 0,
@@ -360,20 +352,20 @@
                         insert: file.content,
                     },
                     annotations: Transaction.userEvent.of('program'),
-                })
-                view.dispatch(transaction)
+                });
+                view.dispatch(transaction);
 
                 if (file.content === '# ') {
                     // カーソルをドキュメントの末尾に移動
-                    let state = view.state
-                    let endPos = state.doc.length
+                    let state = view.state;
+                    let endPos = state.doc.length;
                     let moveCursor = state.update({
                         selection: { anchor: endPos, head: endPos },
-                    })
-                    view.dispatch(moveCursor)
+                    });
+                    view.dispatch(moveCursor);
                 }
 
-                prevFileName = file.filename
+                prevFileName = file.filename;
             }
         }
     }

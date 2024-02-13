@@ -1,36 +1,36 @@
 <script lang="ts">
-    import CardView from './lib/CardView.svelte'
-    import ListView from './lib/ListView.svelte'
-    import ArchiveView from './lib/ArchiveView.svelte'
-    import TaskView from './lib/TaskView.svelte'
-    import CalendarView from './lib/CalendarView.svelte'
-    import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event'
-    import { onDestroy } from 'svelte'
-    import ConfigurationView from './lib/ConfigurationView.svelte'
-    import { createNewFileWithContent } from './lib/repository/NodeRepository'
+    import CardView from './lib/CardView.svelte';
+    import ListView from './lib/ListView.svelte';
+    import ArchiveView from './lib/ArchiveView.svelte';
+    import TaskView from './lib/TaskView.svelte';
+    import CalendarView from './lib/CalendarView.svelte';
+    import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event';
+    import { onDestroy } from 'svelte';
+    import ConfigurationView from './lib/ConfigurationView.svelte';
+    import { createNewFileWithContent } from './lib/repository/NodeRepository';
 
-    let tabPane = 'list'
+    let tabPane = 'list';
 
-    let unlistenCallbackPromises: Promise<UnlistenFn>[] = []
+    let unlistenCallbackPromises: Promise<UnlistenFn>[] = [];
     for (let p of ['card', 'list', 'task', 'calendar', 'archive']) {
         unlistenCallbackPromises.push(
             listen(`do_${p}_view`, () => {
-                console.log(`${p}_view`)
-                tabPane = `${p}`
+                console.log(`${p}_view`);
+                tabPane = `${p}`;
             }),
-        )
+        );
     }
     unlistenCallbackPromises.push(
         listen('do_new_file', async () => {
-            const fileItem = await createNewFileWithContent('# ')
-            await emit('do_created', fileItem)
+            const fileItem = await createNewFileWithContent('# ');
+            await emit('do_created', fileItem);
         }),
-    )
+    );
     onDestroy(async () => {
         for (let unlistenCallbackPromise of unlistenCallbackPromises) {
-            ;(await unlistenCallbackPromise)()
+            (await unlistenCallbackPromise)();
         }
-    })
+    });
 </script>
 
 <main class="container">
