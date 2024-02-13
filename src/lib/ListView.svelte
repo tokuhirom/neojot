@@ -1,90 +1,94 @@
 <script lang="ts">
-
-    import EntryView from "./EntryView.svelte";
-    import FileListItem from "./FileListItem.svelte";
-    import {type FileItem, shouldShowFileItem} from "./FileItem";
+    import EntryView from './EntryView.svelte'
+    import FileListItem from './FileListItem.svelte'
+    import { type FileItem, shouldShowFileItem } from './FileItem'
     import {
         archiveFile,
         createNewFileWithContent,
         loadFileList,
-        loadMarkdownFile
-    } from "./repository/NodeRepository";
-    import {onDestroy, onMount} from "svelte";
-    import {listen, type UnlistenFn} from "@tauri-apps/api/event";
-    import LinkCards from "./LinkCards.svelte";
-    import ClearableSearchBox from "./ClearableSearchBox.svelte";
+        loadMarkdownFile,
+    } from './repository/NodeRepository'
+    import { onDestroy, onMount } from 'svelte'
+    import { listen, type UnlistenFn } from '@tauri-apps/api/event'
+    import LinkCards from './LinkCards.svelte'
+    import ClearableSearchBox from './ClearableSearchBox.svelte'
 
-    let fileItems: FileItem[] = [];
+    let fileItems: FileItem[] = []
 
-let filteredFileItems: FileItem[];
-let selectedItem: FileItem | undefined;
+    let filteredFileItems: FileItem[]
+    let selectedItem: FileItem | undefined
 
-let searchWord = "";
+    let searchWord = ''
 
-$: if (fileItems || searchWord) {
-    filteredFileItems = fileItems.filter(it => shouldShowFileItem(it, searchWord));
-}
-
-onMount(async () => {
-    fileItems = await loadFileList("data", true);
-
-    selectedItem = fileItems[0];
-});
-
-async function openEntry(fileItem: FileItem) {
-    console.log(`open: ${fileItem.filename}`)
-    // reload content from file system
-    fileItem.content = await loadMarkdownFile(fileItem.filename);
-    selectedItem = fileItem;
-}
-
-let unlistenCallbackPromises: Promise<UnlistenFn>[] = [];
-unlistenCallbackPromises.push(listen("sort_file_list", async () => {
-    fileItems.sort((a, b) => b.mtime - a.mtime);
-    fileItems = fileItems;
-}));
-unlistenCallbackPromises.push(listen("do_created", async (event) => {
-    const fileItem = event.payload as FileItem;
-    console.log(`ListView.do_created: ${fileItem.filename}`)
-    if (!fileItems.some(item => item.filename === fileItem.filename)) {
-        fileItems.unshift(fileItem);
-        selectedItem = fileItem;
+    $: if (fileItems || searchWord) {
+        filteredFileItems = fileItems.filter((it) =>
+            shouldShowFileItem(it, searchWord),
+        )
     }
-}));
-unlistenCallbackPromises.push(listen("do_archive", async () => {
-    if (selectedItem) {
-        console.log(`Archiving: ${selectedItem.filename}`)
-        await archiveFile(selectedItem);
-        fileItems = await loadFileList("data", true);
-        selectedItem = fileItems[0];
+
+    onMount(async () => {
+        fileItems = await loadFileList('data', true)
+
+        selectedItem = fileItems[0]
+    })
+
+    async function openEntry(fileItem: FileItem) {
+        console.log(`open: ${fileItem.filename}`)
+        // reload content from file system
+        fileItem.content = await loadMarkdownFile(fileItem.filename)
+        selectedItem = fileItem
     }
-}));
-onDestroy(async () => {
-    for (let unlistenCallbackPromise of unlistenCallbackPromises) {
-        (await unlistenCallbackPromise)();
-    }
-});
+
+    let unlistenCallbackPromises: Promise<UnlistenFn>[] = []
+    unlistenCallbackPromises.push(
+        listen('sort_file_list', async () => {
+            fileItems.sort((a, b) => b.mtime - a.mtime)
+            fileItems = fileItems
+        }),
+    )
+    unlistenCallbackPromises.push(
+        listen('do_created', async (event) => {
+            const fileItem = event.payload as FileItem
+            console.log(`ListView.do_created: ${fileItem.filename}`)
+            if (
+                !fileItems.some((item) => item.filename === fileItem.filename)
+            ) {
+                fileItems.unshift(fileItem)
+                selectedItem = fileItem
+            }
+        }),
+    )
+    unlistenCallbackPromises.push(
+        listen('do_archive', async () => {
+            if (selectedItem) {
+                console.log(`Archiving: ${selectedItem.filename}`)
+                await archiveFile(selectedItem)
+                fileItems = await loadFileList('data', true)
+                selectedItem = fileItems[0]
+            }
+        }),
+    )
+    onDestroy(async () => {
+        for (let unlistenCallbackPromise of unlistenCallbackPromises) {
+            ;(await unlistenCallbackPromise)()
+        }
+    })
 </script>
 
 <div class="list-view">
     <div class="file-list">
-        <ClearableSearchBox bind:searchWord={searchWord} />
+        <ClearableSearchBox bind:searchWord />
         {#if filteredFileItems && selectedItem}
             {#each filteredFileItems as fileItem}
-                <FileListItem openEntry={openEntry}
-                              fileItem={fileItem}
-                              selectedItem={selectedItem} />
+                <FileListItem {openEntry} {fileItem} {selectedItem} />
             {/each}
         {/if}
     </div>
     <div class="log-view">
         {#if selectedItem !== undefined}
-            <EntryView
-                       file={selectedItem}
-                       fileItems={fileItems}
-                       openEntry={openEntry} />
+            <EntryView file={selectedItem} {fileItems} {openEntry} />
 
-            <LinkCards file={selectedItem} fileItems={fileItems} openEntry={openEntry} />
+            <LinkCards file={selectedItem} {fileItems} {openEntry} />
         {/if}
     </div>
 </div>

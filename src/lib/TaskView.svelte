@@ -1,54 +1,58 @@
 <script lang="ts">
-    import {onDestroy, onMount} from "svelte";
-    import {archiveFile, loadFileList} from "./repository/NodeRepository";
-    import {type FileItem} from "./FileItem";
-    import EntryView from "./EntryView.svelte";
-    import {listen} from "@tauri-apps/api/event";
-    import LinkCards from "./LinkCards.svelte";
+    import { onDestroy, onMount } from 'svelte'
+    import { archiveFile, loadFileList } from './repository/NodeRepository'
+    import { type FileItem } from './FileItem'
+    import EntryView from './EntryView.svelte'
+    import { listen } from '@tauri-apps/api/event'
+    import LinkCards from './LinkCards.svelte'
 
-let fileItems: FileItem[] = [];
-let filteredFileItems: FileItem[] = [];
-let selectedItem: FileItem | undefined = undefined;
+    let fileItems: FileItem[] = []
+    let filteredFileItems: FileItem[] = []
+    let selectedItem: FileItem | undefined = undefined
 
-onMount(async () => {
-    fileItems = await loadFileList("data", true);
-    filteredFileItems = fileItems.filter(it => it.title.includes("TODO:"));
-    selectedItem = filteredFileItems[0];
-});
+    onMount(async () => {
+        fileItems = await loadFileList('data', true)
+        filteredFileItems = fileItems.filter((it) => it.title.includes('TODO:'))
+        selectedItem = filteredFileItems[0]
+    })
 
-async function openFile(fileItem: FileItem) {
-    selectedItem = fileItem;
-}
+    async function openFile(fileItem: FileItem) {
+        selectedItem = fileItem
+    }
 
-    let unlistenArchive = listen("do_archive", async () => {
+    let unlistenArchive = listen('do_archive', async () => {
         if (selectedItem) {
             console.log(`Archiving: ${selectedItem.filename}`)
-            await archiveFile(selectedItem);
-            const fileItems = await loadFileList("data", true);
-            filteredFileItems = fileItems.filter(it => it.title.includes("TODO:"));
-            selectedItem = filteredFileItems[0];
+            await archiveFile(selectedItem)
+            const fileItems = await loadFileList('data', true)
+            filteredFileItems = fileItems.filter((it) =>
+                it.title.includes('TODO:'),
+            )
+            selectedItem = filteredFileItems[0]
         }
     })
     onDestroy(async () => {
         for (let unlisten of [unlistenArchive]) {
-            (await unlisten)();
+            ;(await unlisten)()
         }
-    });
+    })
 </script>
 
 <div class="task-view">
     <div class="file-list">
-    {#each filteredFileItems as fileItem}
-        <button on:click={() => openFile(fileItem)}>{fileItem.title}</button>
-    {/each}
+        {#each filteredFileItems as fileItem}
+            <button on:click={() => openFile(fileItem)}>{fileItem.title}</button
+            >
+        {/each}
     </div>
     <div class="log-view">
         {#if selectedItem !== undefined}
             <EntryView
-                    file={selectedItem}
-                    fileItems={filteredFileItems}
-                    openEntry={openFile} />
-            <LinkCards file={selectedItem} fileItems={fileItems} openEntry={openFile} />
+                file={selectedItem}
+                fileItems={filteredFileItems}
+                openEntry={openFile}
+            />
+            <LinkCards file={selectedItem} {fileItems} openEntry={openFile} />
         {/if}
     </div>
 </div>

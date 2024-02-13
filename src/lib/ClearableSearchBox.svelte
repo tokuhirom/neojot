@@ -1,6 +1,13 @@
 <script>
-    export let searchWord = ''; // 検索ボックスのテキストを保持する変数
+    export let searchWord = '' // 検索ボックスのテキストを保持する変数
 </script>
+
+<div class="clearable-search-box">
+    <input type="text" bind:value={searchWord} class="search-input" />
+    {#if searchWord}
+        <button class="clear-btn" on:click={() => (searchWord = '')}>✗</button>
+    {/if}
+</div>
 
 <style>
     .clearable-search-box {
@@ -24,10 +31,3 @@
         cursor: pointer;
     }
 </style>
-
-<div class="clearable-search-box">
-    <input type="text" bind:value={searchWord} class="search-input" />
-    {#if searchWord}
-        <button class="clear-btn" on:click={() => searchWord = ''}>✗</button>
-    {/if}
-</div>

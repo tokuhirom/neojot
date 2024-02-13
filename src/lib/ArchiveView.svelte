@@ -1,41 +1,43 @@
 <script lang="ts">
-    import {onMount} from "svelte";
-    import {deleteArchivedFile, loadFileList} from "./repository/NodeRepository";
-    import type {FileItem} from "./FileItem";
-    import FileCardItem from "./FileCardItem.svelte";
+    import { onMount } from 'svelte'
+    import {
+        deleteArchivedFile,
+        loadFileList,
+    } from './repository/NodeRepository'
+    import type { FileItem } from './FileItem'
+    import FileCardItem from './FileCardItem.svelte'
 
-    export let fileItems: FileItem[] = [];
-    let selectedItem: FileItem | undefined = undefined;
+    export let fileItems: FileItem[] = []
+    let selectedItem: FileItem | undefined = undefined
 
     onMount(async () => {
-        fileItems = await loadFileList("archived", true);
-    });
+        fileItems = await loadFileList('archived', true)
+    })
 
     function onSelect(fileItem: FileItem) {
-        selectedItem = fileItem;
+        selectedItem = fileItem
     }
 
     async function deleteSelectedEntry() {
         if (selectedItem) {
-            await deleteArchivedFile(selectedItem);
-            fileItems = await loadFileList("archived", true);
-            selectedItem = undefined;
+            await deleteArchivedFile(selectedItem)
+            fileItems = await loadFileList('archived', true)
+            selectedItem = undefined
         }
     }
 </script>
 
 <div class="container">
     {#if selectedItem}
-        <button class="delete-btn" on:click={deleteSelectedEntry}>Delete</button>
+        <button class="delete-btn" on:click={deleteSelectedEntry}>Delete</button
+        >
         <pre class="archived-source">{selectedItem.content}</pre>
+    {:else if fileItems.length > 0}
+        {#each fileItems as file}
+            <FileCardItem {onSelect} {file} />
+        {/each}
     {:else}
-        {#if fileItems.length > 0}
-            {#each fileItems as file}
-                <FileCardItem onSelect={onSelect} file={file} />
-            {/each}
-        {:else}
-            No archived items.
-        {/if}
+        No archived items.
     {/if}
 </div>
 

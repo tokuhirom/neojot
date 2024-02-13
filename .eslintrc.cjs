@@ -9,10 +9,11 @@ module.exports = {
         project: './tsconfig.json', // TypeScriptの設定ファイルへのパス
         extraFileExtensions: ['.svelte'],
     },
-    plugins: ['@typescript-eslint'], // 使用するプラグイン
+    plugins: ['@typescript-eslint', "prettier"], // 使用するプラグイン
     extends: [
         'eslint:recommended', // ESLintの推奨ルール
         'plugin:svelte/recommended',
+        "prettier",
         'plugin:@typescript-eslint/recommended', // TypeScript推奨ルール
     ],
     overrides: [
@@ -30,6 +31,7 @@ module.exports = {
         'svelte3/typescript': () => require('typescript'),
     },
     rules: {
+        "prettier/prettier": "error",
         // カスタムルール (プロジェクトのニーズに応じて調整)
     },
 };
