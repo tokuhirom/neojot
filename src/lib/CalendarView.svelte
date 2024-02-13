@@ -1,106 +1,106 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onMount } from 'svelte'
     import {
         type CalendarData,
         loadFileList,
         readCalendarFile,
-    } from './repository/NodeRepository';
-    import type { FileItem } from './FileItem';
-    import EntryView from './EntryView.svelte';
-    import LinkCards from './LinkCards.svelte';
+    } from './repository/NodeRepository'
+    import type { FileItem } from './FileItem'
+    import EntryView from './EntryView.svelte'
+    import LinkCards from './LinkCards.svelte'
 
-    let year: number;
-    let month: number;
-    let calendars: CalendarDay[][] = [];
-    let calendarData: CalendarData | undefined = undefined;
-    let fileMap: Record<string, CalendarFileEntry> = {};
+    let year: number
+    let month: number
+    let calendars: CalendarDay[][] = []
+    let calendarData: CalendarData | undefined = undefined
+    let fileMap: Record<string, CalendarFileEntry> = {}
 
-    let selectedItem: FileItem | undefined = undefined;
+    let selectedItem: FileItem | undefined = undefined
 
-    let fileItems: FileItem[] = [];
+    let fileItems: FileItem[] = []
 
     type CalendarFileEntry = {
-        fileItem: FileItem;
-        prefix: string;
-    };
+        fileItem: FileItem
+        prefix: string
+    }
 
     type CalendarDay = {
-        day: number | null; // 日付、またはプレースホルダー用にnull
-        date: Date | null; // 実際のDateオブジェクト、またはnull
-    };
+        day: number | null // 日付、またはプレースホルダー用にnull
+        date: Date | null // 実際のDateオブジェクト、またはnull
+    }
 
     function generateCalendar(year: number, month: number): CalendarDay[][] {
         // 指定された月の最初の日と最後の日を取得
-        const firstDayOfMonth = new Date(year, month - 1, 1);
-        const lastDayOfMonth = new Date(year, month, 0);
+        const firstDayOfMonth = new Date(year, month - 1, 1)
+        const lastDayOfMonth = new Date(year, month, 0)
 
         // 月の最初の日が週の何日目か（0=日曜日、6=土曜日）
-        const startWeekday = firstDayOfMonth.getDay();
+        const startWeekday = firstDayOfMonth.getDay()
 
         // 月の日数
-        const numberOfDaysInMonth = lastDayOfMonth.getDate();
+        const numberOfDaysInMonth = lastDayOfMonth.getDate()
 
         // カレンダー配列を初期化
-        const calendar: CalendarDay[][] = [];
-        let week: CalendarDay[] = [];
-        let dayCounter = 1;
+        const calendar: CalendarDay[][] = []
+        let week: CalendarDay[] = []
+        let dayCounter = 1
 
         // 月の最初の日まで空白で埋める
         for (let i = 0; i < startWeekday; i++) {
-            week.push({ day: null, date: null });
+            week.push({ day: null, date: null })
         }
 
         // 月の日数分ループして配列を埋める
         while (dayCounter <= numberOfDaysInMonth) {
             if (week.length === 7) {
-                calendar.push(week);
-                week = [];
+                calendar.push(week)
+                week = []
             }
             week.push({
                 day: dayCounter,
                 date: new Date(year, month - 1, dayCounter),
-            });
-            dayCounter++;
+            })
+            dayCounter++
         }
 
         // 最後の週が7日未満の場合、残りを空白で埋める
         while (week.length < 7) {
-            week.push({ day: null, date: null });
+            week.push({ day: null, date: null })
         }
-        calendar.push(week);
+        calendar.push(week)
 
-        return calendar;
+        return calendar
     }
 
     onMount(async () => {
-        const currentDate = new Date();
-        year = currentDate.getFullYear();
-        month = currentDate.getMonth() + 1;
+        const currentDate = new Date()
+        year = currentDate.getFullYear()
+        month = currentDate.getMonth() + 1
 
-        console.log('GENER');
-        calendars = generateCalendar(year, month);
+        console.log('GENER')
+        calendars = generateCalendar(year, month)
 
-        calendarData = await readCalendarFile(year, month);
+        calendarData = await readCalendarFile(year, month)
 
-        const dataFileList = await loadFileList('data', false);
-        fileItems = dataFileList;
+        const dataFileList = await loadFileList('data', false)
+        fileItems = dataFileList
         for (let fileItem of dataFileList) {
             fileMap[fileItem.filename.replace(/.+\//, '')] = {
                 fileItem: fileItem,
                 prefix: 'data',
-            };
+            }
         }
-        const archivedFileList = await loadFileList('archived', false);
+        const archivedFileList = await loadFileList('archived', false)
         for (let fileItem of archivedFileList) {
             fileMap[fileItem.filename.replace(/.+\//, '')] = {
                 fileItem: fileItem,
                 prefix: 'archived',
-            };
+            }
         }
-    });
+    })
 
     function openFile(fileItem: FileItem) {
-        selectedItem = fileItem;
+        selectedItem = fileItem
     }
 </script>
 
