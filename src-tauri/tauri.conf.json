@@ -6,10 +6,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 1600,
         "resizable": true,
         "title": "NeoJot",
-        "width": 800
+        "width": 1800
       }
     ]
   },
