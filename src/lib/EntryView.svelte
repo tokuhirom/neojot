@@ -5,7 +5,7 @@
     import {defaultKeymap, indentLess, indentMore} from "@codemirror/commands";
     import {markdown, markdownLanguage} from "@codemirror/lang-markdown";
     import {EditorState, RangeSetBuilder, Transaction} from "@codemirror/state";
-    import {Decoration, EditorView, keymap, ViewPlugin, WidgetType} from "@codemirror/view";
+    import {Decoration, EditorView, type KeyBinding, keymap, ViewPlugin, WidgetType} from "@codemirror/view";
     import {extractTitle, type FileItem} from "./FileItem";
     import {emit} from "@tauri-apps/api/event";
     import {oneDark, oneDarkHighlightStyle} from "@codemirror/theme-one-dark";
@@ -223,21 +223,21 @@ onMount(() => {
         return null;
     };
 
-    async function findOrCreateEntry(pageName: string) {
+    function findOrCreateEntry(pageName: string) {
         for (let fileItem of fileItems) {
             if (fileItem.title == pageName) {
                 openEntry(fileItem);
-                return;
             }
         }
 
         // create new entry
-        const fileItem = await createNewFileWithContent(`# ${pageName}`);
-        fileItems.unshift(fileItem);
-        openEntry(fileItem);
+        createNewFileWithContent(`# ${pageName}`).then((fileItem: FileItem) => {
+            fileItems.unshift(fileItem);
+            openEntry(fileItem);
+        });
     }
 
-    async function openInternalLink(view: EditorView) {
+    function openInternalLink(view: EditorView) {
         const { from, to } = view.state.selection.main;
         if (from === to) { // カーソル位置のみをチェック
             const line = view.state.doc.lineAt(from);
@@ -250,7 +250,7 @@ onMount(() => {
             while ((match = linkRegex.exec(lineText)) !== null) {
                 if (match.index <= lineOffset && match.index + match[0].length >= lineOffset) {
                     const pageName = match[0].slice(2, -2); // リンク名の取得
-                    await findOrCreateEntry(pageName);
+                    findOrCreateEntry(pageName);
                     return true;
                 }
             }
@@ -258,7 +258,7 @@ onMount(() => {
         return false;
     }
 
-    const customKeymap = [
+    const customKeymap: KeyBinding[] = [
         {
             key: "Mod-b",
             run: openInternalLink,
@@ -276,7 +276,7 @@ onMount(() => {
         ...defaultKeymap // 標準のキーマップを含める
     ];
 
-    const handlePaste = async (event) => {
+    const handlePaste = (event) => {
         let handled = false;
 
         const items = (event.clipboardData || event.originalEvent.clipboardData).items;
@@ -286,14 +286,15 @@ onMount(() => {
 
                 const blob = item.getAsFile();
                 // Now you can handle the image file (blob)
-                const pathFromAppDir = await readAndSaveImage(blob);
-                const path = `../${pathFromAppDir}`;
+                readAndSaveImage(blob).then((pathFromAppDir) => {
+                    const path = `../${pathFromAppDir}`;
 
-                const markdownImageText = `![image](${path})\n`;
-                const transaction = view.state.update({
-                    changes: {from: view.state.selection.main.from, insert: markdownImageText}
+                    const markdownImageText = `![image](${path})\n`;
+                    const transaction = view.state.update({
+                        changes: {from: view.state.selection.main.from, insert: markdownImageText}
+                    });
+                    view.dispatch(transaction);
                 });
-                view.dispatch(transaction);
             }
         }
 
