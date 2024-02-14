@@ -37,7 +37,6 @@
     import { yaml } from '@codemirror/lang-yaml';
     import { internalLinkDecorator } from './InternalWikiLink';
     import { imageDecorator } from './ImageViewWidget';
-    import { getCurrent } from '@tauri-apps/api/window';
 
     export let file: FileItem;
     export let fileItems: FileItem[];
