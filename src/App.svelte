@@ -22,7 +22,12 @@
     }
     unlistenCallbackPromises.push(
         listen('do_new_file', async () => {
-            const fileItem = await createNewFileWithContent('# ');
+            const fileItem = await createNewFileWithContent('# \n\n');
+
+            if (tabPane !== 'list' && tabPane !== 'card') {
+                tabPane = 'list';
+            }
+
             await emit('do_created', fileItem);
         }),
     );
