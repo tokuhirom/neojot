@@ -89,7 +89,7 @@
 
     async function reloadFiles() {
         let newFileMap: Record<string, CalendarFileEntry> = {};
-        const dataFileList = await loadFileList('data', false);
+        const dataFileList = await loadFileList('data');
         fileItems = dataFileList;
         for (let fileItem of dataFileList) {
             newFileMap[fileItem.filename.replace(/.+\//, '')] = {
@@ -97,7 +97,7 @@
                 prefix: 'data',
             };
         }
-        const archivedFileList = await loadFileList('archived', false);
+        const archivedFileList = await loadFileList('archived');
         for (let fileItem of archivedFileList) {
             newFileMap[fileItem.filename.replace(/.+\//, '')] = {
                 fileItem: fileItem,
@@ -119,7 +119,7 @@
                 } else {
                     console.log(`Archiving: ${selectedItem.filename}`);
                     await archiveFile(selectedItem);
-                    fileItems = await loadFileList('data', true);
+                    fileItems = await loadFileList('data');
                     selectedItem = fileItems[0];
                 }
             }

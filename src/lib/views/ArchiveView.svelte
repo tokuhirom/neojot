@@ -11,7 +11,7 @@
     let selectedItem: FileItem | undefined = undefined;
 
     onMount(async () => {
-        fileItems = await loadFileList('archived', true);
+        fileItems = await loadFileList('archived');
     });
 
     function onSelect(fileItem: FileItem) {
@@ -21,7 +21,7 @@
     async function deleteSelectedEntry() {
         if (selectedItem) {
             await deleteArchivedFile(selectedItem);
-            fileItems = await loadFileList('archived', true);
+            fileItems = await loadFileList('archived');
             selectedItem = undefined;
         }
     }

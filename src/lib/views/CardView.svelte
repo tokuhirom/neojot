@@ -15,7 +15,7 @@
     let selectedItem: FileItem | undefined = undefined;
 
     onMount(async () => {
-        fileItems = await loadFileList('data', true);
+        fileItems = await loadFileList('data');
     });
 
     let unlistenCallbackPromises: Promise<UnlistenFn>[] = [];
@@ -41,7 +41,7 @@
         listen('do_archive', async () => {
             if (selectedItem) {
                 await archiveFile(selectedItem);
-                fileItems = await loadFileList('data', true);
+                fileItems = await loadFileList('data');
                 selectedItem = undefined;
             }
         }),

@@ -26,7 +26,7 @@
     }
 
     onMount(async () => {
-        fileItems = await loadFileList('data', true);
+        fileItems = await loadFileList('data');
 
         selectedItem = fileItems[0];
     });
@@ -62,7 +62,7 @@
             if (selectedItem) {
                 console.log(`Archiving: ${selectedItem.filename}`);
                 await archiveFile(selectedItem);
-                fileItems = await loadFileList('data', true);
+                fileItems = await loadFileList('data');
                 selectedItem = fileItems[0];
             }
         }),

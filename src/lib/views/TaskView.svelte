@@ -11,7 +11,7 @@
     let selectedItem: FileItem | undefined = undefined;
 
     onMount(async () => {
-        fileItems = await loadFileList('data', true);
+        fileItems = await loadFileList('data');
         filteredFileItems = fileItems.filter((it) =>
             it.title.includes('TODO:'),
         );
@@ -26,7 +26,7 @@
         if (selectedItem) {
             console.log(`Archiving: ${selectedItem.filename}`);
             await archiveFile(selectedItem);
-            const fileItems = await loadFileList('data', true);
+            const fileItems = await loadFileList('data');
             filteredFileItems = fileItems.filter((it) =>
                 it.title.includes('TODO:'),
             );

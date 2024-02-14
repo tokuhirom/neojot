@@ -74,10 +74,7 @@ export async function loadMarkdownFile(name: string): Promise<string> {
     });
 }
 
-export async function loadFileList(
-    prefix: string,
-    retry: boolean,
-): Promise<FileItem[]> {
+export async function loadFileList(prefix: string): Promise<FileItem[]> {
     if (!(await exists(prefix, { baseDir: BaseDirectory.AppData }))) {
         await mkdir(prefix, { baseDir: BaseDirectory.AppData });
     }
@@ -85,19 +82,6 @@ export async function loadFileList(
     const fileItems = (await invoke('get_files', { prefix })) as FileItem[];
     console.log('loaded file items');
     console.log(fileItems);
-
-    if (fileItems.length == 0 && prefix == 'data') {
-        // 最初の1ファイルを作成する
-        console.log(`There's no files in ${prefix}. Create new file...`);
-
-        const newFileItem = await createNewFileWithContent('# ');
-        if (retry) {
-            console.log(
-                `Created new file ${newFileItem.filename}... so, i need to reload`,
-            );
-            return await loadFileList(prefix, false);
-        }
-    }
 
     return fileItems;
 }
