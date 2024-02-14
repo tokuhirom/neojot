@@ -16,16 +16,11 @@
     let month: number;
     let calendars: CalendarDay[][] = [];
     let calendarData: CalendarData | undefined = undefined;
-    let fileMap: Record<string, CalendarFileEntry> = {};
+    let fileMap: Record<string, FileItem> = {};
 
     let selectedItem: FileItem | undefined = undefined;
 
     let fileItems: FileItem[] = [];
-
-    type CalendarFileEntry = {
-        fileItem: FileItem;
-        prefix: string;
-    };
 
     type CalendarDay = {
         day: number | null; // 日付、またはプレースホルダー用にnull
@@ -88,21 +83,15 @@
     });
 
     async function reloadFiles() {
-        let newFileMap: Record<string, CalendarFileEntry> = {};
+        let newFileMap: Record<string, FileItem> = {};
         const dataFileList = await loadFileList('data');
         fileItems = dataFileList;
         for (let fileItem of dataFileList) {
-            newFileMap[fileItem.filename.replace(/.+\//, '')] = {
-                fileItem: fileItem,
-                prefix: 'data',
-            };
+            newFileMap[fileItem.filename.replace(/.+\//, '')] = fileItem;
         }
         const archivedFileList = await loadFileList('archived');
         for (let fileItem of archivedFileList) {
-            newFileMap[fileItem.filename.replace(/.+\//, '')] = {
-                fileItem: fileItem,
-                prefix: 'archived',
-            };
+            newFileMap[fileItem.filename.replace(/.+\//, '')] = fileItem;
         }
         fileMap = newFileMap;
     }
@@ -162,13 +151,10 @@
                                         {#if fileMap[filename]}
                                             <button
                                                 on:click={() =>
-                                                    openFile(
-                                                        fileMap[filename]
-                                                            .fileItem,
-                                                    )}
-                                                >{fileMap[filename].fileItem
-                                                    .title}</button
+                                                    openFile(fileMap[filename])}
                                             >
+                                                {fileMap[filename].title}
+                                            </button>
                                         {/if}
                                     {/each}
                                 {/if}
