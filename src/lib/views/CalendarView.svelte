@@ -1,13 +1,16 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     import {
+        archiveFile,
         type CalendarData,
+        deleteArchivedFile,
         loadFileList,
         readCalendarFile,
     } from '../repository/NodeRepository';
     import type { FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
     import LinkCards from '../link/LinkCards.svelte';
+    import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 
     let year: number;
     let month: number;
@@ -81,21 +84,50 @@
         calendars = generateCalendar(year, month);
 
         calendarData = await readCalendarFile(year, month);
+        await reloadFiles();
+    });
 
+    async function reloadFiles() {
+        let newFileMap: Record<string, CalendarFileEntry> = {};
         const dataFileList = await loadFileList('data', false);
         fileItems = dataFileList;
         for (let fileItem of dataFileList) {
-            fileMap[fileItem.filename.replace(/.+\//, '')] = {
+            newFileMap[fileItem.filename.replace(/.+\//, '')] = {
                 fileItem: fileItem,
                 prefix: 'data',
             };
         }
         const archivedFileList = await loadFileList('archived', false);
         for (let fileItem of archivedFileList) {
-            fileMap[fileItem.filename.replace(/.+\//, '')] = {
+            newFileMap[fileItem.filename.replace(/.+\//, '')] = {
                 fileItem: fileItem,
                 prefix: 'archived',
             };
+        }
+        fileMap = newFileMap;
+    }
+
+    let unlistenCallbackPromises: Promise<UnlistenFn>[] = [];
+    unlistenCallbackPromises.push(
+        listen('do_archive', async () => {
+            if (selectedItem) {
+                if (selectedItem.filename.startsWith('archived/')) {
+                    console.log(`Deleting: ${selectedItem.filename}`);
+                    await deleteArchivedFile(selectedItem);
+                    await reloadFiles();
+                    selectedItem = fileItems[0];
+                } else {
+                    console.log(`Archiving: ${selectedItem.filename}`);
+                    await archiveFile(selectedItem);
+                    fileItems = await loadFileList('data', true);
+                    selectedItem = fileItems[0];
+                }
+            }
+        }),
+    );
+    onDestroy(async () => {
+        for (let unlistenCallbackPromise of unlistenCallbackPromises) {
+            (await unlistenCallbackPromise)();
         }
     });
 
@@ -149,6 +181,9 @@
     </div>
     <div class="log-view">
         {#if selectedItem !== undefined}
+            {#if selectedItem.filename.startsWith('archived/')}
+                <div class="archived">Archived</div>
+            {/if}
             <EntryView file={selectedItem} {fileItems} openEntry={openFile} />
             <LinkCards file={selectedItem} {fileItems} openEntry={openFile} />
         {/if}
@@ -156,6 +191,15 @@
 </div>
 
 <style>
+    .archived {
+        margin: 8px;
+        padding: 8px;
+        border: orange;
+        background-color: bisque;
+        border-radius: 8px;
+        color: #0f0f0f;
+    }
+
     .calendar-view {
         display: flex; /* Enables Flexbox */
         flex-direction: row; /* Stack children vertically */
@@ -164,7 +208,7 @@
         padding-right: 8px;
     }
     .calendar {
-        flex: 0 0 250px;
+        flex: 0 0 50%;
         overflow-y: auto;
         padding-right: 9px;
         padding-left: 4px;
@@ -204,6 +248,7 @@
         text-align: left;
         word-break: break-all;
         min-width: 50px;
+        width: 100%;
 
         background: none;
         color: inherit;

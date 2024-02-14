@@ -146,7 +146,7 @@ export async function archiveFile(fileItem: FileItem) {
 }
 
 export async function deleteArchivedFile(fileItem: FileItem) {
-    await remove(`archived/${fileItem.filename}`, {
+    await remove(fileItem.filename, {
         baseDir: BaseDirectory.AppData,
     });
 }
