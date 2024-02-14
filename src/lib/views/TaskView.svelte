@@ -49,11 +49,7 @@
     </div>
     <div class="log-view">
         {#if selectedItem !== undefined}
-            <EntryView
-                file={selectedItem}
-                fileItems={filteredFileItems}
-                openEntry={openFile}
-            />
+            <EntryView file={selectedItem} {fileItems} openEntry={openFile} />
             <LinkCards file={selectedItem} {fileItems} openEntry={openFile} />
         {/if}
     </div>

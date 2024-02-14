@@ -48,6 +48,8 @@ export function buildLinks(
     selectedFileItem: FileItem,
     fileItems: FileItem[],
 ): Links {
+    console.log('Starting buildLinks');
+
     const title2fileItem: Record<string, FileItem> = {};
     for (const fileItem of fileItems) {
         title2fileItem[fileItem.title] = fileItem;
@@ -110,6 +112,8 @@ export function buildLinks(
         ([src, dst]) => ({ src, dst }),
     );
     twoHopLinks.sort((a, b) => b.src.mtime - a.src.mtime);
+
+    console.log('Finished buildLinks');
 
     return {
         links: uniqueLinks,
