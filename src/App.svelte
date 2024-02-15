@@ -105,9 +105,15 @@
                 tabPane = 'list';
             }
 
-            selectedItem = fileItem;
-
-            await emit('do_created', fileItem);
+            if (
+                !dataFileItems.some(
+                    (item) => item.filename === fileItem.filename,
+                )
+            ) {
+                dataFileItems.unshift(fileItem);
+                allFileItems.unshift(fileItem);
+                selectedItem = fileItem;
+            }
         }),
     );
     unlistenCallbackPromises.push(
