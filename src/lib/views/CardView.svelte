@@ -55,7 +55,7 @@
             Back to List
         </button>
 
-        <EntryView file={selectedItem} {allFileItems} {openEntry} />
+        <EntryView file={selectedItem} {allFileItems} {onSelectItem} />
         <LinkCards file={selectedItem} {allFileItems} {onSelectItem} />
     {:else}
         {#each dataFileItems as file}

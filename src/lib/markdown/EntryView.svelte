@@ -40,7 +40,7 @@
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
-    export let openEntry: (fileItem: FileItem) => void;
+    export let onSelectItem: (fileItem: FileItem) => void;
 
     let myElement;
 
@@ -160,7 +160,7 @@
         function findOrCreateEntry(pageName: string) {
             for (let fileItem of allFileItems) {
                 if (fileItem.title == pageName) {
-                    openEntry(fileItem);
+                    onSelectItem(fileItem);
                 }
             }
 
@@ -171,7 +171,7 @@
             createNewFileWithContent(`# ${pageName}\n\n`).then(
                 (fileItem: FileItem) => {
                     allFileItems.unshift(fileItem);
-                    openEntry(fileItem);
+                    onSelectItem(fileItem);
                 },
             );
         }

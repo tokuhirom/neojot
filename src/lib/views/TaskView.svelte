@@ -36,7 +36,7 @@
             <EntryView
                 file={selectedItem}
                 {allFileItems}
-                openEntry={openFile}
+                onSelectItem={openFile}
             />
             <LinkCards
                 file={selectedItem}

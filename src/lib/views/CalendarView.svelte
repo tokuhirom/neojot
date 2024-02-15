@@ -39,7 +39,7 @@
             <EntryView
                 file={selectedItem}
                 fileItems={dataFileItems}
-                openEntry={openFile}
+                onSelectItem={openFile}
             />
             <LinkCards
                 file={selectedItem}
