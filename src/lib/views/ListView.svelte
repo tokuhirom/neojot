@@ -53,15 +53,6 @@
             }
         }),
     );
-    unlistenCallbackPromises.push(
-        listen('do_archive', async () => {
-            if (selectedItem) {
-                console.log(`Archiving: ${selectedItem.filename}`);
-                await archiveFile(selectedItem);
-                selectedItem = dataFileItems[0];
-            }
-        }),
-    );
     onDestroy(async () => {
         for (let unlistenCallbackPromise of unlistenCallbackPromises) {
             (await unlistenCallbackPromise)();
