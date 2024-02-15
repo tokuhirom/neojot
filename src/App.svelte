@@ -57,6 +57,26 @@
         allFileItems = archived.concat(data);
     }
 
+    async function archiveOrDeleteEntry(
+        fileItem: FileItem,
+    ): Promise<FileItem | undefined> {
+        if (fileItem.filename.startsWith('archived/')) {
+            console.log(`Deleting: ${fileItem.filename}`);
+            await deleteArchivedFile(fileItem);
+            await reloadFiles();
+        } else {
+            console.log(`Archiving: ${fileItem.filename}`);
+            await archiveFile(fileItem);
+            await reloadFiles();
+        }
+
+        if (tabPane === 'archive') {
+            return undefined;
+        } else {
+            return dataFileItems[0];
+        }
+    }
+
     let unlistenCallbackPromises: Promise<UnlistenFn>[] = [];
     console.log(`Register callbacks: ${unlistenCallbackPromises.length}!`);
     for (let p of ['card', 'list', 'task', 'calendar', 'archive']) {
@@ -93,21 +113,7 @@
     unlistenCallbackPromises.push(
         listen('do_archive', async () => {
             if (selectedItem) {
-                if (selectedItem.filename.startsWith('archived/')) {
-                    console.log(`Deleting: ${selectedItem.filename}`);
-                    await deleteArchivedFile(selectedItem);
-                    await reloadFiles();
-                } else {
-                    console.log(`Archiving: ${selectedItem.filename}`);
-                    await archiveFile(selectedItem);
-                    await reloadFiles();
-                }
-
-                if (tabPane === 'archive') {
-                    selectedItem = undefined;
-                } else {
-                    selectedItem = dataFileItems[0];
-                }
+                selectedItem = await archiveOrDeleteEntry(selectedItem);
             }
         }),
     );
@@ -168,7 +174,12 @@
                 {onSelectItem}
             />
         {:else if tabPane === 'archive'}
-            <ArchiveView {selectedItem} {archivedFileItems} {onSelectItem} />
+            <ArchiveView
+                {selectedItem}
+                {archivedFileItems}
+                {onSelectItem}
+                {archiveOrDeleteEntry}
+            />
         {:else if tabPane === 'task'}
             <TaskView
                 {allFileItems}

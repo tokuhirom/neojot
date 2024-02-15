@@ -7,14 +7,15 @@
     import FileCardItem from '../card/FileCardItem.svelte';
 
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
+    export let archiveOrDeleteEntry: (
+        fileItem: FileItem,
+    ) => Promise<FileItem | undefined>;
     export let selectedItem: FileItem | undefined = undefined;
     export let archivedFileItems: FileItem[] = [];
 
     async function deleteSelectedEntry() {
         if (selectedItem) {
-            await deleteArchivedFile(selectedItem);
-            archivedFileItems = await loadFileList('archived');
-            selectedItem = undefined;
+            onSelectItem(await archiveOrDeleteEntry(selectedItem));
         }
     }
 </script>
