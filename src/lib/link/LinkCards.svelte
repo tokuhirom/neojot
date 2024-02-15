@@ -6,19 +6,19 @@
     import { createNewFileWithContent } from '../repository/NodeRepository';
 
     export let file: FileItem;
-    export let fileItems: FileItem[];
-    export let openEntry: (fileItem: FileItem) => void;
+    export let allFileItems: FileItem[];
+    export let onSelectItem: (fileItem: FileItem) => void;
 
     let links: Links | undefined = undefined;
 
-    $: if (fileItems || file) {
-        links = buildLinks(file, fileItems);
+    $: if (allFileItems || file) {
+        links = buildLinks(file, allFileItems);
     }
 
     async function createNewEntry(title: string) {
         const fileItem = await createNewFileWithContent(`# ${title}\n\n`);
-        fileItems.unshift(fileItem);
-        openEntry(fileItem);
+        allFileItems.unshift(fileItem);
+        onSelectItem(fileItem);
     }
 </script>
 
@@ -26,18 +26,18 @@
     {#if links}
         <div class="row">
             {#each links.links as file}
-                <FileCardItem onSelect={openEntry} {file} />
+                <FileCardItem {onSelectItem} {file} />
             {/each}
         </div>
         {#each links.twoHopLinks as twoHopLink}
             <div class="row">
                 <FileCardItem
-                    onSelect={openEntry}
+                    {onSelectItem}
                     file={twoHopLink.src}
                     backgroundColor="yellowgreen"
                 />
                 {#each twoHopLink.dst as dst}
-                    <FileCardItem onSelect={openEntry} file={dst} />
+                    <FileCardItem {onSelectItem} file={dst} />
                 {/each}
             </div>
         {/each}

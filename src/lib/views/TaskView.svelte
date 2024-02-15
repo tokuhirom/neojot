@@ -6,38 +6,22 @@
     import { listen } from '@tauri-apps/api/event';
     import LinkCards from '../link/LinkCards.svelte';
 
-    let fileItems: FileItem[] = [];
+    export let allFileItems: FileItem[] = [];
+    export let dataFileItems: FileItem[] = [];
+    export let selectedItem: FileItem | undefined = undefined;
+    export let onSelectItem: (FileItem) => void;
     let filteredFileItems: FileItem[] = [];
-    let selectedItem: FileItem | undefined = undefined;
 
     onMount(async () => {
-        fileItems = await loadFileList('data');
-        filteredFileItems = fileItems.filter((it) =>
+        filteredFileItems = dataFileItems.filter((it) =>
             it.title.includes('TODO:'),
         );
         selectedItem = filteredFileItems[0];
     });
 
     async function openFile(fileItem: FileItem) {
-        selectedItem = fileItem;
+        onSelectItem(fileItem);
     }
-
-    let unlistenArchive = listen('do_archive', async () => {
-        if (selectedItem) {
-            console.log(`Archiving: ${selectedItem.filename}`);
-            await archiveFile(selectedItem);
-            const fileItems = await loadFileList('data');
-            filteredFileItems = fileItems.filter((it) =>
-                it.title.includes('TODO:'),
-            );
-            selectedItem = filteredFileItems[0];
-        }
-    });
-    onDestroy(async () => {
-        for (let unlisten of [unlistenArchive]) {
-            (await unlisten)();
-        }
-    });
 </script>
 
 <div class="task-view">
@@ -49,8 +33,16 @@
     </div>
     <div class="log-view">
         {#if selectedItem !== undefined}
-            <EntryView file={selectedItem} {fileItems} openEntry={openFile} />
-            <LinkCards file={selectedItem} {fileItems} openEntry={openFile} />
+            <EntryView
+                file={selectedItem}
+                {allFileItems}
+                openEntry={openFile}
+            />
+            <LinkCards
+                file={selectedItem}
+                {allFileItems}
+                onSelectItem={openFile}
+            />
         {/if}
     </div>
 </div>

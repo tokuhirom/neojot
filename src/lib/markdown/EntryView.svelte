@@ -39,7 +39,7 @@
     import { imageDecorator } from './ImageViewWidget';
 
     export let file: FileItem;
-    export let fileItems: FileItem[];
+    export let allFileItems: FileItem[];
     export let openEntry: (fileItem: FileItem) => void;
 
     let myElement;
@@ -56,7 +56,6 @@
             await emit('change_title', { filename: file.filename });
         }
         await saveMarkdownFile(file.filename, text);
-        file.title = extractTitle(file.content);
         file.mtime = Math.floor(Date.now() / 1000);
         await emit('sort_file_list');
     }
@@ -123,7 +122,7 @@
                 const word = context.matchBefore(/\[\[\w*/);
                 if (word) {
                     console.log('Return links');
-                    const options = fileItems.map((fileItem) => {
+                    const options = allFileItems.map((fileItem) => {
                         return {
                             label: `[[${fileItem.title}]]`,
                             type: 'keyword',
@@ -159,7 +158,7 @@
         };
 
         function findOrCreateEntry(pageName: string) {
-            for (let fileItem of fileItems) {
+            for (let fileItem of allFileItems) {
                 if (fileItem.title == pageName) {
                     openEntry(fileItem);
                 }
@@ -171,7 +170,7 @@
             );
             createNewFileWithContent(`# ${pageName}\n\n`).then(
                 (fileItem: FileItem) => {
-                    fileItems.unshift(fileItem);
+                    allFileItems.unshift(fileItem);
                     openEntry(fileItem);
                 },
             );
@@ -342,7 +341,9 @@
     $: if (file) {
         if (view) {
             if (prevFileName !== file.filename) {
-                console.log(`Loading entry: ${file.filename}`);
+                console.log(
+                    `Loading entry: ${file.filename} (previous: ${prevFileName})`,
+                );
 
                 let state = view.state;
                 let transaction = state.update({

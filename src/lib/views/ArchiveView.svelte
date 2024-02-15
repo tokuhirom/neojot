@@ -7,21 +7,18 @@
     import type { FileItem } from '../file_item/FileItem';
     import FileCardItem from '../card/FileCardItem.svelte';
 
-    export let fileItems: FileItem[] = [];
-    let selectedItem: FileItem | undefined = undefined;
-
-    onMount(async () => {
-        fileItems = await loadFileList('archived');
-    });
+    export let onSelectItem: (fileItem: FileItem | undefined) => void;
+    export let selectedItem: FileItem | undefined = undefined;
+    export let archivedFileItems: FileItem[] = [];
 
     function onSelect(fileItem: FileItem) {
-        selectedItem = fileItem;
+        onSelectItem(fileItem);
     }
 
     async function deleteSelectedEntry() {
         if (selectedItem) {
             await deleteArchivedFile(selectedItem);
-            fileItems = await loadFileList('archived');
+            archivedFileItems = await loadFileList('archived');
             selectedItem = undefined;
         }
     }
@@ -32,8 +29,8 @@
         <button class="delete-btn" on:click={deleteSelectedEntry}>Delete</button
         >
         <pre class="archived-source">{selectedItem.content}</pre>
-    {:else if fileItems.length > 0}
-        {#each fileItems as file}
+    {:else if archivedFileItems.length > 0}
+        {#each archivedFileItems as file}
             <FileCardItem {onSelect} {file} />
         {/each}
     {:else}

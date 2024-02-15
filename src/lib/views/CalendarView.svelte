@@ -1,26 +1,23 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
     import {
-        archiveFile,
         type CalendarData,
-        deleteArchivedFile,
-        loadFileList,
         readCalendarFile,
     } from '../repository/NodeRepository';
     import type { FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
     import LinkCards from '../link/LinkCards.svelte';
-    import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+    import { type UnlistenFn } from '@tauri-apps/api/event';
+
+    export let allFileItems: FileItem[] = [];
+    export let dataFileItems: FileItem[] = [];
+    export let selectedItem: FileItem | undefined = undefined;
 
     let year: number;
     let month: number;
     let calendars: CalendarDay[][] = [];
     let calendarData: CalendarData | undefined = undefined;
     let fileMap: Record<string, FileItem> = {};
-
-    let selectedItem: FileItem | undefined = undefined;
-
-    let fileItems: FileItem[] = [];
 
     type CalendarDay = {
         day: number | null; // 日付、またはプレースホルダー用にnull
@@ -75,7 +72,6 @@
         year = currentDate.getFullYear();
         month = currentDate.getMonth() + 1;
 
-        console.log('GENER');
         calendars = generateCalendar(year, month);
 
         calendarData = await readCalendarFile(year, month);
@@ -84,36 +80,13 @@
 
     async function reloadFiles() {
         let newFileMap: Record<string, FileItem> = {};
-        const dataFileList = await loadFileList('data');
-        fileItems = dataFileList;
-        for (let fileItem of dataFileList) {
-            newFileMap[fileItem.filename.replace(/.+\//, '')] = fileItem;
-        }
-        const archivedFileList = await loadFileList('archived');
-        for (let fileItem of archivedFileList) {
+        for (let fileItem of allFileItems) {
             newFileMap[fileItem.filename.replace(/.+\//, '')] = fileItem;
         }
         fileMap = newFileMap;
     }
 
     let unlistenCallbackPromises: Promise<UnlistenFn>[] = [];
-    unlistenCallbackPromises.push(
-        listen('do_archive', async () => {
-            if (selectedItem) {
-                if (selectedItem.filename.startsWith('archived/')) {
-                    console.log(`Deleting: ${selectedItem.filename}`);
-                    await deleteArchivedFile(selectedItem);
-                    await reloadFiles();
-                    selectedItem = fileItems[0];
-                } else {
-                    console.log(`Archiving: ${selectedItem.filename}`);
-                    await archiveFile(selectedItem);
-                    fileItems = await loadFileList('data');
-                    selectedItem = fileItems[0];
-                }
-            }
-        }),
-    );
     onDestroy(async () => {
         for (let unlistenCallbackPromise of unlistenCallbackPromises) {
             (await unlistenCallbackPromise)();
@@ -170,8 +143,16 @@
             {#if selectedItem.filename.startsWith('archived/')}
                 <div class="archived">Archived</div>
             {/if}
-            <EntryView file={selectedItem} {fileItems} openEntry={openFile} />
-            <LinkCards file={selectedItem} {fileItems} openEntry={openFile} />
+            <EntryView
+                file={selectedItem}
+                fileItems={dataFileItems}
+                openEntry={openFile}
+            />
+            <LinkCards
+                file={selectedItem}
+                {allFileItems}
+                onSelectItem={openFile}
+            />
         {/if}
     </div>
 </div>

@@ -12,47 +12,43 @@
     import LinkCards from '../link/LinkCards.svelte';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
 
-    let fileItems: FileItem[] = [];
+    export let allFileItems: FileItem[] = [];
+    export let dataFileItems: FileItem[] = [];
+    export let selectedItem: FileItem | undefined = undefined;
+    export let onSelectItem: (fileItem: FileItem | undefined) => void;
 
     let filteredFileItems: FileItem[];
-    let selectedItem: FileItem | undefined;
 
     let searchWord = '';
 
-    $: if (fileItems || searchWord) {
-        filteredFileItems = fileItems.filter((it) =>
+    $: if (dataFileItems || searchWord) {
+        filteredFileItems = dataFileItems.filter((it) =>
             shouldShowFileItem(it, searchWord),
         );
     }
 
     onMount(async () => {
-        fileItems = await loadFileList('data');
-
-        selectedItem = fileItems[0];
+        selectedItem = dataFileItems[0];
     });
 
     async function openEntry(fileItem: FileItem) {
         console.log(`open: ${fileItem.filename}`);
         // reload content from file system
         fileItem.content = await loadMarkdownFile(fileItem.filename);
-        selectedItem = fileItem;
+        onSelectItem(fileItem);
     }
 
     let unlistenCallbackPromises: Promise<UnlistenFn>[] = [];
-    unlistenCallbackPromises.push(
-        listen('sort_file_list', async () => {
-            fileItems.sort((a, b) => b.mtime - a.mtime);
-            fileItems = fileItems;
-        }),
-    );
     unlistenCallbackPromises.push(
         listen('do_created', async (event) => {
             const fileItem = event.payload as FileItem;
             console.log(`ListView.do_created: ${fileItem.filename}`);
             if (
-                !fileItems.some((item) => item.filename === fileItem.filename)
+                !dataFileItems.some(
+                    (item) => item.filename === fileItem.filename,
+                )
             ) {
-                fileItems.unshift(fileItem);
+                dataFileItems.unshift(fileItem);
                 selectedItem = fileItem;
             }
         }),
@@ -62,8 +58,7 @@
             if (selectedItem) {
                 console.log(`Archiving: ${selectedItem.filename}`);
                 await archiveFile(selectedItem);
-                fileItems = await loadFileList('data');
-                selectedItem = fileItems[0];
+                selectedItem = dataFileItems[0];
             }
         }),
     );
@@ -85,9 +80,9 @@
     </div>
     <div class="log-view">
         {#if selectedItem !== undefined}
-            <EntryView file={selectedItem} {fileItems} {openEntry} />
+            <EntryView file={selectedItem} {allFileItems} {openEntry} />
 
-            <LinkCards file={selectedItem} {fileItems} {openEntry} />
+            <LinkCards file={selectedItem} {allFileItems} {onSelectItem} />
         {/if}
     </div>
 </div>
