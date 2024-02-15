@@ -167,3 +167,5 @@ async function mkdir_p(path: string) {
         await mkdir(path, { baseDir: BaseDirectory.AppData });
     }
 }
+
+export class type {}
