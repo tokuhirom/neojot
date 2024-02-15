@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
     import {
         deleteArchivedFile,
         loadFileList,
@@ -10,10 +9,6 @@
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let selectedItem: FileItem | undefined = undefined;
     export let archivedFileItems: FileItem[] = [];
-
-    function onSelect(fileItem: FileItem) {
-        onSelectItem(fileItem);
-    }
 
     async function deleteSelectedEntry() {
         if (selectedItem) {
@@ -31,7 +26,7 @@
         <pre class="archived-source">{selectedItem.content}</pre>
     {:else if archivedFileItems.length > 0}
         {#each archivedFileItems as file}
-            <FileCardItem {onSelect} {file} />
+            <FileCardItem {onSelectItem} {file} />
         {/each}
     {:else}
         No archived items.
