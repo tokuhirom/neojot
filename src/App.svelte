@@ -85,6 +85,8 @@
                 tabPane = 'list';
             }
 
+            selectedItem = fileItem;
+
             await emit('do_created', fileItem);
         }),
     );
