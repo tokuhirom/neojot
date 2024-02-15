@@ -3,7 +3,7 @@
     import { listen } from '@tauri-apps/api/event';
     import { onDestroy } from 'svelte';
 
-    export let openEntry: (fileItem: FileItem) => void;
+    export let onSelectItem: (fileItem: FileItem) => void;
     export let fileItem: FileItem;
     export let selectedItem: FileItem;
 
@@ -18,7 +18,7 @@
     });
 
     function handleOnClick() {
-        openEntry(fileItem);
+        onSelectItem(fileItem);
     }
 
     function formatEpochSeconds() {

@@ -1,9 +1,7 @@
 <script lang="ts">
-    import { onDestroy, onMount } from 'svelte';
-    import { archiveFile, loadFileList } from '../repository/NodeRepository';
+    import { onMount } from 'svelte';
     import { type FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
-    import { listen } from '@tauri-apps/api/event';
     import LinkCards from '../link/LinkCards.svelte';
 
     export let allFileItems: FileItem[] = [];
@@ -18,31 +16,20 @@
         );
         selectedItem = filteredFileItems[0];
     });
-
-    async function openFile(fileItem: FileItem) {
-        onSelectItem(fileItem);
-    }
 </script>
 
 <div class="task-view">
     <div class="file-list">
         {#each filteredFileItems as fileItem}
-            <button on:click={() => openFile(fileItem)}>{fileItem.title}</button
+            <button on:click={() => onSelectItem(fileItem)}
+                >{fileItem.title}</button
             >
         {/each}
     </div>
     <div class="log-view">
         {#if selectedItem !== undefined}
-            <EntryView
-                file={selectedItem}
-                {allFileItems}
-                onSelectItem={openFile}
-            />
-            <LinkCards
-                file={selectedItem}
-                {allFileItems}
-                onSelectItem={openFile}
-            />
+            <EntryView file={selectedItem} {allFileItems} {onSelectItem} />
+            <LinkCards file={selectedItem} {allFileItems} {onSelectItem} />
         {/if}
     </div>
 </div>

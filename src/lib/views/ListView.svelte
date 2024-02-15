@@ -26,38 +26,6 @@
             shouldShowFileItem(it, searchWord),
         );
     }
-
-    onMount(async () => {
-        selectedItem = dataFileItems[0];
-    });
-
-    async function openEntry(fileItem: FileItem) {
-        console.log(`open: ${fileItem.filename}`);
-        // reload content from file system
-        fileItem.content = await loadMarkdownFile(fileItem.filename);
-        onSelectItem(fileItem);
-    }
-
-    let unlistenCallbackPromises: Promise<UnlistenFn>[] = [];
-    unlistenCallbackPromises.push(
-        listen('do_created', async (event) => {
-            const fileItem = event.payload as FileItem;
-            console.log(`ListView.do_created: ${fileItem.filename}`);
-            if (
-                !dataFileItems.some(
-                    (item) => item.filename === fileItem.filename,
-                )
-            ) {
-                dataFileItems.unshift(fileItem);
-                selectedItem = fileItem;
-            }
-        }),
-    );
-    onDestroy(async () => {
-        for (let unlistenCallbackPromise of unlistenCallbackPromises) {
-            (await unlistenCallbackPromise)();
-        }
-    });
 </script>
 
 <div class="list-view">
@@ -65,18 +33,13 @@
         <ClearableSearchBox bind:searchWord />
         {#if filteredFileItems && selectedItem}
             {#each filteredFileItems as fileItem}
-                <FileListItem {openEntry} {fileItem} {selectedItem} />
+                <FileListItem {onSelectItem} {fileItem} {selectedItem} />
             {/each}
         {/if}
     </div>
     <div class="log-view">
         {#if selectedItem !== undefined}
-            <EntryView
-                file={selectedItem}
-                {allFileItems}
-                onSelectItem={openEntry}
-            />
-
+            <EntryView file={selectedItem} {allFileItems} {onSelectItem} />
             <LinkCards file={selectedItem} {allFileItems} {onSelectItem} />
         {/if}
     </div>
