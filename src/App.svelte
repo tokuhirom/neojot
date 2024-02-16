@@ -4,7 +4,7 @@
     import ArchiveView from './lib/views/ArchiveView.svelte';
     import TaskView from './lib/views/TaskView.svelte';
     import CalendarView from './lib/views/CalendarView.svelte';
-    import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event';
+    import { listen, type UnlistenFn } from '@tauri-apps/api/event';
     import { onDestroy, onMount } from 'svelte';
     import ConfigurationView from './lib/views/ConfigurationView.svelte';
     import {

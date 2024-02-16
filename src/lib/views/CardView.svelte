@@ -1,16 +1,27 @@
 <script lang="ts">
-    import type { FileItem } from '../file_item/FileItem';
+    import { type FileItem, shouldShowFileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
     import LinkCards from '../link/LinkCards.svelte';
     import FileCardItem from '../card/FileCardItem.svelte';
+    import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
+
+    let filteredFileItems: FileItem[];
+    let searchWord = '';
+
+    $: if (dataFileItems || searchWord) {
+        filteredFileItems = dataFileItems.filter((it) =>
+            shouldShowFileItem(it, searchWord),
+        );
+    }
 </script>
 
 <div class="container">
+    <ClearableSearchBox bind:searchWord />
     {#if selectedItem}
         <button class="back-to-list" on:click={() => onSelectItem(undefined)}>
             Back to List
@@ -19,7 +30,7 @@
         <EntryView file={selectedItem} {allFileItems} {onSelectItem} />
         <LinkCards file={selectedItem} {allFileItems} {onSelectItem} />
     {:else}
-        {#each dataFileItems as file}
+        {#each filteredFileItems as file}
             <FileCardItem {onSelectItem} {file} />
         {/each}
     {/if}
