@@ -34,7 +34,7 @@
         previousTabPane = tabPane;
 
         console.log(`Switched tabPane to ${tabPane}`);
-        if (tabPane === 'list' || tabPane === 'card') {
+        if (tabPane === 'list') {
             if (dataFileItems.length > 0) {
                 selectedItem = dataFileItems[0];
             } else {
