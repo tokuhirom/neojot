@@ -49,15 +49,18 @@
         let state = view.state;
         let doc = state.doc;
         let text = doc.toString();
-        file.content = text;
-        const newTitle = extractTitle(text);
-        if (file.title !== newTitle) {
-            file.title = newTitle;
-            await emit('change_title', { filename: file.filename });
+        if (file.content !== text) {
+            file.content = text;
+
+            const newTitle = extractTitle(text);
+            if (file.title !== newTitle) {
+                file.title = newTitle;
+                await emit('change_title', { filename: file.filename });
+            }
+            await saveMarkdownFile(file.filename, text);
+            file.mtime = Math.floor(Date.now() / 1000);
+            await emit('sort_file_list');
         }
-        await saveMarkdownFile(file.filename, text);
-        file.mtime = Math.floor(Date.now() / 1000);
-        await emit('sort_file_list');
     }
 
     let view: EditorView;
