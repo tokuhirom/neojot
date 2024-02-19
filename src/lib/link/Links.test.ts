@@ -18,55 +18,55 @@ const orig = {
     title: 'orig',
     content: `[[foo]] [[bar]] [[goo]] [[miso]] [[soup]] [[jot]] [[orig]]`,
     mtime: 0,
-    filename: '',
+    filename: 'orig.md',
 };
 const foo = {
     title: 'foo',
     content: ``,
     mtime: 0,
-    filename: '',
+    filename: 'foo.md',
 };
 const bar = {
     title: 'bar',
     content: `[[boz]]`,
     mtime: 0,
-    filename: '',
+    filename: 'bar.md',
 };
 const boo = {
     title: 'boo',
     content: `[[orig]]`,
     mtime: 0,
-    filename: '',
+    filename: 'boo.md',
 };
 const boz = {
     title: 'boz',
     content: ``,
     mtime: 0,
-    filename: '',
+    filename: 'boz.md',
 };
 const miso = {
     title: 'miso',
     content: `[[soup]]`,
     mtime: 0,
-    filename: '',
+    filename: 'miso.md',
 };
 const soup = {
     title: 'soup',
     content: ``,
     mtime: 0,
-    filename: '',
+    filename: 'soup.md',
 };
 const jot = {
     title: 'jot',
     content: ``,
     mtime: 0,
-    filename: '',
+    filename: 'jot.md',
 };
 const jotmisc = {
     title: 'jotmisc',
     content: `[[jot]]`,
     mtime: 0,
-    filename: '',
+    filename: 'jotmisc.md',
 };
 const fileItems: FileItem[] = [
     orig,
