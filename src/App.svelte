@@ -170,10 +170,6 @@
         >
     </div>
     <div class="main">
-        <h1>
-            {#if selectedItem}{selectedItem.title} - {selectedItem.filename}{/if}
-            <!-- Debugging... -->
-        </h1>
         {#if tabPane === 'list'}
             <ListView
                 {allFileItems}
