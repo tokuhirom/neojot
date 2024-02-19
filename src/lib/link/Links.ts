@@ -1,8 +1,4 @@
-import {
-    extractBrackets,
-    extractBracketsWithCache,
-    type FileItem,
-} from '../file_item/FileItem';
+import { extractBracketsWithCache, type FileItem } from '../file_item/FileItem';
 
 export type Links = {
     links: FileItem[];
