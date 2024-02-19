@@ -53,3 +53,24 @@ export function extractBrackets(content: string): string[] {
 
     return matches;
 }
+
+type CacheEntry = {
+    mtime: number;
+    links: string[];
+};
+
+const cache: Record<string, CacheEntry> = {};
+
+export function extractBracketsWithCache(fileItem: FileItem) {
+    const r = cache[fileItem.filename];
+    if (r && r.mtime === fileItem.mtime) {
+        return r.links;
+    } else {
+        const links = extractBrackets(fileItem.content);
+        cache[fileItem.filename] = {
+            mtime: fileItem.mtime,
+            links: links,
+        };
+        return links;
+    }
+}

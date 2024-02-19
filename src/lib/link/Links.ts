@@ -1,4 +1,8 @@
-import { extractBrackets, type FileItem } from '../file_item/FileItem';
+import {
+    extractBrackets,
+    extractBracketsWithCache,
+    type FileItem,
+} from '../file_item/FileItem';
 
 export type Links = {
     links: FileItem[];
@@ -29,7 +33,7 @@ export function extractLinks(fileItems: FileItem[]): {
     const forwardLinks: Map<string, string[]> = new Map();
     const backwardLinks: Map<string, string[]> = new Map();
     for (const srcFileItem of fileItems) {
-        const links = extractBrackets(srcFileItem.content);
+        const links = extractBracketsWithCache(srcFileItem);
         for (const link of links) {
             if (srcFileItem.title !== link) {
                 pushValue(forwardLinks, srcFileItem.title, link);

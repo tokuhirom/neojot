@@ -162,14 +162,14 @@
 
         function findOrCreateEntry(pageName: string) {
             for (let fileItem of allFileItems) {
-                if (fileItem.title == pageName) {
+                if (fileItem.title === pageName) {
                     onSelectItem(fileItem);
                 }
             }
 
             // create new entry
             console.log(
-                `Page '${pageName}' is not found. Trying to create new entry...`,
+                `Page '${pageName}' is not found. Trying to create new entry...${allFileItems.length}`,
             );
             createNewFileWithContent(`# ${pageName}\n\n`).then(
                 (fileItem: FileItem) => {
