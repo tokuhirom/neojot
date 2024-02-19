@@ -77,55 +77,57 @@
         }
     }
 
-    let unlistenCallbackPromises: Promise<UnlistenFn>[] = [];
-    console.log(`Register callbacks: ${unlistenCallbackPromises.length}!`);
-    for (let p of ['card', 'list', 'task', 'calendar', 'archive']) {
-        unlistenCallbackPromises.push(
-            listen(`do_${p}_view`, () => {
-                console.log(`${p}_view`);
-                tabPane = `${p}`;
+    let unlistenCallbackPromises: UnlistenFn[] = [];
 
-                if (p === 'archive') {
-                    selectedItem = undefined;
+    onMount(async () => {
+        console.log(`Register callbacks: ${unlistenCallbackPromises.length}!`);
+        for (let p of ['card', 'list', 'task', 'calendar', 'archive']) {
+            unlistenCallbackPromises.push(
+                await listen(`do_${p}_view`, () => {
+                    console.log(`${p}_view`);
+                    tabPane = `${p}`;
+
+                    if (p === 'archive') {
+                        selectedItem = undefined;
+                    }
+                }),
+            );
+        }
+        unlistenCallbackPromises.push(
+            await listen('sort_file_list', async () => {
+                dataFileItems.sort((a, b) => b.mtime - a.mtime);
+                dataFileItems = dataFileItems;
+            }),
+        );
+        unlistenCallbackPromises.push(
+            await listen('do_new_file', async () => {
+                console.log('do_new_file');
+
+                const fileItem = await createNewFileWithContent('# \n\n');
+
+                if (tabPane !== 'list' && tabPane !== 'card') {
+                    tabPane = 'list';
+                }
+
+                dataFileItems.unshift(fileItem);
+                allFileItems.unshift(fileItem);
+
+                dataFileItems = dataFileItems; // reload ListView's file list.
+
+                selectedItem = fileItem;
+            }),
+        );
+        unlistenCallbackPromises.push(
+            await listen('do_archive', async () => {
+                if (selectedItem) {
+                    selectedItem = await archiveOrDeleteEntry(selectedItem);
                 }
             }),
         );
-    }
-    unlistenCallbackPromises.push(
-        listen('sort_file_list', async () => {
-            dataFileItems.sort((a, b) => b.mtime - a.mtime);
-            dataFileItems = dataFileItems;
-        }),
-    );
-    unlistenCallbackPromises.push(
-        listen('do_new_file', async () => {
-            const fileItem = await createNewFileWithContent('# \n\n');
-
-            if (tabPane !== 'list' && tabPane !== 'card') {
-                tabPane = 'list';
-            }
-
-            if (
-                !dataFileItems.some(
-                    (item) => item.filename === fileItem.filename,
-                )
-            ) {
-                dataFileItems.unshift(fileItem);
-                allFileItems.unshift(fileItem);
-                selectedItem = fileItem;
-            }
-        }),
-    );
-    unlistenCallbackPromises.push(
-        listen('do_archive', async () => {
-            if (selectedItem) {
-                selectedItem = await archiveOrDeleteEntry(selectedItem);
-            }
-        }),
-    );
+    });
     onDestroy(async () => {
         for (let unlistenCallbackPromise of unlistenCallbackPromises) {
-            (await unlistenCallbackPromise)();
+            unlistenCallbackPromise();
         }
     });
 
