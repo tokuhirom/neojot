@@ -41,6 +41,7 @@
     export let file: FileItem;
     export let allFileItems: FileItem[];
     export let onSelectItem: (fileItem: FileItem) => void;
+    export let onSaved: () => void;
 
     let myElement;
 
@@ -60,6 +61,7 @@
             await saveMarkdownFile(file.filename, text);
             file.mtime = Math.floor(Date.now() / 1000);
             await emit('sort_file_list');
+            onSaved();
         }
     }
 

@@ -19,6 +19,10 @@
             shouldShowFileItem(it, searchWord),
         );
     }
+
+    function onSaved() {
+        selectedItem = selectedItem;
+    }
 </script>
 
 <div class="list-view">
@@ -32,7 +36,12 @@
     </div>
     <div class="log-view">
         {#if selectedItem !== undefined}
-            <EntryView file={selectedItem} {allFileItems} {onSelectItem} />
+            <EntryView
+                file={selectedItem}
+                {allFileItems}
+                {onSelectItem}
+                {onSaved}
+            />
             <LinkCards file={selectedItem} {allFileItems} {onSelectItem} />
         {/if}
     </div>

@@ -18,6 +18,10 @@
             shouldShowFileItem(it, searchWord),
         );
     }
+
+    function onSaved() {
+        selectedItem = selectedItem;
+    }
 </script>
 
 <div class="container">
@@ -27,7 +31,12 @@
             Back to List
         </button>
 
-        <EntryView file={selectedItem} {allFileItems} {onSelectItem} />
+        <EntryView
+            file={selectedItem}
+            {allFileItems}
+            {onSelectItem}
+            {onSaved}
+        />
         <LinkCards file={selectedItem} {allFileItems} {onSelectItem} />
     {:else}
         {#each filteredFileItems as file}

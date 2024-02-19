@@ -22,6 +22,10 @@
     function openFile(fileItem: FileItem) {
         selectedItem = fileItem;
     }
+
+    function onSaved() {
+        selectedItem = selectedItem;
+    }
 </script>
 
 <div class="calendar-view">
@@ -40,6 +44,7 @@
                 file={selectedItem}
                 fileItems={dataFileItems}
                 onSelectItem={openFile}
+                {onSaved}
             />
             <LinkCards
                 file={selectedItem}

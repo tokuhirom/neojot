@@ -23,6 +23,8 @@
 </script>
 
 <div>
+    {file.mtime}
+    {file.title}
     {#if links}
         <div class="row">
             {#each links.links as file}
