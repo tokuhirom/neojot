@@ -179,6 +179,8 @@
                     onSelectItem(fileItem);
                 },
             );
+
+            onSaved();
         }
 
         function openInternalLink(view: EditorView) {
