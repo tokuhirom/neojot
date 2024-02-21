@@ -207,11 +207,36 @@
             return false;
         }
 
+        function formatDate(date) {
+            let d = new Date(date),
+                month = '' + (d.getMonth() + 1),
+                day = '' + d.getDate(),
+                year = d.getFullYear();
+
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+
+            return '[' + [year, month, day].join('-') + ']! ';
+        }
+
+        function insertDateCommand(view) {
+            const dateStr = formatDate(new Date()); // 現在の日付を取得
+            const from = view.state.selection.main.from;
+            const to = from + dateStr.length;
+
+            view.dispatch({
+                changes: { from: from, insert: dateStr },
+                selection: { anchor: to },
+            });
+            return true;
+        }
+
         const customKeymap: KeyBinding[] = [
             {
                 key: 'Mod-b',
                 run: openInternalLink,
             },
+            { key: 'Mod-t', run: insertDateCommand },
             {
                 key: 'Tab',
                 preventDefault: true,
