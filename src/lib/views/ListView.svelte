@@ -23,6 +23,14 @@
     function onSaved() {
         selectedItem = selectedItem;
     }
+
+    function onCreateItem(fileItem: FileItem) {
+        dataFileItems.unshift(fileItem);
+        allFileItems.unshift(fileItem);
+        dataFileItems = dataFileItems;
+        allFileItems = allFileItems;
+        onSelectItem(fileItem);
+    }
 </script>
 
 <div class="list-view">
@@ -41,8 +49,14 @@
                 {allFileItems}
                 {onSelectItem}
                 {onSaved}
+                {onCreateItem}
             />
-            <LinkCards file={selectedItem} {allFileItems} {onSelectItem} />
+            <LinkCards
+                file={selectedItem}
+                {allFileItems}
+                {onSelectItem}
+                {onCreateItem}
+            />
         {/if}
     </div>
 </div>

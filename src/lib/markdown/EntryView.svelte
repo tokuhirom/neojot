@@ -41,6 +41,7 @@
     export let file: FileItem;
     export let allFileItems: FileItem[];
     export let onSelectItem: (fileItem: FileItem) => void;
+    export let onCreateItem: (fileItem: FileItem) => void;
     export let onSaved: () => void;
 
     let myElement;
@@ -166,6 +167,7 @@
             for (let fileItem of allFileItems) {
                 if (fileItem.title === pageName) {
                     onSelectItem(fileItem);
+                    return;
                 }
             }
 
@@ -175,12 +177,9 @@
             );
             createNewFileWithContent(`# ${pageName}\n\n`).then(
                 (fileItem: FileItem) => {
-                    allFileItems.unshift(fileItem);
-                    onSelectItem(fileItem);
+                    onCreateItem(fileItem);
                 },
             );
-
-            onSaved();
         }
 
         function openInternalLink(view: EditorView) {

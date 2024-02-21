@@ -8,6 +8,7 @@
     export let file: FileItem;
     export let allFileItems: FileItem[];
     export let onSelectItem: (fileItem: FileItem) => void;
+    export let onCreateItem: (fileItem: FileItem) => void;
 
     let links: Links | undefined = undefined;
 
@@ -17,8 +18,7 @@
 
     async function createNewEntry(title: string) {
         const fileItem = await createNewFileWithContent(`# ${title}\n\n`);
-        allFileItems.unshift(fileItem);
-        onSelectItem(fileItem);
+        onCreateItem(fileItem);
     }
 </script>
 
