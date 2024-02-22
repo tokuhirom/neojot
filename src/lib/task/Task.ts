@@ -130,7 +130,6 @@ export function extractTasks(fileItems: FileItem[]): Task[] {
 }
 
 export function sortTasks(tasks: Task[]): Task[] {
-    console.log(tasks.length);
     const today = new Date();
     tasks.sort(
         (a, b) => calculateFreshness(b, today) - calculateFreshness(a, today),

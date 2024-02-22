@@ -4,11 +4,30 @@
     import { type FileItem, shouldShowFileItem } from '../file_item/FileItem';
     import LinkCards from '../link/LinkCards.svelte';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
+    import {
+        calculateFreshness,
+        extractTasks,
+        sortTasks,
+        type Task,
+    } from '../task/Task';
+    import { onMount } from 'svelte';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
+    let tasks: Task[] = [];
+
+    onMount(() => {
+        updateTasks();
+    });
+
+    function updateTasks() {
+        const today = new Date();
+        tasks = sortTasks(extractTasks(dataFileItems)).filter((task) => {
+            return calculateFreshness(task, today) > 0;
+        });
+    }
 
     let filteredFileItems: FileItem[];
 
@@ -22,6 +41,7 @@
 
     function onSaved() {
         selectedItem = selectedItem;
+        updateTasks();
     }
 
     function onCreateItem(fileItem: FileItem) {
@@ -35,6 +55,13 @@
 
 <div class="list-view">
     <div class="file-list">
+        {#each tasks as task}
+            <button class="task" on:click={() => onSelectItem(task.fileItem)}>
+                {task.symbol}
+                {task.title}
+            </button>
+        {/each}
+
         <ClearableSearchBox bind:searchWord />
         {#if filteredFileItems && selectedItem}
             {#each filteredFileItems as fileItem}
@@ -62,6 +89,20 @@
 </div>
 
 <style>
+    .task {
+        text-align: left;
+        width: 100%;
+        font-size: 100%;
+
+        background-color: darkslategrey;
+        color: inherit;
+        border: none;
+        padding: 8px;
+        cursor: pointer;
+        border-bottom: darkslategrey 1px solid;
+        margin-bottom: 9px;
+    }
+
     .list-view {
         display: flex; /* Enables Flexbox */
         flex-direction: row; /* Stack children vertically */
