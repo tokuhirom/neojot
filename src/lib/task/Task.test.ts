@@ -1,4 +1,4 @@
-import { expect, type Test, test } from 'vitest';
+import { expect, test } from 'vitest';
 import { calculateFreshness, parseDate } from './Task';
 
 interface TestCase {
