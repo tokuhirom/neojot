@@ -3,7 +3,7 @@
   "extends": [
     "config:recommended"
   ],
-  "automerge": true,
-  "platformAutomerge": true,
+  "automerge": false,
+  "platformAutomerge": false,
   "labels": [ "dependency upgrade" ]
 }
