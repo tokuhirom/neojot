@@ -37,6 +37,7 @@
     import { yaml } from '@codemirror/lang-yaml';
     import { internalLinkDecorator } from './InternalWikiLink';
     import { imageDecorator } from './ImageViewWidget';
+    import { openSearchPanel, searchKeymap } from '@codemirror/search';
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
@@ -247,6 +248,9 @@
                 preventDefault: true,
                 run: indentLess,
             },
+            { key: 'Mod-f', run: openSearchPanel, preventDefault: true },
+            { key: 'Mod-r', run: openSearchPanel, preventDefault: true }, // replace?
+            ...searchKeymap,
             ...defaultKeymap, // 標準のキーマップを含める
         ];
 
