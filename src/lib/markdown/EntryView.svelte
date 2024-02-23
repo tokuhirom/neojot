@@ -265,8 +265,8 @@
 
         function changeSymbol(view: EditorView, newSymbol: string): boolean {
             const { state, dispatch } = view;
-            let { from, to } = state.selection.main;
 
+            let { from } = state.selection.main;
             // 現在の行を取得
             const line = state.doc.lineAt(from);
             const lineText = line.text;
@@ -300,6 +300,42 @@
             run: (view: EditorView) => changeSymbol(view, symbol),
         }));
 
+        // エンターキーが押されたときに実行される関数
+        function completeTaskAndLog(view: EditorView): boolean {
+            const { state, dispatch } = view;
+
+            let { from } = state.selection.main;
+            // 現在の行を取得
+            const line = state.doc.lineAt(from);
+            const lineText = line.text;
+            const datePattern = /^(\[\d{4}-\d{2}-\d{2}])([@!+~-].*)/; // 日付パターンとその後に続く任意の記号
+            const match = datePattern.exec(lineText);
+
+            if (match && from <= line.from + match.index + match[0].length) {
+                let replaceFrom = line.from;
+                let replaceTo = replaceFrom + match[0].length;
+
+                // 現在の日付を取得
+                const currentDate = format(new Date(), 'yyyy-MM-dd');
+                // 新しい行の内容を準備
+                const completedTask = `[${currentDate}]. ${match[1]}:${match[2]}`;
+
+                // 現在の行の後に新しい行を追加
+                dispatch(
+                    state.update({
+                        changes: {
+                            from: replaceFrom,
+                            to: replaceTo,
+                            insert: completedTask,
+                        },
+                        userEvent: 'input',
+                    }),
+                );
+                return true;
+            }
+            return false;
+        }
+
         const customKeymap: KeyBinding[] = [
             {
                 key: 'Mod-+', // Cmd/Ctrl + +
@@ -326,6 +362,7 @@
             },
             { key: 'Mod-f', run: openSearchPanel, preventDefault: true },
             { key: 'Mod-r', run: openSearchPanel, preventDefault: true }, // replace?
+            { key: 'Enter', run: completeTaskAndLog },
             ...taskKeyBindings,
             ...searchKeymap,
             ...defaultKeymap, // 標準のキーマップを含める
