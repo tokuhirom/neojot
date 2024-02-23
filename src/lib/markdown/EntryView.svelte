@@ -38,6 +38,7 @@
     import { internalLinkDecorator } from './InternalWikiLink';
     import { imageDecorator } from './ImageViewWidget';
     import { openSearchPanel, searchKeymap } from '@codemirror/search';
+    import { mermaidPlugin } from './MermaidWidget';
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
@@ -316,6 +317,7 @@
                 }),
                 autocompletion({ override: [myCompletion] }),
                 oneDark,
+                mermaidPlugin(),
                 syntaxHighlighting(oneDarkHighlightStyle),
                 EditorView.lineWrapping,
                 EditorView.updateListener.of(async (update) => {
