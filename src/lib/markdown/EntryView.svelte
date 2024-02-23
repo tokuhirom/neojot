@@ -39,6 +39,7 @@
     import { imageDecorator } from './ImageViewWidget';
     import { openSearchPanel, searchKeymap } from '@codemirror/search';
     import { mermaidPlugin } from './MermaidWidget';
+    import { addDays, format, parse } from 'date-fns';
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
@@ -209,20 +210,8 @@
             return false;
         }
 
-        function formatDate(date) {
-            let d = new Date(date),
-                month = '' + (d.getMonth() + 1),
-                day = '' + d.getDate(),
-                year = d.getFullYear();
-
-            if (month.length < 2) month = '0' + month;
-            if (day.length < 2) day = '0' + day;
-
-            return '[' + [year, month, day].join('-') + ']! ';
-        }
-
         function insertDateCommand(view) {
-            const dateStr = formatDate(new Date()); // 現在の日付を取得
+            const dateStr = format(new Date(), '[yyyy-MM-dd]- '); // 現在の日付を取得
             const from = view.state.selection.main.from;
             const to = from + dateStr.length;
 
@@ -233,7 +222,93 @@
             return true;
         }
 
+        function updateDate(view: EditorView, increment: boolean): boolean {
+            const { state, dispatch } = view;
+            const { selection } = state;
+            const { from, to } = selection.main;
+
+            if (from !== to) {
+                // 選択範囲が空でない場合は何もしない
+                return false;
+            }
+
+            const line = state.doc.lineAt(from);
+            const dateRegex = /\[(\d{4}-\d{2}-\d{2})]/g; // YYYY-MM-DD 形式の日付にマッチする正規表現
+            let match: RegExpExecArray | null;
+
+            while ((match = dateRegex.exec(line.text)) !== null) {
+                if (
+                    match.index <= from - line.from &&
+                    match.index + match[0].length >= from - line.from
+                ) {
+                    // カーソル位置に日付が含まれている場合
+                    const date = parse(match[1], 'yyyy-MM-dd', new Date());
+                    const updatedDate = addDays(date, increment ? 1 : -1);
+                    const formattedDate = format(updatedDate, '[yyyy-MM-dd]');
+
+                    // 日付を更新する
+                    dispatch(
+                        state.update({
+                            changes: {
+                                from: line.from + match.index,
+                                to: line.from + match.index + match[0].length,
+                                insert: formattedDate,
+                            },
+                        }),
+                    );
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        function changeSymbol(view: EditorView, newSymbol: string): boolean {
+            const { state, dispatch } = view;
+            let { from, to } = state.selection.main;
+
+            // 現在の行を取得
+            const line = state.doc.lineAt(from);
+            const lineText = line.text;
+            const datePattern = /\[\d{4}-\d{2}-\d{2}][@!+~.-]?/; // 日付パターンとその後に続く任意の記号
+            const match = datePattern.exec(lineText);
+
+            // パターンにマッチし、かつカーソル位置がパターンの直後にある場合に置換を実行
+            if (match && from <= line.from + match.index + match[0].length) {
+                // マッチした部分の最後の記号を新しい記号で置換
+                let replaceFrom = line.from + match.index + match[0].length - 1;
+                let replaceTo = replaceFrom + 1;
+
+                // 置換実行
+                dispatch(
+                    state.update({
+                        changes: {
+                            from: replaceFrom,
+                            to: replaceTo,
+                            insert: newSymbol,
+                        },
+                    }),
+                );
+                return true;
+            }
+
+            return false;
+        }
+        const taskSymbols = ['@', '!', '+', '~', '.', '-'];
+        const taskKeyBindings = taskSymbols.map((symbol) => ({
+            key: symbol,
+            run: (view: EditorView) => changeSymbol(view, symbol),
+        }));
+
         const customKeymap: KeyBinding[] = [
+            {
+                key: 'Mod-+', // Cmd/Ctrl + +
+                run: (view) => updateDate(view, true),
+            },
+            {
+                key: 'Mod--', // Cmd/Ctrl + -
+                run: (view) => updateDate(view, false),
+            },
             {
                 key: 'Mod-b',
                 run: openInternalLink,
@@ -251,6 +326,7 @@
             },
             { key: 'Mod-f', run: openSearchPanel, preventDefault: true },
             { key: 'Mod-r', run: openSearchPanel, preventDefault: true }, // replace?
+            ...taskKeyBindings,
             ...searchKeymap,
             ...defaultKeymap, // 標準のキーマップを含める
         ];
