@@ -9,6 +9,9 @@
         defaultKeymap,
         indentLess,
         indentMore,
+        redo,
+        undo,
+        history,
     } from '@codemirror/commands';
     import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
     import { EditorState, Transaction } from '@codemirror/state';
@@ -337,6 +340,8 @@
         }
 
         const customKeymap: KeyBinding[] = [
+            { key: 'Mod-z', run: undo, preventDefault: true },
+            { key: 'Mod-Shift-z', run: redo, preventDefault: true },
             {
                 key: 'Mod-+', // Cmd/Ctrl + +
                 run: (view) => updateDate(view, true),
@@ -420,6 +425,7 @@
         let startState = EditorState.create({
             doc: file.content,
             extensions: [
+                history(),
                 internalLinkDecorator,
                 imageDecorator,
                 EditorView.domEventHandlers({ paste: handlePaste }),
