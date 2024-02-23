@@ -6,6 +6,7 @@
     export let archiveOrDeleteEntry: (
         fileItem: FileItem,
     ) => Promise<FileItem | undefined>;
+    export let unarchiveEntry: (fileItem: FileItem) => void;
     export let selectedItem: FileItem | undefined = undefined;
     export let archivedFileItems: FileItem[] = [];
 
@@ -14,11 +15,21 @@
             onSelectItem(await archiveOrDeleteEntry(selectedItem));
         }
     }
+
+    async function unarchiveSelectedEntry() {
+        if (selectedItem) {
+            await unarchiveEntry(selectedItem);
+            onSelectItem(undefined);
+        }
+    }
 </script>
 
 <div class="container">
     {#if selectedItem}
         <button class="delete-btn" on:click={deleteSelectedEntry}>Delete</button
+        >
+        <button class="delete-btn" on:click={unarchiveSelectedEntry}
+            >Unarchive</button
         >
         <pre class="archived-source">{selectedItem.content}</pre>
     {:else if archivedFileItems.length > 0}

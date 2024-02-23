@@ -129,6 +129,24 @@ export async function archiveFile(fileItem: FileItem) {
     );
 }
 
+export async function unarchiveFile(fileItem: FileItem) {
+    console.log(`Unarchive file: ${fileItem.filename}`);
+    await mkdir_p('data');
+
+    const content = await readTextFile(fileItem.filename, {
+        baseDir: BaseDirectory.AppData,
+    });
+
+    await rename(
+        fileItem.filename,
+        fileItem.filename.replace('archived/', 'data/'),
+        {
+            oldPathBaseDir: BaseDirectory.AppData,
+            newPathBaseDir: BaseDirectory.AppData,
+        },
+    );
+}
+
 export async function deleteArchivedFile(fileItem: FileItem) {
     await remove(fileItem.filename, {
         baseDir: BaseDirectory.AppData,

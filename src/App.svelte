@@ -13,6 +13,7 @@
         deleteArchivedFile,
         loadFileList,
         loadMarkdownFile,
+        unarchiveFile,
     } from './lib/repository/NodeRepository';
     import type { FileItem } from './lib/file_item/FileItem';
 
@@ -74,6 +75,18 @@
             return undefined;
         } else {
             return dataFileItems[0];
+        }
+    }
+
+    async function unarchiveEntry(
+        fileItem: FileItem,
+    ): Promise<FileItem | undefined> {
+        if (fileItem.filename.startsWith('archived/')) {
+            console.log(`Deleting: ${fileItem.filename}`);
+            await unarchiveFile(fileItem);
+            await reloadFiles();
+        } else {
+            throw new Error("It's not archived");
         }
     }
 
@@ -183,6 +196,7 @@
                 {archivedFileItems}
                 {onSelectItem}
                 {archiveOrDeleteEntry}
+                {unarchiveEntry}
             />
         {:else if tabPane === 'task'}
             <TaskView
