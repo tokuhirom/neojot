@@ -314,7 +314,10 @@
             const datePattern = /^(\[\d{4}-\d{2}-\d{2}])([@!+~-].*)/; // 日付パターンとその後に続く任意の記号
             const match = datePattern.exec(lineText);
 
-            if (match && from <= line.from + match.index + match[0].length) {
+            if (
+                match &&
+                from <= line.from + match.index + match[1].length + 1
+            ) {
                 let replaceFrom = line.from;
                 let replaceTo = replaceFrom + match[0].length;
 
