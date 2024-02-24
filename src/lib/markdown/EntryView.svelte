@@ -170,8 +170,10 @@
         };
 
         function findOrCreateEntry(pageName: string) {
+            const lowerPageName = pageName.toLowerCase();
+
             for (let fileItem of allFileItems) {
-                if (fileItem.title === pageName) {
+                if (fileItem.title.toLowerCase() === lowerPageName) {
                     onSelectItem(fileItem);
                     return;
                 }

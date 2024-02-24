@@ -32,8 +32,16 @@ export function extractLinks(fileItems: FileItem[]): {
         const links = extractBracketsWithCache(srcFileItem);
         for (const link of links) {
             if (srcFileItem.title !== link) {
-                pushValue(forwardLinks, srcFileItem.title, link);
-                pushValue(backwardLinks, link, srcFileItem.title);
+                pushValue(
+                    forwardLinks,
+                    srcFileItem.title.toLowerCase(),
+                    link.toLowerCase(),
+                );
+                pushValue(
+                    backwardLinks,
+                    link.toLowerCase(),
+                    srcFileItem.title.toLowerCase(),
+                );
             }
         }
     }
@@ -50,9 +58,9 @@ export function buildLinks(
 ): Links {
     console.log('Starting buildLinks');
 
-    const title2fileItem: Record<string, FileItem> = {};
+    const lowerTitle2fileItem: Record<string, FileItem> = {};
     for (const fileItem of fileItems) {
-        title2fileItem[fileItem.title] = fileItem;
+        lowerTitle2fileItem[fileItem.title.toLowerCase()] = fileItem;
     }
 
     const { forward, backward } = extractLinks(fileItems);
@@ -60,25 +68,26 @@ export function buildLinks(
     const links: FileItem[] = []; // links and backward links(unique)
     const twoHopLinksMap: Map<FileItem, FileItem[]> = new Map();
     const newLinks: string[] = [];
-    (forward.get(selectedFileItem.title) || []).forEach((dest) => {
-        if (dest === selectedFileItem.title) {
+    const selectedLowerTitle = selectedFileItem.title.toLowerCase();
+    (forward.get(selectedLowerTitle) || []).forEach((dest) => {
+        if (dest === selectedLowerTitle) {
             // do nothing
         } else if (
             (forward.has(dest) ||
                 (backward.has(dest) && backward.get(dest)!.length > 1)) &&
-            title2fileItem[dest]
+            lowerTitle2fileItem[dest]
         ) {
             // two hop links
-            const twoHopSrc = title2fileItem[dest];
+            const twoHopSrc = lowerTitle2fileItem[dest];
             const forwardTwoHopDst = (forward.get(dest) || [])
-                .map((it) => title2fileItem[it])
+                .map((it) => lowerTitle2fileItem[it])
                 .filter((it) => it);
             const backwardTwoHopDst = (backward.get(dest) || [])
-                .map((it) => title2fileItem[it])
+                .map((it) => lowerTitle2fileItem[it])
                 .filter((it) => it);
             const twoHopDst = [
                 ...new Set([...forwardTwoHopDst, ...backwardTwoHopDst]),
-            ].filter((it) => it.title != selectedFileItem.title);
+            ].filter((it) => it.title != selectedLowerTitle);
 
             if (twoHopDst.length > 0) {
                 twoHopLinksMap.set(twoHopSrc, twoHopDst);
@@ -86,17 +95,17 @@ export function buildLinks(
                 links.push(twoHopSrc);
             }
         } else {
-            if (title2fileItem[dest]) {
+            if (lowerTitle2fileItem[dest]) {
                 // links block
-                links.push(title2fileItem[dest]);
+                links.push(lowerTitle2fileItem[dest]);
             } else {
                 // new links
                 newLinks.push(dest);
             }
         }
     });
-    (backward.get(selectedFileItem.title) || []).forEach((dest) => {
-        links.push(title2fileItem[dest]);
+    (backward.get(selectedLowerTitle) || []).forEach((dest) => {
+        links.push(lowerTitle2fileItem[dest]);
     });
 
     const twoHopItems = new Set();
@@ -106,7 +115,7 @@ export function buildLinks(
     });
     const uniqueLinks = links
         .filter((item) => !twoHopItems.has(item.title))
-        .filter((it) => it.title !== selectedFileItem.title);
+        .filter((it) => it.title !== selectedLowerTitle);
 
     const twoHopLinks: TwoHopPair[] = Array.from(twoHopLinksMap).map(
         ([src, dst]) => ({ src, dst }),
