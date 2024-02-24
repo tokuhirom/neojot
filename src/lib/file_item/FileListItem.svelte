@@ -83,8 +83,9 @@
         ><span class="title">{fileItem.title}</span>
         {#if matchLines && searchWords}
             {#each matchLines as line}
-                <span class="match-line"
-                    >{@html highlightKeyword(line, searchWords)}</span
+                <span class="match-line">
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                    {@html highlightKeyword(line, searchWords)}</span
                 >
             {/each}
         {/if}
