@@ -10,6 +10,7 @@
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (FileItem) => void;
+    export let title2fileItem: Record<string, FileItem>;
     let tasks: Task[] = [];
 
     onMount(() => {
@@ -75,6 +76,7 @@
                 {onSelectItem}
                 {onSaved}
                 {onCreateItem}
+                {title2fileItem}
             />
             <LinkCards
                 file={selectedItem}

@@ -9,6 +9,7 @@
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
+    export let title2fileItem: Record<string, FileItem>;
 
     let year: number;
     let month: number;
@@ -54,6 +55,7 @@
                 onSelectItem={openFile}
                 {onSaved}
                 {onCreateItem}
+                {title2fileItem}
             />
             <LinkCards
                 file={selectedItem}

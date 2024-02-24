@@ -9,6 +9,7 @@
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
+    export let title2fileItem: Record<string, FileItem>;
 
     let filteredFileItems: FileItem[];
     let searchWord = '';
@@ -45,6 +46,7 @@
             {onSelectItem}
             {onSaved}
             {onCreateItem}
+            {title2fileItem}
         />
         <LinkCards
             file={selectedItem}

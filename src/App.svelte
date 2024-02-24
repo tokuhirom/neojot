@@ -153,6 +153,32 @@
         }
         selectedItem = fileItem;
     }
+
+    function extractGotoLinks(content: string): string[] {
+        const pattern = /^>>>\s+(.+?)$/gm;
+        const matches = [];
+        let match;
+        while ((match = pattern.exec(content)) !== null) {
+            // マッチした部分（キーワード）を配列に追加
+            matches.push(match[1]); // match[1]は、'>>> 'に続く部分にマッチします
+        }
+        if (matches.length > 0) {
+            console.log(matches);
+        }
+        return matches;
+    }
+
+    let title2fileItem: Record<string, FileItem> = {};
+    $: if (allFileItems) {
+        const map: Record<string, FileItem> = {};
+        allFileItems.forEach((fileItem) => {
+            map[fileItem.title] = fileItem;
+            extractGotoLinks(fileItem.content).forEach((goto) => {
+                map[goto] = fileItem;
+            });
+        });
+        title2fileItem = map;
+    }
 </script>
 
 <main class="container">
@@ -189,6 +215,7 @@
                 {dataFileItems}
                 {selectedItem}
                 {onSelectItem}
+                {title2fileItem}
             />
         {:else if tabPane === 'archive'}
             <ArchiveView
@@ -204,6 +231,7 @@
                 {dataFileItems}
                 {selectedItem}
                 {onSelectItem}
+                {title2fileItem}
             />
         {:else if tabPane === 'calendar'}
             <CalendarView
@@ -211,6 +239,7 @@
                 {dataFileItems}
                 {onSelectItem}
                 {selectedItem}
+                {title2fileItem}
             />
         {:else if tabPane === 'configuration'}
             <ConfigurationView />

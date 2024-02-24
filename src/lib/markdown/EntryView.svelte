@@ -49,6 +49,7 @@
     export let onSelectItem: (fileItem: FileItem) => void;
     export let onCreateItem: (fileItem: FileItem) => void;
     export let onSaved: () => void;
+    export let title2fileItem: Record<string, FileItem>;
 
     let myElement;
 
@@ -134,9 +135,9 @@
                 const word = context.matchBefore(/\[\[\w*/);
                 if (word) {
                     console.log('Return links');
-                    const options = allFileItems.map((fileItem) => {
+                    const options = Object.keys(title2fileItem).map((title) => {
                         return {
-                            label: `[[${fileItem.title}]]`,
+                            label: `[[${title}]]`,
                             type: 'keyword',
                         };
                     });
@@ -172,9 +173,9 @@
         function findOrCreateEntry(pageName: string) {
             const lowerPageName = pageName.toLowerCase();
 
-            for (let fileItem of allFileItems) {
-                if (fileItem.title.toLowerCase() === lowerPageName) {
-                    onSelectItem(fileItem);
+            for (let title of Object.keys(title2fileItem)) {
+                if (title.toLowerCase() === lowerPageName) {
+                    onSelectItem(title2fileItem[title]);
                     return;
                 }
             }
