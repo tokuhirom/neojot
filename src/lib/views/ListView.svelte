@@ -111,6 +111,7 @@
                 {onCreateItem}
                 {title2fileItem}
                 {comefromLinks}
+                search={(keyword) => (searchWord = keyword)}
             />
             <LinkCards
                 file={selectedItem}

@@ -195,9 +195,9 @@
     }
 
     let comefromLinks: Record<string, FileItem> = {};
-    $: if (allFileItems) {
+    $: if (dataFileItems) {
         const map: Record<string, FileItem> = {};
-        allFileItems.forEach((fileItem) => {
+        dataFileItems.forEach((fileItem) => {
             extractComeFromLinks(fileItem.content).forEach((link) => {
                 map[link] = fileItem;
             });

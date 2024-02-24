@@ -49,6 +49,7 @@
             {onCreateItem}
             {title2fileItem}
             {comefromLinks}
+            search={undefined}
         />
         <LinkCards
             file={selectedItem}

@@ -23,7 +23,7 @@ function buildKeywordRegex(keywords: string[]): RegExp {
 
 // キーワードハイライトプラグインのファクトリ関数
 export function comeFromLinkHighlightPlugin(
-    keywords: string[],
+    getKeywords: () => string[],
     findOrCreateEntry: (pageName: string) => void,
 ): Extension {
     return ViewPlugin.fromClass(
@@ -31,26 +31,26 @@ export function comeFromLinkHighlightPlugin(
             decorations: RangeSet<Decoration>;
 
             constructor(view: EditorView) {
-                this.decorations = this.computeDecorations(view, keywords);
+                this.decorations = this.computeDecorations(view, getKeywords);
             }
 
             update(update: ViewUpdate) {
                 if (update.docChanged || update.selectionSet) {
                     this.decorations = this.computeDecorations(
                         update.view,
-                        keywords,
+                        getKeywords,
                     );
                 }
             }
 
             computeDecorations(
                 view: EditorView,
-                keywords: string[],
+                getKeywords: () => string[],
             ): RangeSet<Decoration> {
                 const builder = new RangeSetBuilder<Decoration>();
                 for (const { from, to } of view.visibleRanges) {
                     const text = view.state.doc.sliceString(from, to);
-                    const keywordRegex = buildKeywordRegex(keywords);
+                    const keywordRegex = buildKeywordRegex(getKeywords());
                     let match;
                     while ((match = keywordRegex.exec(text))) {
                         const start = from + match.index;

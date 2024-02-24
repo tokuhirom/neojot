@@ -53,6 +53,7 @@
     export let onSaved: () => void;
     export let title2fileItem: Record<string, FileItem>;
     export let comefromLinks: Record<string, FileItem>;
+    export let search: (keyword: string) => void | undefined;
 
     let myElement;
 
@@ -179,6 +180,9 @@
             for (let title of Object.keys(comefromLinks)) {
                 if (title.toLowerCase() === lowerPageName) {
                     onSelectItem(comefromLinks[title]);
+                    if (search) {
+                        search(pageName);
+                    }
                     return;
                 }
             }
@@ -186,6 +190,9 @@
             for (let title of Object.keys(title2fileItem)) {
                 if (title.toLowerCase() === lowerPageName) {
                     onSelectItem(title2fileItem[title]);
+                    if (search) {
+                        search(pageName);
+                    }
                     return;
                 }
             }
@@ -197,6 +204,9 @@
             createNewFileWithContent(`# ${pageName}\n\n`).then(
                 (fileItem: FileItem) => {
                     onCreateItem(fileItem);
+                    if (search) {
+                        search(pageName);
+                    }
                 },
             );
         }
@@ -453,7 +463,7 @@
                 internalLinkDecorator,
                 imageDecorator,
                 comeFromLinkHighlightPlugin(
-                    Object.keys(comefromLinks),
+                    () => Object.keys(comefromLinks),
                     findOrCreateEntry,
                 ),
                 EditorView.domEventHandlers({ paste: handlePaste }),
