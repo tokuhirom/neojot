@@ -45,12 +45,12 @@ test('calc @: Scheduled', () => {
     // 予定日自体ではスコアは0（予定日 = '2024-02-10', duration = 3）
     const currentDate = '2024-02-10';
     const cases = [
-        { taskDate: '2024-02-11', score: -Infinity }, // 予定日のあと
+        { taskDate: '2024-02-14', score: -4 }, // 未来すぎるの予定
+        { taskDate: '2024-02-13', score: -3 }, // 未来すぎるの予定
+        { taskDate: '2024-02-12', score: 0 },
+        { taskDate: '2024-02-11', score: 0 },
         { taskDate: '2024-02-10', score: 0 },
-        { taskDate: '2024-02-09', score: 0 },
-        { taskDate: '2024-02-08', score: 0 },
-        { taskDate: '2024-02-07', score: 0 },
-        { taskDate: '2024-02-06', score: -Infinity }, // 表示期間の前
+        { taskDate: '2024-02-09', score: -Infinity }, // 過ぎ去った予定
     ];
 
     expect(calcResults(currentDate, 3, '@', cases)).toStrictEqual(cases);
@@ -67,7 +67,7 @@ test('calc ! Deadline', () => {
     const symbol = '!'; // タスクの種類（締切）
 
     const cases = [
-        { taskDate: '2024-02-06', score: -Infinity }, // 締切日の4日前
+        { taskDate: '2024-02-06', score: -999 }, // 締切日の4日前
         { taskDate: '2024-02-07', score: 0 }, // 締切日の3日前
         { taskDate: '2024-02-08', score: 1 }, // 締切日の2日前
         { taskDate: '2024-02-09', score: 2 }, // 締切日の1日前
@@ -91,7 +91,7 @@ test('calc + todo', () => {
     const symbol = '+'; // タスクの種類（締切）
 
     const cases = [
-        { taskDate: '2024-02-09', score: -Infinity },
+        { taskDate: '2024-02-09', score: -999 },
         { taskDate: '2024-02-10', score: 0 }, // 指定日
         { taskDate: '2024-02-11', score: 1 },
         { taskDate: '2024-02-12', score: 2 },
@@ -113,7 +113,7 @@ test('calc - Memo', () => {
     const symbol = '-';
 
     const cases: TestCase[] = [
-        { taskDate: '2024-02-09', score: -Infinity }, // 覚書の日の前（durationよりも前）
+        { taskDate: '2024-02-09', score: -999 }, // 覚書の日の前（durationよりも前）
         { taskDate: '2024-02-10', score: 3 }, // 覚書の日
         { taskDate: '2024-02-11', score: 2 }, // 覚書の日の翌日
         { taskDate: '2024-02-12', score: 1 }, // 覚書の日の2日あと

@@ -26,17 +26,19 @@ export function calculateFreshness(
     switch (task.symbol) {
         case '@':
             // 予定は、直近3日程度の間表示されていれば良い。
-            {
-                const isWithinDurationBeforeSchedule =
-                    diffDays >= -task.duration && diffDays <= 0;
-                freshness = isWithinDurationBeforeSchedule ? 0 : -Infinity;
+            if (diffDays < 0) {
+                freshness = -Infinity; // 過去の予定に興味なし
+            } else if (diffDays < task.duration) {
+                freshness = 0;
+            } else {
+                freshness = -diffDays;
             }
             break;
         case '+':
             // TODO: 指定日はscore 0。それ以後は 1ずつ増えていく
             if (diffDays < 0) {
                 // 指定日より前は表示されないため、-Infinity
-                freshness = -Infinity;
+                freshness = -999;
             } else {
                 // 指定日からスコアは0開始で、その後は日ごとに1ずつ増加
                 freshness = diffDays;
@@ -45,7 +47,7 @@ export function calculateFreshness(
         case '!':
             // 〆切: 指定日の7日前から徐々に浮かび、指定日以降浮きっぱなし
             if (diffDays < -task.duration) {
-                freshness = -Infinity; // 期間前は表示されない
+                freshness = -999; // 期間前は表示されない
             } else {
                 freshness = task.duration + diffDays; // 締切日以降は継続して増加
             }
@@ -56,12 +58,10 @@ export function calculateFreshness(
             if (diffDays >= 0) {
                 // 指定日以後、duration日間、スコアは日ごとに減少
                 freshness =
-                    diffDays <= task.duration
-                        ? task.duration - diffDays
-                        : -Infinity;
+                    diffDays <= task.duration ? task.duration - diffDays : -999;
             } else {
                 // 指定日以前は-Infinity
-                freshness = -Infinity;
+                freshness = -999;
             }
             break;
         case '.':
