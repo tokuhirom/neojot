@@ -29,14 +29,38 @@
         });
     }
 
-    let filteredFileItems: FileItem[];
+    type SearchResult = {
+        lines: string[];
+        fileItem: FileItem;
+    };
+
+    let searchResult: SearchResult[];
 
     let searchWord = '';
 
     $: if (dataFileItems || searchWord) {
-        filteredFileItems = dataFileItems.filter((it) =>
-            shouldShowFileItem(it, searchWord),
-        );
+        const r: SearchResult[] = [];
+        dataFileItems.forEach((fileItem) => {
+            if (shouldShowFileItem(fileItem, searchWord)) {
+                const lines: string[] = [];
+                if (searchWord.length > 0) {
+                    const contentLines = fileItem.content.split(/\n/);
+                    const lowerWords = searchWord.toLowerCase().split(/\s+/);
+                    contentLines.filter((line) => {
+                        if (
+                            lowerWords.some((word) =>
+                                line.toLowerCase().includes(word),
+                            )
+                        ) {
+                            lines.push(line);
+                        }
+                    });
+                }
+                r.push({ lines: lines, fileItem });
+            }
+        });
+
+        searchResult = r;
     }
 
     function onSaved() {
@@ -63,9 +87,15 @@
         {/each}
 
         <ClearableSearchBox bind:searchWord />
-        {#if filteredFileItems && selectedItem}
-            {#each filteredFileItems as fileItem}
-                <FileListItem {onSelectItem} {fileItem} {selectedItem} />
+        {#if searchResult && selectedItem}
+            {#each searchResult as result}
+                <FileListItem
+                    {onSelectItem}
+                    fileItem={result.fileItem}
+                    matchLines={result.lines}
+                    {searchWord}
+                    {selectedItem}
+                />
             {/each}
         {/if}
     </div>

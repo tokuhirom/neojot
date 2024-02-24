@@ -52,7 +52,7 @@ export function mermaidPlugin() {
 
             findMermaidBlocks(view: EditorView) {
                 const builder = new RangeSetBuilder<Decoration>();
-                for (let { from, to } of view.visibleRanges) {
+                for (const { from, to } of view.visibleRanges) {
                     const text = view.state.doc.sliceString(from, to);
                     const regex = /```mermaid([^`]*?)```/g;
                     let match;

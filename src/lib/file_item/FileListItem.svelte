@@ -5,7 +5,16 @@
 
     export let onSelectItem: (fileItem: FileItem) => void;
     export let fileItem: FileItem;
+    export let matchLines: string[] | undefined;
+    export let searchWord: string | undefined;
     export let selectedItem: FileItem;
+
+    let searchWords: string[] | undefined = undefined;
+
+    $: if (searchWord) {
+        searchWords =
+            searchWord.length > 0 ? searchWord.split(/\s+/) : undefined;
+    }
 
     const unlisten = listen('change_title', (e) => {
         const payload = e.payload as { filename: string };
@@ -32,6 +41,39 @@
 
         return `${year}-${month}-${day} ${hours}:${minutes}`;
     }
+
+    function highlightKeyword(line: string, keywords: string[]): string {
+        // HTMLエンティティにエスケープする関数
+        const escapeHtml = (text: string) =>
+            text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+        // 特殊文字をエスケープする関数
+        const escapeRegExp = (text: string) =>
+            text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+
+        // エスケープされたキーワード用の正規表現を構築
+        const regex = new RegExp(
+            keywords
+                .map((keyword) => '(' + escapeRegExp(keyword) + ')')
+                .join('|') + '(.)',
+            'gi',
+        );
+
+        // エスケープされたキーワードをマッチさせ、強調表示
+        return line.replace(regex, (match) => {
+            for (let i = 1; i < keywords.length + 1; i++) {
+                if (match[i]) {
+                    return `<span class="keyword" style="color: red">${escapeHtml(match)}</span>`;
+                }
+            }
+            return escapeHtml(match[0]);
+        });
+    }
 </script>
 
 <div>
@@ -39,19 +81,19 @@
         on:click={handleOnClick}
         class:active={selectedItem.filename === fileItem.filename}
         ><span class="title">{fileItem.title}</span>
+        {#if matchLines && searchWords}
+            {#each matchLines as line}
+                <span class="match-line"
+                    >{@html highlightKeyword(line, searchWords)}</span
+                >
+            {/each}
+        {/if}
         <span class="mtime">{formatEpochSeconds()}</span>
         <span class="filename">{fileItem.filename.replace(/.+\//, '')}</span>
     </button>
 </div>
 
 <style>
-    .mtime {
-        display: block;
-        font-size: 60%;
-        color: darkgrey;
-        float: left;
-    }
-
     button {
         width: 100%;
 
@@ -66,6 +108,19 @@
 
         text-align: left;
         overflow-x: hidden;
+    }
+
+    .mtime {
+        display: block;
+        font-size: 60%;
+        color: darkgrey;
+        float: left;
+    }
+
+    .match-line {
+        font-size: 80%;
+        display: block;
+        border-bottom: 1px darkgrey dotted;
     }
 
     .title {

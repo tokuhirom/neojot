@@ -133,10 +133,6 @@ export async function unarchiveFile(fileItem: FileItem) {
     console.log(`Unarchive file: ${fileItem.filename}`);
     await mkdir_p('data');
 
-    const content = await readTextFile(fileItem.filename, {
-        baseDir: BaseDirectory.AppData,
-    });
-
     await rename(
         fileItem.filename,
         fileItem.filename.replace('archived/', 'data/'),
