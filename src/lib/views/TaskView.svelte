@@ -4,7 +4,13 @@
     import EntryView from '../markdown/EntryView.svelte';
     import LinkCards from '../link/LinkCards.svelte';
     import { format } from 'date-fns';
-    import { extractTasks, sortTasks, type Task, taskType } from '../task/Task';
+    import {
+        calculateFreshness,
+        extractTasks,
+        sortTasks,
+        type Task,
+        taskType,
+    } from '../task/Task';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -40,15 +46,19 @@
     }
 
     function determineClass(task) {
-        const today = new Date().toISOString().split('T')[0];
-        if (task.symbol === '.') {
-            return 'done';
-        } else if (task.symbol === '!' && task.date === today) {
-            return 'today';
-        } else if (task.symbol === '!' && task.date < today) {
-            return 'overdue';
-        }
-        return '';
+        const now = new Date();
+        const score = calculateFreshness(task, now);
+
+        const typeClass = taskType(task).toLowerCase();
+        return typeClass + ' ' + (score < 0 ? 'negative' : 'positive');
+        // if (task.symbol === '.') {
+        //     return 'done';
+        // } else if (task.symbol === '!' && task.date === today) {
+        //     return 'today';
+        // } else if (task.symbol === '!' && task.date < today) {
+        //     return 'overdue';
+        // }
+        // return '';
     }
 </script>
 
@@ -141,21 +151,23 @@
     }
 
     /* 完了済みタスク */
-    .done {
-        color: #757575;
+    .completed {
+        color: #757575 !important;
         text-decoration: line-through;
         background-color: #f0f0f0;
     }
 
-    /* 今日が期限のタスク */
-    .today {
-        color: #007bff !important;
-        background-color: #007bff; /* 明るい青、Bootstrapのプライマリーカラーを参考 */
-        border-color: #007bff;
+    .positive {
+        background-color: darkslategrey !important;
     }
 
-    /* 期限切れのタスク */
-    .overdue {
-        color: #dc3545 !important;
+    .schedule {
+        color: orange !important;
+    }
+    .deadline {
+        color: crimson !important;
+    }
+    .todo {
+        color: cornflowerblue !important;
     }
 </style>
