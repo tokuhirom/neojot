@@ -307,7 +307,7 @@
         }));
 
         // エンターキーが押されたときに実行される関数
-        function completeTaskAndLog(view: EditorView): boolean {
+        function completeTaskAndLog(view: EditorView, key: string): boolean {
             const { state, dispatch } = view;
 
             let { from } = state.selection.main;
@@ -327,7 +327,7 @@
                 // 現在の日付を取得
                 const currentDate = format(new Date(), 'yyyy-MM-dd');
                 // 新しい行の内容を準備
-                const completedTask = `[${currentDate}]. ${match[1]}:${match[2]}`;
+                const completedTask = `[${currentDate}]. ${key}${match[1]}:${match[2]}`;
 
                 // 現在の行の後に新しい行を追加
                 dispatch(
@@ -373,7 +373,14 @@
             },
             { key: 'Mod-f', run: openSearchPanel, preventDefault: true },
             { key: 'Mod-r', run: openSearchPanel, preventDefault: true }, // replace?
-            { key: 'Enter', run: completeTaskAndLog },
+            {
+                key: 'Enter',
+                run: (view: EditorView) => completeTaskAndLog(view, ''),
+            },
+            {
+                key: 'x',
+                run: (view: EditorView) => completeTaskAndLog(view, 'cancel '),
+            },
             ...taskKeyBindings,
             ...searchKeymap,
             ...defaultKeymap, // 標準のキーマップを含める
