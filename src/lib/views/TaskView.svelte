@@ -107,7 +107,8 @@
         padding-right: 8px;
     }
     .file-list {
-        flex: 0 0 30%;
+        flex: 0 0 250px;
+        height: 100vh;
         overflow-y: auto;
         padding-right: 9px;
         padding-left: 4px;
@@ -137,6 +138,8 @@
         flex-grow: 1;
         margin-block-start: 0;
         margin-block-end: 0;
+        height: 100vh;
+        overflow-y: scroll;
     }
 
     .header {
