@@ -43,6 +43,8 @@
     import { openSearchPanel, searchKeymap } from '@codemirror/search';
     import { mermaidPlugin } from './MermaidWidget';
     import { addDays, format, parse } from 'date-fns';
+    import { comeFromLinkPlugin } from './CoemFromLink';
+    import { comeFromLinkHighlightPlugin } from './KeywordHighlight';
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
@@ -50,6 +52,7 @@
     export let onCreateItem: (fileItem: FileItem) => void;
     export let onSaved: () => void;
     export let title2fileItem: Record<string, FileItem>;
+    export let comefromLinks: Record<string, FileItem>;
 
     let myElement;
 
@@ -172,6 +175,13 @@
 
         function findOrCreateEntry(pageName: string) {
             const lowerPageName = pageName.toLowerCase();
+
+            for (let title of Object.keys(comefromLinks)) {
+                if (title.toLowerCase() === lowerPageName) {
+                    onSelectItem(comefromLinks[title]);
+                    return;
+                }
+            }
 
             for (let title of Object.keys(title2fileItem)) {
                 if (title.toLowerCase() === lowerPageName) {
@@ -439,8 +449,13 @@
             doc: file.content,
             extensions: [
                 history(),
+                comeFromLinkPlugin,
                 internalLinkDecorator,
                 imageDecorator,
+                comeFromLinkHighlightPlugin(
+                    Object.keys(comefromLinks),
+                    findOrCreateEntry,
+                ),
                 EditorView.domEventHandlers({ paste: handlePaste }),
                 keymap.of(customKeymap),
                 markdown({

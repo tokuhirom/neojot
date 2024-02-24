@@ -92,3 +92,7 @@ button {
     text-decoration: underline;
     color: cornflowerblue;
 }
+
+.highlight-keyword {
+    color: deepskyblue;
+}

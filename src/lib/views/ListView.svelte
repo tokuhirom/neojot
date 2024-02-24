@@ -17,6 +17,7 @@
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let title2fileItem: Record<string, FileItem>;
+    export let comefromLinks: Record<string, FileItem>;
     let tasks: Task[] = [];
 
     onMount(() => {
@@ -109,6 +110,7 @@
                 {onSaved}
                 {onCreateItem}
                 {title2fileItem}
+                {comefromLinks}
             />
             <LinkCards
                 file={selectedItem}

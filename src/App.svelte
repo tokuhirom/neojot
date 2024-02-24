@@ -168,6 +168,20 @@
         return matches;
     }
 
+    function extractComeFromLinks(content: string): string[] {
+        const pattern = /^<<<\s+(.+?)$/gm;
+        const matches = [];
+        let match;
+        while ((match = pattern.exec(content)) !== null) {
+            // マッチした部分（キーワード）を配列に追加
+            matches.push(match[1]); // match[1]は、'>>> 'に続く部分にマッチします
+        }
+        if (matches.length > 0) {
+            console.log(matches);
+        }
+        return matches;
+    }
+
     let title2fileItem: Record<string, FileItem> = {};
     $: if (allFileItems) {
         const map: Record<string, FileItem> = {};
@@ -178,6 +192,17 @@
             });
         });
         title2fileItem = map;
+    }
+
+    let comefromLinks: Record<string, FileItem> = {};
+    $: if (allFileItems) {
+        const map: Record<string, FileItem> = {};
+        allFileItems.forEach((fileItem) => {
+            extractComeFromLinks(fileItem.content).forEach((link) => {
+                map[link] = fileItem;
+            });
+        });
+        comefromLinks = map;
     }
 </script>
 
@@ -216,6 +241,7 @@
                 {selectedItem}
                 {onSelectItem}
                 {title2fileItem}
+                {comefromLinks}
             />
         {:else if tabPane === 'archive'}
             <ArchiveView
@@ -232,6 +258,7 @@
                 {selectedItem}
                 {onSelectItem}
                 {title2fileItem}
+                {comefromLinks}
             />
         {:else if tabPane === 'calendar'}
             <CalendarView
@@ -240,6 +267,7 @@
                 {onSelectItem}
                 {selectedItem}
                 {title2fileItem}
+                {comefromLinks}
             />
         {:else if tabPane === 'configuration'}
             <ConfigurationView />
