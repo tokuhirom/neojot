@@ -28,9 +28,6 @@
 
     $: if (dataFileItems) {
         tasks = sortTasks(extractTasks(dataFileItems));
-        if (tasks.length > 0) {
-            selectedItem = tasks[0].fileItem;
-        }
     }
 
     function onSaved() {
