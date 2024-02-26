@@ -296,13 +296,13 @@
             // 現在の行を取得
             const line = state.doc.lineAt(from);
             const lineText = line.text;
-            const datePattern = /\[\d{4}-\d{2}-\d{2}][@!+~.-]?/; // 日付パターンとその後に続く任意の記号
+            const datePattern = /(\[\d{4}-\d{2}-\d{2}])[@!+~.-]?/; // 日付パターンとその後に続く任意の記号
             const match = datePattern.exec(lineText);
 
             // パターンにマッチし、かつカーソル位置がパターンの直後にある場合に置換を実行
             if (match && from <= line.from + match.index + match[0].length) {
                 // マッチした部分の最後の記号を新しい記号で置換
-                let replaceFrom = line.from + match.index + match[0].length - 1;
+                let replaceFrom = line.from + match.index + match[1].length;
                 let replaceTo = replaceFrom + 1;
 
                 // 置換実行
