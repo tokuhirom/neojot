@@ -41,7 +41,6 @@ class ImageViewWidget extends WidgetType {
             readFile(this.src.replace('../', ''), {
                 baseDir: BaseDirectory.AppData,
             }).then((value) => {
-                console.log('then!!');
                 uint8ArrayToDataUrl(value).then((it) => {
                     img.src = it;
                 });
@@ -51,6 +50,7 @@ class ImageViewWidget extends WidgetType {
         }
         img.alt = this.src;
         img.style.maxWidth = '100%';
+        img.style.maxHeight = '400px';
 
         const wrapper = document.createElement('div');
         wrapper.appendChild(img);
