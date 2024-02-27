@@ -13,12 +13,18 @@ import {
 // キーワードハイライト用のデコレーションスタイル
 const keywordDecoration = Decoration.mark({ class: 'highlight-keyword' });
 
-function buildKeywordRegex(keywords: string[]): RegExp {
+export function buildKeywordRegex(keywords: string[]): RegExp {
     // キーワードをエスケープし、| で結合
     const escapedKeywords = keywords.map((kw) =>
         kw.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'),
     );
-    return new RegExp(`\\b(${escapedKeywords.join('|')})\\b`, 'gi');
+    // 英数字と特定の非英数字文字の間、または文字列の開始/終了にマッチするようにする
+    const boundary = '(?<![/\\w.-])';
+    const endBoundary = '(?![/\\w.-])';
+    return new RegExp(
+        `${boundary}(${escapedKeywords.join('|')})${endBoundary}`,
+        'gi',
+    );
 }
 
 // キーワードハイライトプラグインのファクトリ関数
