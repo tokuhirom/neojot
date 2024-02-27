@@ -27,7 +27,7 @@
     function updateTasks() {
         const today = new Date();
         tasks = sortTasks(extractTasks(dataFileItems)).filter((task) => {
-            return calculateFreshness(task, today) > 0;
+            return calculateFreshness(task, today) >= 0;
         });
     }
 
