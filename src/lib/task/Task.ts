@@ -1,4 +1,5 @@
 import type { FileItem } from '../file_item/FileItem';
+import { startOfDay } from 'date-fns';
 
 export type Task = {
     date: Date;
@@ -20,7 +21,7 @@ export function calculateFreshness(
 ): number {
     const taskDate = new Date(task.date);
     const diffDays =
-        (taskDate.getTime() - today.getTime()) / (1000 * 3600 * 24);
+        (taskDate.getTime() - startOfDay(today).getTime()) / (1000 * 3600 * 24);
     let freshness = 0;
 
     switch (task.symbol) {
