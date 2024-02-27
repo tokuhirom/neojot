@@ -84,6 +84,7 @@
                 {onSaved}
                 {onCreateItem}
                 {title2fileItem}
+                search={() => {}}
             />
             <LinkCards
                 file={selectedItem}
