@@ -16,6 +16,7 @@
         unarchiveFile,
     } from './lib/repository/NodeRepository';
     import type { FileItem } from './lib/file_item/FileItem';
+    import ManualView from './lib/views/ManualView.svelte';
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
@@ -229,6 +230,11 @@
             class:active={tabPane === 'archive'}>♻️</button
         >
         <button
+            on:click={() => (tabPane = 'manual')}
+            class:active={tabPane === 'manual'}
+            >&#129489;&#8205;&#127979;️</button
+        >
+        <button
             on:click={() => (tabPane = 'configuration')}
             class:active={tabPane === 'configuration'}>⚙️</button
         >
@@ -269,6 +275,8 @@
                 {title2fileItem}
                 {comefromLinks}
             />
+        {:else if tabPane === 'manual'}
+            <ManualView />
         {:else if tabPane === 'configuration'}
             <ConfigurationView />
         {:else}
