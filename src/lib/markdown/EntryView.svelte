@@ -33,6 +33,7 @@
     import { comeFromLinkHighlightPlugin } from './KeywordHighlight';
     import { languages } from '@codemirror/language-data';
     import { syntaxHighlighting } from '@codemirror/language';
+    import { todoPlugin } from './TodoWidget';
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
@@ -445,6 +446,7 @@
             doc: file.content,
             extensions: [
                 history(),
+                todoPlugin,
                 comeFromLinkPlugin,
                 internalLinkDecorator,
                 imageDecorator,
@@ -559,5 +561,12 @@
 <style>
     .wrapper {
         width: 100%;
+    }
+
+    .canceled {
+        color: #757575;
+    }
+    .done {
+        color: cornflowerblue !important;
     }
 </style>
