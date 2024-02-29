@@ -36,12 +36,32 @@
         allFileItems = allFileItems;
         onSelectItem(fileItem);
     }
+
+    function gotoPrevMonth() {
+        month--;
+        if (month < 1) {
+            year--;
+            month = 12;
+        }
+    }
+
+    function gotoNextMonth() {
+        month++;
+        if (month > 12) {
+            year++;
+            month = 1;
+        }
+    }
 </script>
 
 <div class="calendar-view">
     <div class="calendar">
         {#if month}
-            <h1>{year}-{month.toString().padStart(2, '0')}</h1>
+            <div class="header">
+                <button on:click={gotoPrevMonth} class="month-nav">Prev</button>
+                <h1>{year}-{month.toString().padStart(2, '0')}</h1>
+                <button on:click={gotoNextMonth} class="month-nav">Next</button>
+            </div>
             <CalendarTable {allFileItems} {onSelectItem} {year} {month} />
         {/if}
     </div>
@@ -71,6 +91,26 @@
 </div>
 
 <style>
+    .header {
+        display: flex; /* Flexbox を有効化 */
+        justify-content: center; /* 中央揃え */
+        align-items: center; /* アイテムを垂直方向の中央に配置 */
+        margin-bottom: 20px; /* 下部にマージンを設定 */
+    }
+
+    .month-nav {
+        margin: 0 20px; /* ボタンの外側にマージンを設定 */
+        padding: 5px 10px; /* ボタン内のパディング */
+        background-color: #757575; /* ボタンの背景色 */
+        border: 1px solid #ccc; /* ボタンの境界線 */
+        border-radius: 4px; /* ボタンの角を丸くする */
+        cursor: pointer; /* カーソルをポインタにする */
+    }
+
+    .month-nav:hover {
+        background-color: #e9e9e9; /* ホバー時の背景色を変更 */
+    }
+
     .archived {
         margin: 8px;
         padding: 8px;

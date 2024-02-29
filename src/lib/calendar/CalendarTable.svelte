@@ -23,6 +23,14 @@
         await reloadFiles();
     });
 
+    $: if (year && month) {
+        calendars = generateCalendar(year, month);
+        readCalendarFile(year, month).then((data) => {
+            calendarData = data;
+        });
+        reloadFiles();
+    }
+
     async function reloadFiles() {
         let newFileMap: Record<string, FileItem> = {};
         for (let fileItem of allFileItems) {
@@ -33,6 +41,8 @@
 </script>
 
 <div>
+    <h1>{year}</h1>
+    {month}
     <table>
         {#each calendars as week}
             <tr>
