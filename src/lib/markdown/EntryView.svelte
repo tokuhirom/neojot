@@ -19,7 +19,6 @@
     import { extractTitle, type FileItem } from '../file_item/FileItem';
     import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event';
     import { oneDark, oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
-    import { syntaxHifghlighting } from '@codemirror/language';
     import {
         autocompletion,
         type CompletionContext,
@@ -33,6 +32,7 @@
     import { comeFromLinkPlugin } from './CoemFromLink';
     import { comeFromLinkHighlightPlugin } from './KeywordHighlight';
     import { languages } from '@codemirror/language-data';
+    import { syntaxHighlighting } from '@codemirror/language';
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
