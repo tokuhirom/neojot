@@ -38,6 +38,14 @@
         }
         fileMap = newFileMap;
     }
+
+    function getDayClass(day) {
+        if (!day.date) return '';
+        const dayOfWeek = day.date.getDay();
+        if (dayOfWeek === 0) return 'sunday';
+        if (dayOfWeek === 6) return 'saturday';
+        return '';
+    }
 </script>
 
 <div>
@@ -47,13 +55,7 @@
                 {#each week as day}
                     <td class="day-cell">
                         {#if day.day !== null}
-                            <div
-                                class="day {day.date && day.date.getDay() === 0
-                                    ? 'sunday'
-                                    : day.date && day.date.getDay() === 6
-                                      ? 'saturday'
-                                      : ''}"
-                            >
+                            <div class={getDayClass(day)}>
                                 {day.day}
                             </div>
                             {#if calendarData}
