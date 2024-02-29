@@ -19,7 +19,7 @@
     import { extractTitle, type FileItem } from '../file_item/FileItem';
     import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event';
     import { oneDark, oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
-    import { syntaxHighlighting } from '@codemirror/language';
+    import { syntaxHifghlighting } from '@codemirror/language';
     import {
         autocompletion,
         type CompletionContext,
