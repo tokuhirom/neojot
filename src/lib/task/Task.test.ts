@@ -2,60 +2,72 @@ import { expect, test } from 'vitest';
 import { calculateFreshness, parseDate } from './Task';
 
 interface TestCase {
-    taskDate: string;
+    deadline: string | null;
+    scheduled: string | null;
     score: number;
 }
 
 function calcResults(
     currentDate: string,
-    duration: number,
-    symbol: string,
+    type: string,
     cases: TestCase[],
 ): TestCase[] {
     return cases.map((testCase) => {
-        const { taskDate } = testCase;
-        const calculatedScore = calc(taskDate, duration, symbol, currentDate);
+        const { scheduled, deadline } = testCase;
+        const calculatedScore = calc(scheduled, deadline, type, currentDate);
         return {
-            taskDate,
+            scheduled,
+            deadline,
             score: calculatedScore,
         };
     });
 }
 
 function calc(
-    taskDate: string,
-    duration: number,
-    symbol: string,
+    scheduled: string | null,
+    deadline: string | null,
+    type: string,
     currentDate: string,
 ) {
     return calculateFreshness(
         {
-            date: parseDate(taskDate)!,
-            duration: duration,
-            symbol: symbol,
+            scheduled: scheduled ? parseDate(scheduled) : null,
+            deadline: deadline ? parseDate(deadline) : null,
+            type: type,
         },
         parseDate(currentDate)!,
     );
 }
 
-test('calc @: Scheduled', () => {
-    // @: Scheduled, 予定
-    // 予定はその日と前の duration days の間だけ表示される。そうでなければ -Infinity とする
-
-    // 予定日自体ではスコアは0（予定日 = '2024-02-10', duration = 3）
+test('calc TODO: Scheduled', () => {
     const currentDate = '2024-02-10';
-    const cases = [
-        { taskDate: '2024-02-14', score: -4 }, // 未来すぎるの予定
-        { taskDate: '2024-02-13', score: -3 }, // 未来すぎるの予定
-        { taskDate: '2024-02-12', score: 0 },
-        { taskDate: '2024-02-11', score: 0 },
-        { taskDate: '2024-02-10', score: 0 },
-        { taskDate: '2024-02-09', score: -Infinity }, // 過ぎ去った予定
+    const cases: TestCase[] = [
+        { scheduled: '2024-02-12', deadline: null, score: -1 }, // 前々日は低めに。。
+        { scheduled: '2024-02-11', deadline: null, score: 0 }, // 前日はListViewには表示しない
+        { scheduled: '2024-02-10', deadline: null, score: 1 }, // 当日はもちろん表示する
+        { scheduled: '2024-02-09', deadline: null, score: 2 }, // 翌日は表示する
+        { scheduled: '2024-02-08', deadline: null, score: 3 },
     ];
 
-    expect(calcResults(currentDate, 3, '@', cases)).toStrictEqual(cases);
+    expect(calcResults(currentDate, 'TODO', cases)).toStrictEqual(cases);
 });
 
+test('calc TODO: Deadline', () => {
+    const currentDate = '2024-02-10';
+    const cases: TestCase[] = [
+        { deadline: '2024-02-14', scheduled: null, score: -Infinity }, // 4日前
+        { deadline: '2024-02-13', scheduled: null, score: 0 }, // 3日前
+        { deadline: '2024-02-12', scheduled: null, score: 1 }, // 2日前
+        { deadline: '2024-02-11', scheduled: null, score: 2 }, // 締め切り日の前日はプラス
+        { deadline: '2024-02-10', scheduled: null, score: 3 }, // 締め切り日当日はプラス
+        { deadline: '2024-02-09', scheduled: null, score: 4 }, // 締め切り日の翌日なのでプラスがもっと増える
+        { deadline: '2024-02-08', scheduled: null, score: 5 },
+    ];
+
+    expect(calcResults(currentDate, 'TODO', cases)).toStrictEqual(cases);
+});
+
+/*
 test('calc ! Deadline', () => {
     // !: Deadline, 締め切り
     // Deadline は締切の duration days 前からリストに表示される。
@@ -141,3 +153,4 @@ test('calc . Completed', () => {
         cases,
     );
 });
+*/

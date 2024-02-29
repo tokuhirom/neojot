@@ -97,7 +97,7 @@
     <div class="file-list">
         {#each tasks as task}
             <button class="task" on:click={() => onSelectItem(task.fileItem)}>
-                {task.symbol}
+                {task.type}
                 {task.title}
             </button>
         {/each}
