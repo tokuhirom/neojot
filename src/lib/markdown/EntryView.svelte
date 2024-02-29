@@ -197,9 +197,9 @@
             return false;
         }
 
-        function insertDateCommand(view) {
+        function insertDateCommand(view, key: string) {
             const dateStr =
-                'TODO[Scheduled:' +
+                `${key}[Scheduled:` +
                 format(new Date(), 'yyyy-MM-dd(EEE)') +
                 ']: ';
             const from = view.state.selection.main.from;
@@ -351,7 +351,6 @@
                 key: 'Mod-b',
                 run: openInternalLink,
             },
-            { key: 'Mod-t', run: insertDateCommand },
             {
                 key: 'Tab',
                 preventDefault: true,
@@ -365,6 +364,8 @@
             { key: 'Mod-f', run: openSearchPanel, preventDefault: true },
             { key: 'Mod-r', run: openSearchPanel, preventDefault: true }, // replace?
             // task related -----------------------------------------
+            { key: 'Mod-t', run: (view) => insertDateCommand(view, 'TODO') },
+            { key: 'Mod-p', run: (view) => insertDateCommand(view, 'PLAN') },
             {
                 key: '+', // Cmd/Ctrl + +
                 run: (view) => updateDate(view, true),
@@ -561,12 +562,5 @@
 <style>
     .wrapper {
         width: 100%;
-    }
-
-    .canceled {
-        color: #757575;
-    }
-    .done {
-        color: cornflowerblue !important;
     }
 </style>

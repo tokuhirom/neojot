@@ -48,7 +48,7 @@ export function calculateFreshness(
 }
 
 function parseTask(line: string, fileItem: FileItem): Task | undefined {
-    const taskTypeRegex = /^(TODO|COMPLETED|CANCELED)/;
+    const taskTypeRegex = /^(TODO|COMPLETED|CANCELED|PLAN)/;
     const dateRegex =
         /((Scheduled|Deadline):(\d{4}-\d{2}-\d{2})\([A-Z][a-z][a-z]\))/g;
 

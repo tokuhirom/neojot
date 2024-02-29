@@ -10,6 +10,7 @@ const colorMap: Record<string, string> = {
     done: 'green',
     todo: '#ffcc00',
     canceled: 'gray',
+    plan: 'dodgerblue',
 };
 
 export const todoPlugin = ViewPlugin.fromClass(
@@ -30,7 +31,7 @@ export const todoPlugin = ViewPlugin.fromClass(
             const builder = new RangeSetBuilder<Decoration>();
             for (const { from, to } of view.visibleRanges) {
                 const text = view.state.doc.sliceString(from, to);
-                const keywordRegex = /(DONE|TODO|CANCELED)\[.*?]: /g;
+                const keywordRegex = /(DONE|TODO|CANCELED|PLAN)\[.*?]: /g;
                 let match;
                 while ((match = keywordRegex.exec(text))) {
                     const start = from + match.index;
