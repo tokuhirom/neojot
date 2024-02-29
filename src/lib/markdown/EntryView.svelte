@@ -17,12 +17,7 @@
     import { EditorState, Transaction } from '@codemirror/state';
     import { EditorView, type KeyBinding, keymap } from '@codemirror/view';
     import { extractTitle, type FileItem } from '../file_item/FileItem';
-    import {
-        emit,
-        type Event,
-        listen,
-        type UnlistenFn,
-    } from '@tauri-apps/api/event';
+    import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event';
     import { oneDark, oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
     import {
         LanguageDescription,
@@ -50,6 +45,7 @@
     import { addDays, format, parse } from 'date-fns';
     import { comeFromLinkPlugin } from './CoemFromLink';
     import { comeFromLinkHighlightPlugin } from './KeywordHighlight';
+    import { languages } from '@codemirror/language-data';
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
@@ -110,57 +106,6 @@
     onMount(() => {
         let container = myElement;
 
-        const codeLangauages = [
-            LanguageDescription.of({
-                name: 'javascript',
-                support: javascript(),
-            }),
-            LanguageDescription.of({
-                name: 'python',
-                support: python(),
-            }),
-            LanguageDescription.of({
-                name: 'java',
-                support: java(),
-            }),
-            LanguageDescription.of({
-                name: 'json',
-                support: javascript(),
-            }),
-            LanguageDescription.of({
-                name: 'typescript',
-                support: javascript({ typescript: true }),
-            }),
-            LanguageDescription.of({
-                name: 'cpp',
-                support: cpp(),
-            }),
-            LanguageDescription.of({
-                name: 'css',
-                support: css(),
-            }),
-            LanguageDescription.of({
-                name: 'html',
-                support: html(),
-            }),
-            LanguageDescription.of({
-                name: 'php',
-                support: php(),
-            }),
-            LanguageDescription.of({
-                name: 'sql',
-                support: sql(),
-            }),
-            LanguageDescription.of({
-                name: 'xml',
-                support: xml(),
-            }),
-            LanguageDescription.of({
-                name: 'yaml',
-                support: yaml(),
-            }),
-        ];
-
         const myCompletion = (context: CompletionContext) => {
             {
                 // `[[foobar]]` style notation
@@ -188,9 +133,9 @@
                         from: word.from,
                         // can I get the list from EditorView or something?
                         options: [
-                            ...codeLangauages.map((lang) => {
+                            ...languages.map((lang) => {
                                 return {
-                                    label: '```' + lang.name,
+                                    label: '```' + lang.extensions[0],
                                     type: 'keyword',
                                 };
                             }),
@@ -498,7 +443,7 @@
                 keymap.of(customKeymap),
                 markdown({
                     base: markdownLanguage, // enable github flavored markdown
-                    codeLanguages: codeLangauages,
+                    codeLanguages: languages,
                 }),
                 autocompletion({ override: [myCompletion] }),
                 oneDark,

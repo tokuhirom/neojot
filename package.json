@@ -41,6 +41,8 @@
     "mermaid": "^10.8.0"
   },
   "devDependencies": {
+    "@codemirror/language-data": "^6.4.1",
+    "@codemirror/legacy-modes": "^6.3.3",
     "@sveltejs/vite-plugin-svelte": "^3.0.1",
     "@tauri-apps/cli": "^2.0.0-beta.1",
     "@tsconfig/svelte": "^5.0.2",
