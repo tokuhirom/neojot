@@ -52,6 +52,13 @@
                         if (
                             lowerWords.some((word) =>
                                 line.toLowerCase().includes(word),
+                            ) &&
+                            !(
+                                (line.startsWith('# ') ||
+                                    line.startsWith('<<< ')) &&
+                                line
+                                    .toLowerCase()
+                                    .includes(searchWord.toLowerCase())
                             )
                         ) {
                             lines.push(line);
