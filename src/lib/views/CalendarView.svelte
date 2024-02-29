@@ -135,6 +135,7 @@
         overflow-x: hidden;
         word-break: break-word;
         white-space: normal;
+        height: 100vh;
     }
 
     .log-view {
@@ -144,5 +145,7 @@
         flex-grow: 1;
         margin-block-start: 0;
         margin-block-end: 0;
+        height: 100vh;
+        overflow-y: scroll;
     }
 </style>
