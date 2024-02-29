@@ -1,5 +1,18 @@
 import { expect, test } from 'vitest';
-import { calculateFreshness, parseDate } from './Task';
+import { calculateFreshness } from './Task';
+
+export function parseDate(dateString: string): Date | null {
+    const date = new Date(dateString);
+
+    // Dateオブジェクトが有効かどうかをチェック
+    if (!isNaN(date.getTime())) {
+        // 有効なDateオブジェクトの場合
+        return date;
+    } else {
+        // 無効なDateオブジェクトの場合（パース失敗）
+        return null;
+    }
+}
 
 interface TestCase {
     deadline: string | null;

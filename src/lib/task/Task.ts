@@ -47,19 +47,6 @@ export function calculateFreshness(
     return 0;
 }
 
-export function parseDate(dateString: string): Date | null {
-    const date = new Date(dateString);
-
-    // Dateオブジェクトが有効かどうかをチェック
-    if (!isNaN(date.getTime())) {
-        // 有効なDateオブジェクトの場合
-        return date;
-    } else {
-        // 無効なDateオブジェクトの場合（パース失敗）
-        return null;
-    }
-}
-
 function parseTask(line: string, fileItem: FileItem): Task | undefined {
     const taskTypeRegex = /^(TODO|COMPLETED|CANCELED)/;
     const dateRegex =
