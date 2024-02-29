@@ -88,71 +88,35 @@ export function parseDate(dateString: string): Date | null {
 }
 
 export function extractTasks(fileItems: FileItem[]): Task[] {
-    // [2003-11-27]@ 予定です
-    // [2003-11-27]- 覚書です
-    // [2003-11-27]+ ToDoです
-    // [2003-11-27]! 〆切です
-
     const tasks: Task[] = [];
-    const regex = /^\[(\d{4}-\d\d-\d\d)]([!.@+-])(\d*)\s+(.+)/;
     const newTypeRegex =
         /^(TODO|COMPLETED|CANCELED)(\[(((Finished|Scheduled|Deadline):(\d{4}-\d{2}-\d{2})\([A-Z][a-z][a-z]\)\s*)*)])?:\s*(.+)/;
 
-    // 数字をつけなかったときのデフォルトは, 「-1」「+7」「!7」
-    // https://kaorahi.github.io/howm/uu/#foottext:15
-    const defaultDuration: Record<string, number> = {
-        '-': 1,
-        '+': 7,
-        '!': 7,
-    };
-
     fileItems.forEach((fileItem) => {
         fileItem.content.split('\n').forEach((line) => {
-            {
-                const match = line.match(regex);
-                if (match) {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const [_p, date, symbol, duration, title] = match;
-                    const parsedDate = parseDate(date);
-                    if (!parsedDate) {
-                        return;
-                    }
+            const match = line.match(newTypeRegex);
+            if (match) {
+                const toSymbol: Record<string, string> = {
+                    TODO: '+',
+                    COMPLETED: '.',
+                    CANCELED: 'x',
+                };
 
-                    tasks.push({
-                        date: parsedDate,
-                        symbol,
-                        duration:
-                            parseInt(duration) || defaultDuration[symbol] || 0,
-                        title,
-                        fileItem,
-                    });
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const type = match[1];
+                const date = match[6];
+                const parsedDate = parseDate(date);
+                if (!parsedDate) {
+                    return;
                 }
-            }
-            {
-                const match = line.match(newTypeRegex);
-                if (match) {
-                    const toSymbol: Record<string, string> = {
-                        TODO: '+',
-                        COMPLETED: '.',
-                        CANCELED: 'x',
-                    };
 
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    const type = match[1];
-                    const date = match[6];
-                    const parsedDate = parseDate(date);
-                    if (!parsedDate) {
-                        return;
-                    }
-
-                    tasks.push({
-                        date: parsedDate,
-                        symbol: toSymbol[type] || '?',
-                        duration: 3,
-                        title: match[7],
-                        fileItem,
-                    });
-                }
+                tasks.push({
+                    date: parsedDate,
+                    symbol: toSymbol[type] || '?',
+                    duration: 3,
+                    title: match[7],
+                    fileItem,
+                });
             }
         });
     });
