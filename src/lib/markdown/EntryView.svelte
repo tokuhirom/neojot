@@ -4,7 +4,7 @@
         readAndSaveImage,
         saveMarkdownFile,
     } from '../repository/NodeRepository';
-    import { onMount } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     import {
         defaultKeymap,
         indentLess,
@@ -17,7 +17,12 @@
     import { EditorState, Transaction } from '@codemirror/state';
     import { EditorView, type KeyBinding, keymap } from '@codemirror/view';
     import { extractTitle, type FileItem } from '../file_item/FileItem';
-    import { emit } from '@tauri-apps/api/event';
+    import {
+        emit,
+        type Event,
+        listen,
+        type UnlistenFn,
+    } from '@tauri-apps/api/event';
     import { oneDark, oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
     import {
         LanguageDescription,
@@ -78,6 +83,29 @@
     }
 
     let view: EditorView;
+
+    const unlistenFunctions: UnlistenFn[] = [];
+    onMount(async () => {
+        //        emit('go-to-line-number', { lineNumber: parseInt(lineNumber, 10) });
+        unlistenFunctions.push(
+            await listen('go-to-line-number', (e) => {
+                const lineNumber = e.payload as number;
+                const line = view.state.doc.line(lineNumber);
+                view.dispatch({
+                    selection: { anchor: line.from },
+                    effects: EditorView.scrollIntoView(line.from, {
+                        y: 'center',
+                    }),
+                });
+                view.focus();
+            }),
+        );
+    });
+    onDestroy(() => {
+        unlistenFunctions.forEach((it) => {
+            it();
+        });
+    });
 
     onMount(() => {
         let container = myElement;

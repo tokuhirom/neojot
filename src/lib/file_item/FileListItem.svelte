@@ -1,11 +1,11 @@
 <script lang="ts">
-    import type { FileItem } from './FileItem';
-    import { listen } from '@tauri-apps/api/event';
+    import type { FileItem, MatchedLine } from './FileItem';
+    import { emit, listen } from '@tauri-apps/api/event';
     import { onDestroy } from 'svelte';
 
     export let onSelectItem: (fileItem: FileItem) => void;
     export let fileItem: FileItem;
-    export let matchLines: string[] | undefined;
+    export let matchLines: MatchedLine[] | undefined;
     export let searchWord: string | undefined;
     export let selectedItem: FileItem;
 
@@ -26,8 +26,14 @@
         (await unlisten)();
     });
 
-    function handleOnClick() {
+    function handleOnClick(e: Event) {
+        const elem = e.target as HTMLElement;
         onSelectItem(fileItem);
+
+        const lineNumber = elem.getAttribute('data-lineNumber');
+        if (lineNumber && lineNumber.length) {
+            emit('go-to-line-number', parseInt(lineNumber, 10));
+        }
     }
 
     function formatEpochSeconds() {
@@ -83,9 +89,9 @@
         ><span class="title">{fileItem.title}</span>
         {#if matchLines && searchWords}
             {#each matchLines as line}
-                <span class="match-line">
+                <span class="match-line" data-lineNumber={line.lineNumber}>
                     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                    {@html highlightKeyword(line, searchWords)}</span
+                    {@html highlightKeyword(line.content, searchWords)}</span
                 >
             {/each}
         {/if}

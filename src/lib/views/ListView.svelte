@@ -1,7 +1,11 @@
 <script lang="ts">
     import EntryView from '../markdown/EntryView.svelte';
     import FileListItem from '../file_item/FileListItem.svelte';
-    import { type FileItem, shouldShowFileItem } from '../file_item/FileItem';
+    import {
+        type FileItem,
+        type MatchedLine,
+        shouldShowFileItem,
+    } from '../file_item/FileItem';
     import LinkCards from '../link/LinkCards.svelte';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import {
@@ -32,7 +36,7 @@
     }
 
     type SearchResult = {
-        lines: string[];
+        lines: MatchedLine[];
         fileItem: FileItem;
     };
 
@@ -44,11 +48,11 @@
         const r: SearchResult[] = [];
         dataFileItems.forEach((fileItem) => {
             if (shouldShowFileItem(fileItem, searchWord)) {
-                const lines: string[] = [];
+                const lines: MatchedLine[] = [];
                 if (searchWord.length > 0) {
                     const contentLines = fileItem.content.split(/\n/);
                     const lowerWords = searchWord.toLowerCase().split(/\s+/);
-                    contentLines.filter((line) => {
+                    contentLines.filter((line, index) => {
                         if (
                             lowerWords.some((word) =>
                                 line.toLowerCase().includes(word),
@@ -61,7 +65,10 @@
                                     .includes(searchWord.toLowerCase())
                             )
                         ) {
-                            lines.push(line);
+                            lines.push({
+                                content: line,
+                                lineNumber: index + 1,
+                            } as MatchedLine);
                         }
                     });
                 }

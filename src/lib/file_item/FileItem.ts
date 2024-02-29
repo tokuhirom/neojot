@@ -1,3 +1,8 @@
+export type MatchedLine = {
+    content: string;
+    lineNumber: number;
+};
+
 export type FileItem = {
     filename: string;
     mtime: number;
