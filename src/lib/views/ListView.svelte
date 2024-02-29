@@ -15,6 +15,7 @@
         type Task,
     } from '../task/Task';
     import { onMount } from 'svelte';
+    import { format } from 'date-fns';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -96,8 +97,14 @@
 <div class="list-view">
     <div class="file-list">
         {#each tasks as task}
-            <button class="task" on:click={() => onSelectItem(task.fileItem)}>
+            <button
+                class="task {task.type.toLowerCase()}"
+                on:click={() => onSelectItem(task.fileItem)}
+            >
                 {task.type}
+                {#if task.scheduled && task.type === 'PLAN'}
+                    {format(task.scheduled, 'yyyy-MM-dd(EEE)')}
+                {/if}
                 {task.title}
             </button>
         {/each}
@@ -150,6 +157,11 @@
         cursor: pointer;
         border-bottom: darkslategrey 1px solid;
         margin-bottom: 9px;
+    }
+
+    .task.plan {
+        background-color: #f0f0f0;
+        color: black;
     }
 
     .list-view {

@@ -1,5 +1,5 @@
 import type { FileItem } from '../file_item/FileItem';
-import { differenceInDays } from 'date-fns';
+import { differenceInDays, startOfDay } from 'date-fns';
 import { parse as parseDate2 } from 'date-fns';
 
 export type Task = {
@@ -26,6 +26,24 @@ export function calculateFreshness(
 ): number {
     if (task.type === 'COMPLETED' || task.type === 'CANCELED') {
         return -Infinity;
+    }
+
+    if (task.type == 'PLAN') {
+        if (task.scheduled) {
+            const diffDays = differenceInDays(task.scheduled, today);
+            console.log(
+                task,
+                task.scheduled,
+                differenceInDays(task.scheduled, today),
+            );
+            if (diffDays >= 0 && diffDays < 3) {
+                return 100;
+            } else {
+                return -Infinity;
+            }
+        } else {
+            return -Infinity;
+        }
     }
 
     if (task.deadline) {
@@ -92,6 +110,7 @@ export function extractTasks(fileItems: FileItem[]): Task[] {
         fileItem.content.split('\n').forEach((line) => {
             const taskP = parseTask(line, fileItem);
             if (taskP) {
+                console.log(taskP);
                 tasks.push(taskP);
             }
         });
