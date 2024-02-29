@@ -41,8 +41,6 @@
 </script>
 
 <div>
-    <h1>{year}</h1>
-    {month}
     <table>
         {#each calendars as week}
             <tr>
