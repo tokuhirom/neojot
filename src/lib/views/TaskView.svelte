@@ -68,7 +68,7 @@
             >
                 <span class="header">
                     <span class="date">{format(task.date, 'yyyy-MM-dd')}</span>
-                    <span class="task">{taskType(task)} </span>
+                    <span class="task">{task.type} </span>
                 </span>
                 <span class="title">{task.title}</span>
                 <span class="file-title">{task.fileItem.title}</span>

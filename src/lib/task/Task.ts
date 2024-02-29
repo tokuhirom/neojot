@@ -3,7 +3,8 @@ import { startOfDay } from 'date-fns';
 
 export type Task = {
     date: Date;
-    symbol: string;
+    type: string;
+    symbol: string; // TODO remove this
     duration: number;
     title: string;
     fileItem: FileItem;
@@ -112,6 +113,7 @@ export function extractTasks(fileItems: FileItem[]): Task[] {
 
                 tasks.push({
                     date: parsedDate,
+                    type: type,
                     symbol: toSymbol[type] || '?',
                     duration: 3,
                     title: match[7],
@@ -130,21 +132,4 @@ export function sortTasks(tasks: Task[]): Task[] {
         (a, b) => calculateFreshness(b, today) - calculateFreshness(a, today),
     );
     return tasks;
-}
-
-export function taskType(task: Task) {
-    switch (task.symbol) {
-        case '@':
-            return 'Schedule';
-        case '+':
-            return 'Todo';
-        case '!':
-            return 'Deadline';
-        case '-':
-            return 'Memo';
-        case '.':
-            return 'Completed';
-        default:
-            return 'Unknown';
-    }
 }
