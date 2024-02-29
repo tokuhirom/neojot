@@ -19,25 +19,12 @@
     import { extractTitle, type FileItem } from '../file_item/FileItem';
     import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event';
     import { oneDark, oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
-    import {
-        LanguageDescription,
-        syntaxHighlighting,
-    } from '@codemirror/language';
+    import { syntaxHighlighting } from '@codemirror/language';
     import {
         autocompletion,
         type CompletionContext,
     } from '@codemirror/autocomplete';
-    import { javascript } from '@codemirror/lang-javascript';
-    import { python } from '@codemirror/lang-python';
-    import { java } from '@codemirror/lang-java';
     import { invoke } from '@tauri-apps/api/core';
-    import { cpp } from '@codemirror/lang-cpp';
-    import { css } from '@codemirror/lang-css';
-    import { html } from '@codemirror/lang-html';
-    import { php } from '@codemirror/lang-php';
-    import { sql } from '@codemirror/lang-sql';
-    import { xml } from '@codemirror/lang-xml';
-    import { yaml } from '@codemirror/lang-yaml';
     import { internalLinkDecorator } from './InternalWikiLink';
     import { imageDecorator } from './ImageViewWidget';
     import { openSearchPanel, searchKeymap } from '@codemirror/search';
