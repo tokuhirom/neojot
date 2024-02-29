@@ -174,11 +174,7 @@
         const matches = [];
         let match;
         while ((match = pattern.exec(content)) !== null) {
-            // マッチした部分（キーワード）を配列に追加
             matches.push(match[1]); // match[1]は、'>>> 'に続く部分にマッチします
-        }
-        if (matches.length > 0) {
-            console.log(matches);
         }
         return matches;
     }
