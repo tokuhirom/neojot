@@ -33,6 +33,7 @@
     import { comeFromLinkHighlightPlugin } from './KeywordHighlight';
     import { languages } from '@codemirror/language-data';
     import { syntaxHighlighting } from '@codemirror/language';
+    import { todoPlugin } from './TodoWidget';
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
@@ -196,8 +197,11 @@
             return false;
         }
 
-        function insertDateCommand(view) {
-            const dateStr = format(new Date(), '[yyyy-MM-dd]- '); // 現在の日付を取得
+        function insertDateCommand(view, key: string) {
+            const dateStr =
+                `${key}[Scheduled:` +
+                format(new Date(), 'yyyy-MM-dd(EEE)') +
+                ']: ';
             const from = view.state.selection.main.from;
             const to = from + dateStr.length;
 
@@ -219,59 +223,34 @@
             }
 
             const line = state.doc.lineAt(from);
-            const dateRegex = /\[(\d{4}-\d{2}-\d{2})]/g; // YYYY-MM-DD 形式の日付にマッチする正規表現
-            let match: RegExpExecArray | null;
+            const dateRegex = /(\d{4}-\d{2}-\d{2})\([A-Z][a-z][a-z]\)/g; // グローバル検索に変更
+            let match;
+            let isCursorOnDate = false;
 
+            // 全ての日付パターンをチェック
             while ((match = dateRegex.exec(line.text)) !== null) {
-                if (
-                    match.index <= from - line.from &&
-                    match.index + match[0].length >= from - line.from
-                ) {
-                    // カーソル位置に日付が含まれている場合
-                    const date = parse(match[1], 'yyyy-MM-dd', new Date());
-                    const updatedDate = addDays(date, increment ? 1 : -1);
-                    const formattedDate = format(updatedDate, '[yyyy-MM-dd]');
-
-                    // 日付を更新する
-                    dispatch(
-                        state.update({
-                            changes: {
-                                from: line.from + match.index,
-                                to: line.from + match.index + match[0].length,
-                                insert: formattedDate,
-                            },
-                        }),
-                    );
-                    return true;
+                const matchStart = line.from + match.index;
+                const matchEnd = matchStart + match[0].length;
+                if (from >= matchStart && from <= matchEnd) {
+                    // カーソルが日付パターンの上にある
+                    isCursorOnDate = true;
+                    break;
                 }
             }
 
-            return false;
-        }
+            if (isCursorOnDate && match) {
+                // カーソル位置に日付が含まれている場合
+                const date = parse(match[1], 'yyyy-MM-dd', new Date());
+                const updatedDate = addDays(date, increment ? 1 : -1);
+                const formattedDate = format(updatedDate, 'yyyy-MM-dd(EEE)');
 
-        function changeSymbol(view: EditorView, newSymbol: string): boolean {
-            const { state, dispatch } = view;
-
-            let { from } = state.selection.main;
-            // 現在の行を取得
-            const line = state.doc.lineAt(from);
-            const lineText = line.text;
-            const datePattern = /(\[\d{4}-\d{2}-\d{2}])[@!+~.-]?/; // 日付パターンとその後に続く任意の記号
-            const match = datePattern.exec(lineText);
-
-            // パターンにマッチし、かつカーソル位置がパターンの直後にある場合に置換を実行
-            if (match && from <= line.from + match.index + match[0].length) {
-                // マッチした部分の最後の記号を新しい記号で置換
-                let replaceFrom = line.from + match.index + match[1].length;
-                let replaceTo = replaceFrom + 1;
-
-                // 置換実行
+                // 日付を更新する
                 dispatch(
                     state.update({
                         changes: {
-                            from: replaceFrom,
-                            to: replaceTo,
-                            insert: newSymbol,
+                            from: line.from + match.index,
+                            to: line.from + match.index + match[0].length,
+                            insert: formattedDate,
                         },
                     }),
                 );
@@ -280,11 +259,6 @@
 
             return false;
         }
-        const taskSymbols = ['@', '!', '+', '~', '.', '-'];
-        const taskKeyBindings = taskSymbols.map((symbol) => ({
-            key: symbol,
-            run: (view: EditorView) => changeSymbol(view, symbol),
-        }));
 
         // エンターキーが押されたときに実行される関数
         function completeTaskAndLog(view: EditorView, key: string): boolean {
@@ -294,7 +268,8 @@
             // 現在の行を取得
             const line = state.doc.lineAt(from);
             const lineText = line.text;
-            const datePattern = /^(\[\d{4}-\d{2}-\d{2}])([@!+~-].*)/; // 日付パターンとその後に続く任意の記号
+            const datePattern =
+                /^TODO(\[(((Scheduled|Deadline):\d{4}-\d{2}-\d{2}\([A-Z][a-z][a-z]\)\s*)*)])?:/;
             const match = datePattern.exec(lineText);
 
             if (
@@ -305,9 +280,53 @@
                 let replaceTo = replaceFrom + match[0].length;
 
                 // 現在の日付を取得
-                const currentDate = format(new Date(), 'yyyy-MM-dd');
+                const currentDate = format(new Date(), 'yyyy-MM-dd(EEE)');
                 // 新しい行の内容を準備
-                const completedTask = `[${currentDate}]. ${key}${match[1]}:${match[2]}`;
+                const completedTask = `${key}[Finished:${currentDate} ${match[2]}]:`;
+
+                // 現在の行の後に新しい行を追加
+                dispatch(
+                    state.update({
+                        changes: {
+                            from: replaceFrom,
+                            to: replaceTo,
+                            insert: completedTask,
+                        },
+                        userEvent: 'input',
+                    }),
+                );
+                return true;
+            }
+            return false;
+        }
+
+        // エンターキーが押されたときに実行される関数
+        function insertTodoDate(view: EditorView, key: string): boolean {
+            const { state, dispatch } = view;
+
+            let { from } = state.selection.main;
+            const line = state.doc.lineAt(from);
+            const lineText = line.text;
+            const datePattern =
+                /^TODO(\[(((Scheduled|Deadline):\d{4}-\d{2}-\d{2}\([A-Z][a-z][a-z]\)\s*)*)])?:/;
+            const match = datePattern.exec(lineText);
+
+            if (
+                match &&
+                from <= line.from + match.index + match[0].length + 1
+            ) {
+                if (match[2] && match[2].includes(key)) {
+                    // This key is already included in this task.
+                    // ignore the key input.
+                    return true;
+                }
+                let replaceFrom = line.from;
+                let replaceTo = replaceFrom + match[0].length;
+
+                // 現在の日付を取得
+                const currentDate = format(new Date(), 'yyyy-MM-dd(EEE)');
+                // 新しい行の内容を準備
+                const completedTask = `TODO[${key}:${currentDate}${match[2] ? ' ' + match[2] : ''}]:`;
 
                 // 現在の行の後に新しい行を追加
                 dispatch(
@@ -329,18 +348,9 @@
             { key: 'Mod-z', run: undo, preventDefault: true },
             { key: 'Mod-Shift-z', run: redo, preventDefault: true },
             {
-                key: 'Mod-+', // Cmd/Ctrl + +
-                run: (view) => updateDate(view, true),
-            },
-            {
-                key: 'Mod--', // Cmd/Ctrl + -
-                run: (view) => updateDate(view, false),
-            },
-            {
                 key: 'Mod-b',
                 run: openInternalLink,
             },
-            { key: 'Mod-t', run: insertDateCommand },
             {
                 key: 'Tab',
                 preventDefault: true,
@@ -353,15 +363,33 @@
             },
             { key: 'Mod-f', run: openSearchPanel, preventDefault: true },
             { key: 'Mod-r', run: openSearchPanel, preventDefault: true }, // replace?
+            // task related -----------------------------------------
+            { key: 'Mod-t', run: (view) => insertDateCommand(view, 'TODO') },
+            { key: 'Mod-p', run: (view) => insertDateCommand(view, 'PLAN') },
+            {
+                key: '+', // Cmd/Ctrl + +
+                run: (view) => updateDate(view, true),
+            },
+            {
+                key: '-', // Cmd/Ctrl + -
+                run: (view) => updateDate(view, false),
+            },
             {
                 key: 'Enter',
-                run: (view: EditorView) => completeTaskAndLog(view, ''),
+                run: (view: EditorView) => completeTaskAndLog(view, 'DONE'),
             },
             {
-                key: 'x',
-                run: (view: EditorView) => completeTaskAndLog(view, 'cancel '),
+                key: 'c',
+                run: (view: EditorView) => completeTaskAndLog(view, 'CANCELED'),
             },
-            ...taskKeyBindings,
+            {
+                key: 'd',
+                run: (view: EditorView) => insertTodoDate(view, 'Deadline'),
+            },
+            {
+                key: 's',
+                run: (view: EditorView) => insertTodoDate(view, 'Scheduled'),
+            },
             ...searchKeymap,
             ...defaultKeymap, // 標準のキーマップを含める
         ];
@@ -419,6 +447,7 @@
             doc: file.content,
             extensions: [
                 history(),
+                todoPlugin,
                 comeFromLinkPlugin,
                 internalLinkDecorator,
                 imageDecorator,

@@ -9,7 +9,6 @@
         extractTasks,
         sortTasks,
         type Task,
-        taskType,
     } from '../task/Task';
 
     export let allFileItems: FileItem[] = [];
@@ -46,16 +45,8 @@
         const now = new Date();
         const score = calculateFreshness(task, now);
 
-        const typeClass = taskType(task).toLowerCase();
+        const typeClass = task.type.toLowerCase();
         return typeClass + ' ' + (score < 0 ? 'negative' : 'positive');
-        // if (task.symbol === '.') {
-        //     return 'done';
-        // } else if (task.symbol === '!' && task.date === today) {
-        //     return 'today';
-        // } else if (task.symbol === '!' && task.date < today) {
-        //     return 'overdue';
-        // }
-        // return '';
     }
 </script>
 
@@ -67,8 +58,23 @@
                 class={determineClass(task)}
             >
                 <span class="header">
-                    <span class="date">{format(task.date, 'yyyy-MM-dd')}</span>
-                    <span class="task">{taskType(task)} </span>
+                    {#if task.deadline}
+                        <span class="deadline"
+                            >Deadline: {format(
+                                task.deadline,
+                                'yyyy-MM-dd',
+                            )}</span
+                        >
+                    {/if}
+                    {#if task.scheduled}
+                        <span class="scheduled"
+                            >Scheduled: {format(
+                                task.scheduled,
+                                'yyyy-MM-dd',
+                            )}</span
+                        >
+                    {/if}
+                    <span class="task">{task.type} </span>
                 </span>
                 <span class="title">{task.title}</span>
                 <span class="file-title">{task.fileItem.title}</span>
@@ -164,9 +170,11 @@
 
     .schedule {
         color: orange !important;
+        display: block;
     }
     .deadline {
         color: crimson !important;
+        display: block;
     }
     .todo {
         color: cornflowerblue !important;
