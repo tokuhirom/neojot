@@ -43,7 +43,10 @@
                         task.scheduled.getMonth() + 1 === month) ||
                     (task.deadline &&
                         task.deadline.getFullYear() === year &&
-                        task.deadline.getMonth() + 1 === month),
+                        task.deadline.getMonth() + 1 === month) ||
+                    (task.finished &&
+                        task.finished.getFullYear() === year &&
+                        task.finished.getMonth() + 1 === month),
             )
             .toSorted((a, b) => a.type.localeCompare(b.type));
 
@@ -53,13 +56,14 @@
         tasks.forEach((task) => {
             // at first, if task.scheduled, use it.
             // after that, if task.deadline, use it.
-            for (const date of [task.scheduled, task.deadline]) {
+            for (const date of [task.finished, task.scheduled, task.deadline]) {
                 if (date) {
                     const day = date.getDate();
                     if (!newTaskMap.has(day)) {
                         newTaskMap.set(day, []);
                     }
                     newTaskMap.get(day).push(task);
+                    break;
                 }
             }
         });
@@ -102,7 +106,7 @@
                                 {#each taskMap.get(day.day) || [] as task}
                                     <button
                                         on:click={() => handleTaskOnClick(task)}
-                                        >{#if task.type === 'PLAN'}📅{:else if task.deadline && task.deadline.day === day.day}🚨{:else if task.scheduled && task.scheduled.getDate() === day.day}💪{/if}
+                                        >{#if task.type === 'PLAN'}📅{:else if task.finished && task.finished.getDate() === day.day}✅{:else if task.deadline && task.deadline.getDate() === day.day}🚨{:else if task.scheduled && task.scheduled.getDate() === day.day}💪{/if}
                                         {task.title}
                                     </button>
                                 {/each}

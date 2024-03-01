@@ -1,5 +1,7 @@
 import { expect, test } from 'vitest';
-import { calculateFreshness } from './Task';
+import { calculateFreshness, parseTask } from './Task';
+import { parse as parseDate2 } from 'date-fns/parse';
+import { parse } from 'date-fns';
 
 export function parseDate(dateString: string): Date | null {
     const date = new Date(dateString);
@@ -87,4 +89,29 @@ test('calc CANCELED', () => {
     ];
 
     expect(calcResults(currentDate, 'CANCELED', cases)).toStrictEqual(cases);
+});
+
+test('parseTask', () => {
+    const fileItem = {
+        mtime: 0,
+        title: 'test',
+        filename: 'test.md',
+        content: 'TODO: test',
+    };
+
+    expect(
+        parseTask(
+            'DONE[Finished:2024-03-01(Fri) Scheduled:2024-03-01(Fri)]: Do something',
+            5,
+            fileItem,
+        ),
+    ).toStrictEqual({
+        deadline: null,
+        fileItem: fileItem,
+        finished: parse('2024-03-01', 'yyyy-MM-dd', new Date()),
+        lineNumber: 5,
+        scheduled: parse('2024-03-01', 'yyyy-MM-dd', new Date()),
+        title: 'Do something',
+        type: 'DONE',
+    });
 });

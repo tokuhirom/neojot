@@ -6,6 +6,7 @@ export type Task = {
     type: string;
     scheduled: Date | null;
     deadline: Date | null;
+    finished: Date | null;
     title: string;
     lineNumber: number;
     fileItem: FileItem;
@@ -66,20 +67,21 @@ export function calculateFreshness(
     return 0;
 }
 
-function parseTask(
+export function parseTask(
     line: string,
     lineNumber: number,
     fileItem: FileItem,
 ): Task | undefined {
-    const taskTypeRegex = /^(TODO|COMPLETED|CANCELED|PLAN)/;
+    const taskTypeRegex = /^(TODO|DONE|COMPLETED|CANCELED|PLAN)/;
     const dateRegex =
-        /((Scheduled|Deadline):(\d{4}-\d{2}-\d{2})\([A-Z][a-z][a-z]\))/g;
+        /((Scheduled|Deadline|Finished):(\d{4}-\d{2}-\d{2})\([A-Z][a-z][a-z]\))/g;
 
     const typeMatch = line.match(taskTypeRegex);
     if (!typeMatch) return;
 
     let scheduled: Date | null = null;
     let deadline: Date | null = null;
+    let finished: Date | null = null;
     let match;
 
     while ((match = dateRegex.exec(line)) !== null) {
@@ -91,6 +93,8 @@ function parseTask(
             scheduled = parsedDate;
         } else if (dateType === 'Deadline') {
             deadline = parsedDate;
+        } else if (dateType === 'Finished') {
+            finished = parsedDate;
         }
     }
 
@@ -103,6 +107,7 @@ function parseTask(
         type: typeMatch[1],
         scheduled,
         deadline,
+        finished,
         title,
         lineNumber,
         fileItem,
