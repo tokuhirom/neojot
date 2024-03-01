@@ -34,6 +34,10 @@ export function calculateFreshness(
         return -Infinity;
     }
 
+    if (task.type === 'DOING') {
+        return Infinity;
+    }
+
     if (task.type == 'PLAN') {
         if (task.scheduled) {
             const diffDays = differenceInDays(task.scheduled, today);
@@ -71,7 +75,7 @@ export function parseTask(
     lineNumber: number,
     fileItem: FileItem,
 ): Task | undefined {
-    const taskTypeRegex = /^(TODO|DONE|COMPLETED|CANCELED|PLAN)/;
+    const taskTypeRegex = /^(TODO|DONE|COMPLETED|CANCELED|PLAN|DOING)/;
     const dateRegex =
         /((Scheduled|Deadline|Finished):(\d{4}-\d{2}-\d{2})\([A-Z][a-z][a-z]\))/g;
 
