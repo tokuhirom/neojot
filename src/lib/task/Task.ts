@@ -41,24 +41,19 @@ export function calculateFreshness(
     if (task.type == 'PLAN') {
         if (task.scheduled) {
             const diffDays = differenceInDays(task.scheduled, today);
-            if (diffDays >= 0 && diffDays < 3) {
-                return 100;
-            } else {
+            if (diffDays < 0) {
                 return -Infinity;
             }
+            return 80 - diffDays * 30;
         } else {
-            return -Infinity;
+            return -Infinity; // without scheduled date, it's not a plan
         }
     }
 
     if (task.deadline) {
         const taskDate = new Date(task.deadline);
         const diffDays = differenceInDays(today, taskDate);
-        if (diffDays >= -3) {
-            return diffDays + 3;
-        } else {
-            return -Infinity;
-        }
+        return diffDays + 3;
     }
 
     if (task.scheduled) {

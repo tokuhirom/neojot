@@ -67,10 +67,25 @@ test('calc TODO: Scheduled', () => {
     expect(calcResults(currentDate, 'TODO', cases)).toStrictEqual(cases);
 });
 
+test('calc PLAN: Scheduled', () => {
+    const currentDate = '2024-02-10';
+    const cases: TestCase[] = [
+        { scheduled: '2024-02-14', deadline: null, score: -40 }, // 先すぎる予定は低めに。。
+        { scheduled: '2024-02-13', deadline: null, score: -10 }, // 先すぎる予定は低めに。。
+        { scheduled: '2024-02-12', deadline: null, score: 20 }, // 2日前は表示
+        { scheduled: '2024-02-11', deadline: null, score: 50 },
+        { scheduled: '2024-02-10', deadline: null, score: 80 }, // 当日が最高
+        { scheduled: '2024-02-09', deadline: null, score: -Infinity }, // 過去の予定は表示しない
+        { scheduled: '2024-02-08', deadline: null, score: -Infinity },
+    ];
+
+    expect(calcResults(currentDate, 'PLAN', cases)).toStrictEqual(cases);
+});
+
 test('calc TODO: Deadline', () => {
     const currentDate = '2024-02-10';
     const cases: TestCase[] = [
-        { deadline: '2024-02-14', scheduled: null, score: -Infinity }, // 4日前
+        { deadline: '2024-02-14', scheduled: null, score: -1 }, // 4日前
         { deadline: '2024-02-13', scheduled: null, score: 0 }, // 3日前
         { deadline: '2024-02-12', scheduled: null, score: 1 }, // 2日前
         { deadline: '2024-02-11', scheduled: null, score: 2 }, // 締め切り日の前日はプラス
