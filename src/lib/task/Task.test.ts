@@ -1,6 +1,5 @@
 import { expect, test } from 'vitest';
 import { calculateFreshness, parseTask } from './Task';
-import { parse as parseDate2 } from 'date-fns/parse';
 import { parse } from 'date-fns';
 
 export function parseDate(dateString: string): Date | null {
