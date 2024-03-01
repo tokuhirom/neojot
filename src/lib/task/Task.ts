@@ -7,6 +7,7 @@ export type Task = {
     scheduled: Date | null;
     deadline: Date | null;
     title: string;
+    lineNumber: number;
     fileItem: FileItem;
 };
 
@@ -65,7 +66,11 @@ export function calculateFreshness(
     return 0;
 }
 
-function parseTask(line: string, fileItem: FileItem): Task | undefined {
+function parseTask(
+    line: string,
+    lineNumber: number,
+    fileItem: FileItem,
+): Task | undefined {
     const taskTypeRegex = /^(TODO|COMPLETED|CANCELED|PLAN)/;
     const dateRegex =
         /((Scheduled|Deadline):(\d{4}-\d{2}-\d{2})\([A-Z][a-z][a-z]\))/g;
@@ -99,6 +104,7 @@ function parseTask(line: string, fileItem: FileItem): Task | undefined {
         scheduled,
         deadline,
         title,
+        lineNumber,
         fileItem,
     };
 }
@@ -107,8 +113,8 @@ export function extractTasks(fileItems: FileItem[]): Task[] {
     const tasks: Task[] = [];
 
     fileItems.forEach((fileItem) => {
-        fileItem.content.split('\n').forEach((line) => {
-            const taskP = parseTask(line, fileItem);
+        fileItem.content.split('\n').forEach((line, index) => {
+            const taskP = parseTask(line, index + 1, fileItem);
             if (taskP) {
                 console.log(taskP);
                 tasks.push(taskP);

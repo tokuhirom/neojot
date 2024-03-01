@@ -4,6 +4,7 @@
     import EntryView from '../markdown/EntryView.svelte';
     import LinkCards from '../link/LinkCards.svelte';
     import CalendarTable from '../calendar/CalendarTable.svelte';
+    import { extractTasks, sortTasks, type Task } from '../task/Task';
 
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let allFileItems: FileItem[] = [];
