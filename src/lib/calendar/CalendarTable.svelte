@@ -6,6 +6,7 @@
     } from '../repository/NodeRepository';
     import { onMount } from 'svelte';
     import type { FileItem } from '../file_item/FileItem';
+    import { extractTasks, type Task } from '../task/Task';
 
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let allFileItems: FileItem[] = [];
@@ -29,6 +30,39 @@
             calendarData = data;
         });
         reloadFiles();
+    }
+
+    let taskMap: Map<number, Task[]> = new Map();
+    $: if (year && month) {
+        const tasks = extractTasks(allFileItems)
+            .filter(
+                (task) =>
+                    (task.scheduled &&
+                        task.scheduled.getFullYear() === year &&
+                        task.scheduled.getMonth() + 1 === month) ||
+                    (task.deadline &&
+                        task.deadline.getFullYear() === year &&
+                        task.deadline.getMonth() + 1 === month),
+            )
+            .toSorted((a, b) => a.type.localeCompare(b.type));
+
+        // insert tasks into taskMap.
+        // the key is the day of month.
+        const newTaskMap = new Map<number, Task[]>();
+        tasks.forEach((task) => {
+            // at first, if task.scheduled, use it.
+            // after that, if task.deadline, use it.
+            for (const date of [task.scheduled, task.deadline]) {
+                if (date) {
+                    const day = date.getDate();
+                    if (!newTaskMap.has(day)) {
+                        newTaskMap.set(day, []);
+                    }
+                    newTaskMap.get(day).push(task);
+                }
+            }
+        });
+        taskMap = newTaskMap;
     }
 
     async function reloadFiles() {
@@ -58,6 +92,18 @@
                             <div class={getDayClass(day)}>
                                 {day.day}
                             </div>
+                            {#if taskMap}
+                                {#each taskMap.get(day.day) || [] as task}
+                                    <button
+                                        on:click={() =>
+                                            onSelectItem(
+                                                fileMap[task.filename],
+                                            )}
+                                        >{#if task.type === 'PLAN'}📅{:else if task.deadline && task.deadline.day === day.day}🚨{:else if task.scheduled && task.scheduled.getDate() === day.day}💪{/if}
+                                        {task.title}
+                                    </button>
+                                {/each}
+                            {/if}
                             {#if calendarData}
                                 {#each calendarData[day.day] || [] as filename}
                                     {#if fileMap[filename]}
