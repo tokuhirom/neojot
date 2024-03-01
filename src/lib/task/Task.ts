@@ -37,11 +37,6 @@ export function calculateFreshness(
     if (task.type == 'PLAN') {
         if (task.scheduled) {
             const diffDays = differenceInDays(task.scheduled, today);
-            console.log(
-                task,
-                task.scheduled,
-                differenceInDays(task.scheduled, today),
-            );
             if (diffDays >= 0 && diffDays < 3) {
                 return 100;
             } else {
