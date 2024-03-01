@@ -10,6 +10,7 @@
         sortTasks,
         type Task,
     } from '../task/Task';
+    import { emit } from '@tauri-apps/api/event';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -48,13 +49,18 @@
         const typeClass = task.type.toLowerCase();
         return typeClass + ' ' + (score < 0 ? 'negative' : 'positive');
     }
+
+    function handleOnClick(task: Task) {
+        onSelectItem(task.fileItem);
+        emit('go-to-line-number', task.lineNumber);
+    }
 </script>
 
 <div class="task-view">
     <div class="file-list">
         {#each tasks as task}
             <button
-                on:click={() => onSelectItem(task.fileItem)}
+                on:click={() => handleOnClick(task)}
                 class={determineClass(task)}
             >
                 <span class="header">
