@@ -7,6 +7,7 @@
     import { onMount } from 'svelte';
     import type { FileItem } from '../file_item/FileItem';
     import { extractTasks, type Task } from '../task/Task';
+    import { emit } from '@tauri-apps/api/event';
 
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let allFileItems: FileItem[] = [];
@@ -80,6 +81,11 @@
         if (dayOfWeek === 6) return 'saturday';
         return '';
     }
+
+    function handleTaskOnClick(task: Task) {
+        onSelectItem(task.fileItem);
+        emit('go-to-line-number', task.lineNumber);
+    }
 </script>
 
 <div>
@@ -95,10 +101,7 @@
                             {#if taskMap}
                                 {#each taskMap.get(day.day) || [] as task}
                                     <button
-                                        on:click={() =>
-                                            onSelectItem(
-                                                fileMap[task.filename],
-                                            )}
+                                        on:click={() => handleTaskOnClick(task)}
                                         >{#if task.type === 'PLAN'}📅{:else if task.deadline && task.deadline.day === day.day}🚨{:else if task.scheduled && task.scheduled.getDate() === day.day}💪{/if}
                                         {task.title}
                                     </button>
