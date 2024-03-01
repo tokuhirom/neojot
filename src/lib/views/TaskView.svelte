@@ -166,7 +166,7 @@
     }
 
     /* 完了済みタスク */
-    .completed {
+    .done {
         color: #757575 !important;
         text-decoration: line-through;
         background-color: #f0f0f0;
