@@ -50,6 +50,18 @@ export function calculateFreshness(
         }
     }
 
+    if (task.type == 'NOTE') {
+        if (task.scheduled) {
+            const diffDays = differenceInDays(task.scheduled, today);
+            if (diffDays > 0) {
+                return 0 - diffDays;
+            }
+            return 1 + diffDays;
+        } else {
+            return -Infinity; // without scheduled date, it's not a plan
+        }
+    }
+
     if (task.deadline) {
         const taskDate = new Date(task.deadline);
         const diffDays = differenceInDays(today, taskDate);
@@ -70,7 +82,7 @@ export function parseTask(
     lineNumber: number,
     fileItem: FileItem,
 ): Task | undefined {
-    const taskTypeRegex = /^(TODO|DONE|COMPLETED|CANCELED|PLAN|DOING)/;
+    const taskTypeRegex = /^(TODO|DONE|COMPLETED|CANCELED|PLAN|DOING|NOTE)/;
     const dateRegex =
         /((Scheduled|Deadline|Finished):(\d{4}-\d{2}-\d{2})\([A-Z][a-z][a-z]\))/g;
 

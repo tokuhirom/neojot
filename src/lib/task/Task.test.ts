@@ -82,6 +82,19 @@ test('calc PLAN: Scheduled', () => {
     expect(calcResults(currentDate, 'PLAN', cases)).toStrictEqual(cases);
 });
 
+test('calc NOTE: Scheduled', () => {
+    const currentDate = '2024-02-10';
+    const cases: TestCase[] = [
+        { scheduled: '2024-02-12', deadline: null, score: -2 }, // 未来の日付は低い
+        { scheduled: '2024-02-11', deadline: null, score: -1 }, // 未来の日付は低い
+        { scheduled: '2024-02-10', deadline: null, score: 1 }, // 当日が最高
+        { scheduled: '2024-02-09', deadline: null, score: 0 }, // 過去日付は少し下がる
+        { scheduled: '2024-02-08', deadline: null, score: -1 },
+    ];
+
+    expect(calcResults(currentDate, 'NOTE', cases)).toStrictEqual(cases);
+});
+
 test('calc TODO: Deadline', () => {
     const currentDate = '2024-02-10';
     const cases: TestCase[] = [

@@ -172,7 +172,7 @@
             );
         }
 
-        async function openInternalLink(view: EditorView) {
+        function openInternalLink(view: EditorView) {
             const { from, to } = view.state.selection.main;
             if (from === to) {
                 // カーソル位置のみをチェック
@@ -191,7 +191,7 @@
                         if (match[0].startsWith('http')) {
                             const url = match[0];
                             console.log(`opening url: ${url}`);
-                            await invoke('open_url', { url });
+                            invoke('open_url', { url });
                             return true;
                         } else {
                             // 内部リンクの場合はページを開く
@@ -281,7 +281,7 @@
             const line = state.doc.lineAt(from);
             const lineText = line.text;
             const datePattern =
-                /^(?:TODO|DOING|DONE)(\[(((Scheduled|Deadline):\d{4}-\d{2}-\d{2}\([A-Z][a-z][a-z]\)\s*)*)])?:/;
+                /^(?:TODO|DOING|DONE|NOTE)(\[(((Scheduled|Deadline):\d{4}-\d{2}-\d{2}\([A-Z][a-z][a-z]\)\s*)*)])?:/;
             const match = datePattern.exec(lineText);
 
             if (
@@ -297,7 +297,9 @@
                 const nextKey =
                     key === 'DOING' && line.text.startsWith('DOING')
                         ? 'TODO'
-                        : key;
+                        : key === 'NOTE' && line.text.startsWith('NOTE')
+                          ? 'TODO'
+                          : key;
                 const completedTask = `${nextKey}[${finish ? `Finished:${currentDate} ` : ''}${match[2]}]:`;
 
                 // 現在の行の後に新しい行を追加
@@ -403,6 +405,10 @@
                 key: 'i',
                 run: (view: EditorView) =>
                     changeTaskState(view, 'DOING', false),
+            },
+            {
+                key: 'n',
+                run: (view: EditorView) => changeTaskState(view, 'NOTE', false),
             },
             {
                 key: 'd',
