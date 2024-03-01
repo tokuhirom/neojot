@@ -13,7 +13,18 @@ export type FileItem = {
 export function extractTitle(content: string) {
     const lines = content.split('\n');
     if (lines.length >= 1) {
-        return lines[0].replace(/^#+\s*/, '');
+        const title = lines[0].replace(/^#+\s*/, '');
+        // if title includes non-whitespace characters, return it.
+        if (/\S/.test(title)) {
+            return title;
+        }
+        // check remaining lines, and return first non-empty line.
+        for (const line of lines.slice(1)) {
+            if (/\S/.test(line)) {
+                return line;
+            }
+        }
+        return '';
     } else {
         return '';
     }
