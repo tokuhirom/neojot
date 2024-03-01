@@ -26,7 +26,11 @@ export function calculateFreshness(
     },
     today: Date,
 ): number {
-    if (task.type === 'COMPLETED' || task.type === 'CANCELED') {
+    if (
+        task.type === 'COMPLETED' ||
+        task.type === 'CANCELED' ||
+        task.type === 'DONE'
+    ) {
         return -Infinity;
     }
 

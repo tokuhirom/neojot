@@ -90,6 +90,14 @@ test('calc CANCELED', () => {
 
     expect(calcResults(currentDate, 'CANCELED', cases)).toStrictEqual(cases);
 });
+test('calc DONE', () => {
+    const currentDate = '2024-02-10';
+    const cases: TestCase[] = [
+        { deadline: '2024-02-10', scheduled: null, score: -Infinity },
+    ];
+
+    expect(calcResults(currentDate, 'DONE', cases)).toStrictEqual(cases);
+});
 
 test('parseTask', () => {
     const fileItem = {
