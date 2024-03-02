@@ -65,7 +65,7 @@
     <div class="file-list">
         <ClearableSearchBox bind:searchWord />
         {#each filteredTasks as task}
-            <TaskItem {task} {handleOnClick} />
+            <TaskItem {task} {handleOnClick} fullSize="true" />
         {/each}
     </div>
     <div class="log-view">

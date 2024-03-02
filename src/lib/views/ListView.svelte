@@ -11,13 +11,14 @@
     import {
         calculateFreshness,
         extractTasks,
-        getTaskIcon,
         sortTasks,
         type Task,
     } from '../task/Task';
     import { onMount } from 'svelte';
     import { format } from 'date-fns';
     import TaskIcon from '../task/TaskIcon.svelte';
+    import TaskItem from '../task/TaskItem.svelte';
+    import { emit } from '@tauri-apps/api/event';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -94,22 +95,17 @@
         allFileItems = allFileItems;
         onSelectItem(fileItem);
     }
+
+    function handleOnClick(task: Task) {
+        onSelectItem(task.fileItem);
+        emit('go-to-line-number', task.lineNumber);
+    }
 </script>
 
 <div class="list-view">
     <div class="file-list">
         {#each tasks as task}
-            <button
-                class="task {task.type.toLowerCase()}"
-                on:click={() => onSelectItem(task.fileItem)}
-            >
-                <TaskIcon {task} />
-                {task.type}
-                {#if task.scheduled && task.type === 'PLAN'}
-                    {format(task.scheduled, 'yyyy-MM-dd(EEE)')}
-                {/if}
-                {task.title}
-            </button>
+            <TaskItem {task} {handleOnClick} />
         {/each}
 
         <ClearableSearchBox bind:searchWord />
@@ -148,29 +144,6 @@
 </div>
 
 <style>
-    .task {
-        text-align: left;
-        width: 100%;
-        font-size: 100%;
-
-        background-color: darkslategrey;
-        color: inherit;
-        border: none;
-        padding: 8px;
-        cursor: pointer;
-        border-bottom: darkslategrey 1px solid;
-        margin-bottom: 9px;
-    }
-
-    .task.plan {
-        background-color: #f0f0f0;
-        color: black;
-    }
-    .task.doing {
-        background-color: bisque;
-        color: black;
-    }
-
     .list-view {
         display: flex; /* Enables Flexbox */
         flex-direction: row; /* Stack children vertically */

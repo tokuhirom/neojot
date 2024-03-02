@@ -5,13 +5,14 @@
 
     export let task: Task;
     export let handleOnClick: (task: Task) => void;
+    export let fullSize: boolean = false;
 
     function determineClass(task: Task) {
         const now = new Date();
         const score = calculateFreshness(task, now);
 
         const typeClass = task.type.toLowerCase();
-        return typeClass + ' ' + (score < 0 ? 'negative' : 'positive');
+        return typeClass + ' ' + (score > 0 ? 'positive' : 'negative');
     }
 </script>
 
@@ -20,18 +21,25 @@
         <TaskIcon {task} />
         <span class="task">{task.type} </span>
     </span>
-    <span class="title">{task.title}</span>
-    {#if task.deadline}
-        <span class="deadline"
-            >Deadline: {format(task.deadline, 'yyyy-MM-dd')}</span
-        >
+    <span class="title">
+        {#if task.scheduled && task.type === 'PLAN'}
+            {format(task.scheduled, 'yyyy-MM-dd(EEE)')}
+        {/if}
+        {task.title}</span
+    >
+    {#if fullSize}
+        {#if task.deadline}
+            <span class="deadline"
+                >Deadline: {format(task.deadline, 'yyyy-MM-dd')}</span
+            >
+        {/if}
+        {#if task.scheduled}
+            <span class="scheduled"
+                >Scheduled: {format(task.scheduled, 'yyyy-MM-dd')}</span
+            >
+        {/if}
+        <span class="file-title">{task.fileItem.title}</span>
     {/if}
-    {#if task.scheduled}
-        <span class="scheduled"
-            >Scheduled: {format(task.scheduled, 'yyyy-MM-dd')}</span
-        >
-    {/if}
-    <span class="file-title">{task.fileItem.title}</span>
 </button>
 
 <style>
@@ -83,5 +91,18 @@
     }
     .todo {
         color: cornflowerblue !important;
+    }
+
+    .positive.plan {
+        background-color: #f0f0f0 !important;
+        color: black;
+    }
+    .positive.doing {
+        background-color: bisque !important;
+        color: black;
+    }
+    .positive.todo {
+        background-color: bisque !important;
+        color: black;
     }
 </style>
