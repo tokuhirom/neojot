@@ -5,118 +5,66 @@
     import { invoke } from '@tauri-apps/api/core';
 
     const markdownContent = `
-# NeoJot
+# NeoJot User Guide
 
-## What's this?
+## Introduction
 
-NeoJot is the note-taking application written in TypeScript on Tauri.
-You can use <a href="https://en.wikipedia.org/wiki/Markdown">Markdown</a> for writing your notes.
+NeoJot is a cutting-edge note-taking application developed in TypeScript using the Tauri framework. It integrates Markdown, allowing for efficient formatting of notes to enhance productivity and creativity.
 
-## Note taking strategy
+## Getting Started with NeoJot
 
-There's a NeoJot's note taking strategy.
-Of course, you can ignore following rules, but the author recommend it!
+### Why Use NeoJot?
 
-### Link notes!
+NeoJot encourages linking notes to foster connections between ideas, expand knowledge, and streamline information retrieval. This strategy is recommended to maximize the benefits of NeoJot, though users are free to adapt their usage to personal preferences.
 
-If you link the notes, you get more ideas, knowledge, and information.
+### Creating and Linking Notes
 
-#### Come-From link
+#### Link Notes for Enhanced Connectivity
 
-You can write the following style:
+- **Come-From Links**: Use the syntax \`<<< NoteTitle\` to link all instances of "NoteTitle" within your notes, facilitating easy navigation.
 
-    <<< Emacs
+- **Go-To Links** (Future Feature): \`>>> NoteTitle\` will enable quick searches for "NoteTitle".
 
-After that, when you write a word 'Emacs' in your note, all words are linked to this note!
+- **Wiki-Style Links**: \`[[NoteTitle]]\` creates or links to a note with the title "NoteTitle".
 
-When you click this link, you can go to the note about Emacs.
+## Task Management
 
-#### Go-To link
+NeoJot also offers basic task management features to keep your tasks organized.
 
-You can write the following style:
+### Creating Tasks
 
-    >>> Emacs
+Initiate a task with **Command-T** and input details as follows:
 
-You can quickly search the note about Emacs.
+\`\`\`
+TODO[Scheduled:YYYY-MM-DD]: Task Title
+\`\`\`
 
-(Not implemented yet)
+#### Customizing Tasks
 
-### Wiki sytle link
+- **Insert Scheduled Date**: Press 's' on "TODO" to insert a scheduled date, allowing you to easily set a start date for the task.
+- **Add a Deadline**: 'd' on "TODO" to specify a deadline.
+- **Start a Task**: 'i' on "TODO" to change its status to "DOING".
+- **Complete a Task**: 'Enter' on "DOING" to mark as "DONE".
+- **Cancel a Task**: 'c' on "DOING" to mark as "CANCELLED".
+- **Note Conversion**: 'n' on "TODO" to demote it to "NOTE".
 
-You can create the link to the note by the following style:
+### Task Scoring System
 
-    [[Emacs]]
+Tasks are prioritized based on a scoring system to ensure important tasks are highlighted:
 
-It links to the note that has 'Emacs' title.
-On click the link, you can go to the note about Emacs.
+- **Positive Scores**: Indicate tasks due soon or currently in progress.
+- **Negative Scores**: Completed or cancelled tasks receive negative scores to deprioritize them.
+- **Task Visibility**: Tasks with positive scores are shown prominently, directing focus to immediate priorities.
 
-If there's no note about 'Emacs', NeoJot creates notes has a title 'Emacs' automatically.
+#### Detailed Scoring Logic
 
-## Task management
+- **TODO**: Positive score if deadline is within 3 days or scheduled date is within 1 day.
+- **PLAN**: Positive score if scheduled date is within 3 days.
+- **DOING**: Always positive.
+- **CANCELED, COMPLETED, DONE**: Always negative.
+- **NOTE**: Positive if scheduled date is within 1 day.
 
-NeoJot supports basic task management features.
-
-At first, you type **Command-T** to create a new task on the editor.
-Then, you got the following line:
-
-    TODO[Scheduled:2024-03-02(Sat)]:
-
-After that, type the title of the task.
-
-    TODO[Scheduled:2024-03-02(Sat)]: Write a document about NeoJot
-
-You can also add a deadline to the task. Type 'd' on the word 'TODO'.
-Then you got ta following line:
-
-    TODO[Deadline:2024-03-02(Sat) Scheduled:2024-03-05(Tue)]:  Write a document about NeoJot
-
-When you start the task, type 'i' on the word 'TODO'.
-Then you got the following line:
-
-    DOING[Deadline:2024-03-02(Sat) Scheduled:2024-03-05(Tue)]:  Write a document about NeoJot
-
-When you finish the task, type 'd' on the word 'DOING'.
-Then you got the following line:
-
-    DOING[Deadline:2024-03-02(Sat) Scheduled:2024-03-05(Tue)]:  Write a document about NeoJot
-
-When you finish the task, type 'Enter' on the word 'DOING'.
-Then you got the following line:
-
-    DONE[Finished:2024-03-02(Sat) Deadline:2024-03-02(Sat) Scheduled:2024-03-05(Tue)]:  Write a document about NeoJot
-
-If you cancel the task, type 'c' on the word 'DOING'.
-Then you got the following line:
-
-    CANCEL[Finished:2024-03-02(Sat) Deadline:2024-03-02(Sat) Scheduled:2024-03-05(Tue)]:  Write a document about NeoJot
-
-If the task is not so important, and it's just a note, you can type 'n' on the word 'TODO'.
-Then you got the following line:
-
-    NOTE[Deadline:2024-03-02(Sat) Scheduled:2024-03-05(Tue)]:  Write a document about NeoJot
-
-### Behaviour of the task management
-
-NeoJot provide the score for each task.
-If the score is negative, the task is not so important. As a result, these tasks are displayed in the bottom of the task list.
-If the score is positive, the task is important. As a result, these tasks are displayed in the top of the task list.
-NeoJot shows only tasks, that have the score more than 0  on ListView.
-NeoJot shows all tasks on the TaskView.
-
-The score is calculated by the following logic:
-
-- TODO type
-    - If the task has deadline, task score is positive if since the deadline before 3 days.
-    - If the task has scheduled date, task score is positive if since the scheduled date before 1 day.
-- PLAN type
-    - If the task has scheduled date, task score is positive if since the scheduled date before 3 days.
-- DOING type
-    - Task score is always positive.
-- CANCELED, COMPLETED, DONE type
-    - Task score is always negative.
-- NOTE type
-    - If the task has scheduled date, task score is positive if since the scheduled date before 1 day.
-
+Tasks with a positive score are deemed important and are displayed at the top of the task list, ensuring you always know what needs attention.
 `;
 
     let htmlContent: string | Promise<string> = '';
