@@ -29,12 +29,11 @@
     import { openSearchPanel, searchKeymap } from '@codemirror/search';
     import { mermaidPlugin } from './MermaidWidget';
     import { addDays, format, parse } from 'date-fns';
-    import { comeFromLinkPlugin } from './CoemFromLink';
+    import { linkPlugin } from './LinkPlugin';
     import { comeFromLinkHighlightPlugin } from './KeywordHighlight';
     import { languages } from '@codemirror/language-data';
     import { syntaxHighlighting } from '@codemirror/language';
     import { todoPlugin } from './TodoWidget';
-    import { gotoLinkPlugin } from './GotoLinkWidget';
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
@@ -477,10 +476,7 @@
             extensions: [
                 history(),
                 todoPlugin,
-                comeFromLinkPlugin((keyword) => {
-                    search(keyword);
-                }),
-                gotoLinkPlugin((keyword) => {
+                linkPlugin((keyword) => {
                     search(keyword);
                 }),
                 internalLinkDecorator,
