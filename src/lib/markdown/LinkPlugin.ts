@@ -32,6 +32,9 @@ class LinkPlugin {
                 const linkDecoration = Decoration.mark({
                     class: 'link-plugin-link',
                     attributes: {
+                        title: match[0].startsWith('<<<')
+                            ? 'come-from'
+                            : 'goto',
                         'data-keyword': match[1],
                     },
                 });
