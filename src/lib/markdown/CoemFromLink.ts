@@ -31,7 +31,7 @@ class ComeFromLinkPlugin {
                 const start = from + match.index;
                 const end = start + match[0].length;
                 const linkDecoration = Decoration.mark({
-                    class: 'custom-link',
+                    class: 'come-from-link',
                     attributes: {
                         'data-keyword': match[1],
                     },
@@ -53,7 +53,7 @@ export const comeFromLinkPlugin = function (
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             mousedown: (event: MouseEvent, _view: EditorView) => {
                 const target = event.target as HTMLElement;
-                if (target.matches('.custom-link')) {
+                if (target.matches('.come-from-link')) {
                     // ここでリンクのクリックイベントを処理
                     console.log(`come-from link clicked! ${target.innerText}`);
 
