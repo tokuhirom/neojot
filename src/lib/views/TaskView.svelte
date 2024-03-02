@@ -7,6 +7,7 @@
     import {
         calculateFreshness,
         extractTasks,
+        getTaskIcon,
         sortTasks,
         type Task,
     } from '../task/Task';
@@ -78,25 +79,20 @@
                 class={determineClass(task)}
             >
                 <span class="header">
-                    {#if task.deadline}
-                        <span class="deadline"
-                            >Deadline: {format(
-                                task.deadline,
-                                'yyyy-MM-dd',
-                            )}</span
-                        >
-                    {/if}
-                    {#if task.scheduled}
-                        <span class="scheduled"
-                            >Scheduled: {format(
-                                task.scheduled,
-                                'yyyy-MM-dd',
-                            )}</span
-                        >
-                    {/if}
+                    {getTaskIcon(task)}
                     <span class="task">{task.type} </span>
                 </span>
                 <span class="title">{task.title}</span>
+                {#if task.deadline}
+                    <span class="deadline"
+                        >Deadline: {format(task.deadline, 'yyyy-MM-dd')}</span
+                    >
+                {/if}
+                {#if task.scheduled}
+                    <span class="scheduled"
+                        >Scheduled: {format(task.scheduled, 'yyyy-MM-dd')}</span
+                    >
+                {/if}
                 <span class="file-title">{task.fileItem.title}</span>
             </button>
         {/each}

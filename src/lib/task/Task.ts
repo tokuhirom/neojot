@@ -1,5 +1,5 @@
 import type { FileItem } from '../file_item/FileItem';
-import { differenceInDays } from 'date-fns';
+import { differenceInDays, startOfDay } from 'date-fns';
 import { parse as parseDate2 } from 'date-fns';
 
 export type Task = {
@@ -11,6 +11,25 @@ export type Task = {
     lineNumber: number;
     fileItem: FileItem;
 };
+
+export function getTaskIcon(task: Task): string {
+    const today = startOfDay(new Date());
+    if (task.type === 'DONE') {
+        return '✅';
+    } else if (task.type === 'PLAN') {
+        return '📅';
+    } else if (task.type === 'DOING') {
+        return '✍️';
+    } else if (task.type === 'WAITING') {
+        return '⏳';
+    } else if (task.deadline && task.deadline.getDate() <= today.getDate()) {
+        return '🚨';
+    } else if (task.scheduled && task.scheduled.getDate() === today.getDate()) {
+        return '💪';
+    } else {
+        return '📝';
+    }
+}
 
 // 旬度を計算する関数
 // 旬度はタスクタブと、通常表示の両方で使う。
