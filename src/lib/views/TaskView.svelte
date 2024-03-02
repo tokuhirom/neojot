@@ -13,6 +13,7 @@
     } from '../task/Task';
     import { emit } from '@tauri-apps/api/event';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
+    import TaskIcon from '../task/TaskIcon.svelte';
 
     let searchWord = '';
 
@@ -79,7 +80,7 @@
                 class={determineClass(task)}
             >
                 <span class="header">
-                    {getTaskIcon(task)}
+                    <TaskIcon {task} />
                     <span class="task">{task.type} </span>
                 </span>
                 <span class="title">{task.title}</span>

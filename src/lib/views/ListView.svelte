@@ -11,11 +11,13 @@
     import {
         calculateFreshness,
         extractTasks,
+        getTaskIcon,
         sortTasks,
         type Task,
     } from '../task/Task';
     import { onMount } from 'svelte';
     import { format } from 'date-fns';
+    import TaskIcon from '../task/TaskIcon.svelte';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -101,6 +103,7 @@
                 class="task {task.type.toLowerCase()}"
                 on:click={() => onSelectItem(task.fileItem)}
             >
+                <TaskIcon {task} />
                 {task.type}
                 {#if task.scheduled && task.type === 'PLAN'}
                     {format(task.scheduled, 'yyyy-MM-dd(EEE)')}
