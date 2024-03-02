@@ -11,6 +11,9 @@
         type Task,
     } from '../task/Task';
     import { emit } from '@tauri-apps/api/event';
+    import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
+
+    let searchWord = '';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -19,6 +22,7 @@
     export let title2fileItem: Record<string, FileItem>;
     export let comefromLinks: Record<string, FileItem>;
     let tasks: Task[] = [];
+    let filteredTasks: Task[] = [];
 
     onMount(() => {
         tasks = sortTasks(extractTasks(dataFileItems));
@@ -29,6 +33,14 @@
 
     $: if (dataFileItems) {
         tasks = sortTasks(extractTasks(dataFileItems));
+    }
+
+    $: if (searchWord === '') {
+        filteredTasks = tasks;
+    } else {
+        filteredTasks = tasks.filter((task) => {
+            return task.title.toLowerCase().includes(searchWord.toLowerCase());
+        });
     }
 
     function onSaved() {
@@ -59,7 +71,8 @@
 
 <div class="task-view">
     <div class="file-list">
-        {#each tasks as task}
+        <ClearableSearchBox bind:searchWord />
+        {#each filteredTasks as task}
             <button
                 on:click={() => handleOnClick(task)}
                 class={determineClass(task)}
