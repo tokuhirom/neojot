@@ -476,7 +476,9 @@
             extensions: [
                 history(),
                 todoPlugin,
-                comeFromLinkPlugin,
+                comeFromLinkPlugin((keyword) => {
+                    search(keyword);
+                }),
                 internalLinkDecorator,
                 imageDecorator,
                 comeFromLinkHighlightPlugin(

@@ -5,9 +5,7 @@ import {
     ViewUpdate,
 } from '@codemirror/view';
 import { type RangeSet, RangeSetBuilder } from '@codemirror/state';
-
-// カスタムデコレーションスタイル
-const linkDecoration = Decoration.mark({ class: 'custom-link' });
+import type { FileItem } from '../file_item/FileItem';
 
 // カスタムプラグインの型定義
 class ComeFromLinkPlugin {
@@ -32,6 +30,12 @@ class ComeFromLinkPlugin {
             while ((match = regex.exec(text))) {
                 const start = from + match.index;
                 const end = start + match[0].length;
+                const linkDecoration = Decoration.mark({
+                    class: 'custom-link',
+                    attributes: {
+                        'data-keyword': match[1],
+                    },
+                });
                 builder.add(start, end, linkDecoration);
             }
         }
@@ -39,19 +43,26 @@ class ComeFromLinkPlugin {
     }
 }
 
-export const comeFromLinkPlugin = ViewPlugin.fromClass(ComeFromLinkPlugin, {
-    decorations: (v) => v.decorations,
+export const comeFromLinkPlugin = function (
+    searchItem: (keyword: string) => void,
+) {
+    return ViewPlugin.fromClass(ComeFromLinkPlugin, {
+        decorations: (v) => v.decorations,
 
-    eventHandlers: {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        mousedown: (event: MouseEvent, _view: EditorView) => {
-            const target = event.target as HTMLElement;
-            if (target.matches('.custom-link')) {
-                // ここでリンクのクリックイベントを処理
-                console.log(`come-from link clicked! ${target.innerText}`);
+        eventHandlers: {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            mousedown: (event: MouseEvent, _view: EditorView) => {
+                const target = event.target as HTMLElement;
+                if (target.matches('.custom-link')) {
+                    // ここでリンクのクリックイベントを処理
+                    console.log(`come-from link clicked! ${target.innerText}`);
 
-                // クリック時にはキーワード検索をかけるのが howm の挙動ではある。
-            }
+                    const keyword = target.getAttribute('data-keyword');
+                    if (keyword) {
+                        searchItem(keyword);
+                    }
+                }
+            },
         },
-    },
-});
+    });
+};
