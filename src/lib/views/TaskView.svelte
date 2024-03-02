@@ -3,17 +3,15 @@
     import { type FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
     import LinkCards from '../link/LinkCards.svelte';
-    import { format } from 'date-fns';
     import {
         calculateFreshness,
         extractTasks,
-        getTaskIcon,
         sortTasks,
         type Task,
     } from '../task/Task';
     import { emit } from '@tauri-apps/api/event';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
-    import TaskIcon from '../task/TaskIcon.svelte';
+    import TaskItem from '../task/TaskItem.svelte';
 
     let searchWord = '';
 
@@ -57,14 +55,6 @@
         onSelectItem(fileItem);
     }
 
-    function determineClass(task) {
-        const now = new Date();
-        const score = calculateFreshness(task, now);
-
-        const typeClass = task.type.toLowerCase();
-        return typeClass + ' ' + (score < 0 ? 'negative' : 'positive');
-    }
-
     function handleOnClick(task: Task) {
         onSelectItem(task.fileItem);
         emit('go-to-line-number', task.lineNumber);
@@ -75,27 +65,7 @@
     <div class="file-list">
         <ClearableSearchBox bind:searchWord />
         {#each filteredTasks as task}
-            <button
-                on:click={() => handleOnClick(task)}
-                class={determineClass(task)}
-            >
-                <span class="header">
-                    <TaskIcon {task} />
-                    <span class="task">{task.type} </span>
-                </span>
-                <span class="title">{task.title}</span>
-                {#if task.deadline}
-                    <span class="deadline"
-                        >Deadline: {format(task.deadline, 'yyyy-MM-dd')}</span
-                    >
-                {/if}
-                {#if task.scheduled}
-                    <span class="scheduled"
-                        >Scheduled: {format(task.scheduled, 'yyyy-MM-dd')}</span
-                    >
-                {/if}
-                <span class="file-title">{task.fileItem.title}</span>
-            </button>
+            <TaskItem {task} {handleOnClick} />
         {/each}
     </div>
     <div class="log-view">
@@ -138,21 +108,6 @@
         word-break: break-word;
         white-space: normal;
     }
-    .file-list button {
-        display: block;
-        word-break: break-all;
-        width: 100%;
-        text-align: left;
-        background: none;
-        color: inherit;
-        border: none;
-        padding: 8px;
-        margin: 0;
-        font: inherit;
-        cursor: pointer;
-        border-bottom: darkslategrey 1px solid;
-        overflow-x: hidden;
-    }
     .log-view {
         flex: 0 0 68%;
         /*overflow-x: hidden;*/
@@ -162,39 +117,5 @@
         margin-block-end: 0;
         height: 100vh;
         overflow-y: scroll;
-    }
-
-    .header {
-        display: block;
-    }
-    .title {
-        display: block;
-    }
-    .file-title {
-        display: block;
-        font-size: 80%;
-    }
-
-    /* 完了済みタスク */
-    .done {
-        color: #757575 !important;
-        text-decoration: line-through;
-        background-color: #f0f0f0;
-    }
-
-    .positive {
-        background-color: darkslategrey !important;
-    }
-
-    .schedule {
-        color: orange !important;
-        display: block;
-    }
-    .deadline {
-        color: crimson !important;
-        display: block;
-    }
-    .todo {
-        color: cornflowerblue !important;
     }
 </style>

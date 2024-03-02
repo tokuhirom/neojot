@@ -32,4 +32,4 @@
     $: icon = getTaskIcon(task);
 </script>
 
-<div>{icon}</div>
+<span>{icon}</span>
