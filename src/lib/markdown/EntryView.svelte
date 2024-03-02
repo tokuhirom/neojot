@@ -34,6 +34,7 @@
     import { languages } from '@codemirror/language-data';
     import { syntaxHighlighting } from '@codemirror/language';
     import { todoPlugin } from './TodoWidget';
+    import { gotoLinkPlugin } from './GotoLinkWidget';
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
@@ -477,6 +478,9 @@
                 history(),
                 todoPlugin,
                 comeFromLinkPlugin((keyword) => {
+                    search(keyword);
+                }),
+                gotoLinkPlugin((keyword) => {
                     search(keyword);
                 }),
                 internalLinkDecorator,
