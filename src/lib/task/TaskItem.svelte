@@ -74,11 +74,6 @@
     .done {
         color: #757575 !important;
         text-decoration: line-through;
-        background-color: #f0f0f0;
-    }
-
-    .positive {
-        background-color: darkslategrey !important;
     }
 
     .schedule {
@@ -86,6 +81,9 @@
         display: block;
     }
     .deadline {
+        display: block;
+    }
+    .positive .deadline {
         color: crimson !important;
         display: block;
     }
