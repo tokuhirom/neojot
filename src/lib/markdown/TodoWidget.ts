@@ -5,6 +5,7 @@ import {
     ViewPlugin,
     ViewUpdate,
 } from '@codemirror/view';
+import { format } from 'date-fns';
 
 const colorMap: Record<string, string> = {
     done: 'green',
@@ -101,6 +102,29 @@ export const todoPlugin = ViewPlugin.fromClass(
                     replaceLine(view, (type, param, title) => {
                         const newType = type === 'DOING' ? 'TODO' : 'DOING';
                         return `${newType}[${param}]:${title}`;
+                    });
+                } else if (event.key === 'c') {
+                    console.log('c key pressed');
+                    event.preventDefault();
+                    event.stopPropagation();
+                    replaceLine(view, (type, param, title) => {
+                        const currentDate = format(
+                            new Date(),
+                            'yyyy-MM-dd(EEE)',
+                        );
+                        return `CANCELED[Finished:${currentDate} ${param}]:${title}`;
+                    });
+                } else if (event.key === 'Enter') {
+                    console.log('Enter key pressed');
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    replaceLine(view, (type, param, title) => {
+                        const currentDate = format(
+                            new Date(),
+                            'yyyy-MM-dd(EEE)',
+                        );
+                        return `DONE[Finished:${currentDate} ${param}]:${title}`;
                     });
                 }
             },

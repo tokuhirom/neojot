@@ -268,57 +268,6 @@
             return false;
         }
 
-        // エンターキーが押されたときに実行される関数
-        function changeTaskState(
-            view: EditorView,
-            key: string,
-            finish: boolean,
-        ): boolean {
-            const { state, dispatch } = view;
-
-            let { from } = state.selection.main;
-            // 現在の行を取得
-            const line = state.doc.lineAt(from);
-            const lineText = line.text;
-            const datePattern =
-                /^(?:TODO|DOING|DONE|NOTE)(\[(((Scheduled|Deadline):\d{4}-\d{2}-\d{2}\([A-Z][a-z][a-z]\)\s*)*)])?:/;
-            const match = datePattern.exec(lineText);
-
-            if (
-                match &&
-                from <= line.from + match.index + match[1].length + 1
-            ) {
-                let replaceFrom = line.from;
-                let replaceTo = replaceFrom + match[0].length;
-
-                // 現在の日付を取得
-                const currentDate = format(new Date(), 'yyyy-MM-dd(EEE)');
-                // 新しい行の内容を準備
-                const nextKey =
-                    key === 'DOING' && line.text.startsWith('DOING')
-                        ? 'TODO'
-                        : key === 'NOTE' && line.text.startsWith('NOTE')
-                          ? 'TODO'
-                          : key;
-                const completedTask = `${nextKey}[${finish ? `Finished:${currentDate} ` : ''}${match[2]}]:`;
-
-                // 現在の行の後に新しい行を追加
-                dispatch(
-                    state.update({
-                        changes: {
-                            from: replaceFrom,
-                            to: replaceTo,
-                            insert: completedTask,
-                        },
-                        userEvent: 'input',
-                    }),
-                );
-                return true;
-            }
-            return false;
-        }
-
-        // エンターキーが押されたときに実行される関数
         function insertTodoDate(view: EditorView, key: string): boolean {
             const { state, dispatch } = view;
 
@@ -391,15 +340,6 @@
             {
                 key: '-', // Cmd/Ctrl + -
                 run: (view) => updateDate(view, false),
-            },
-            {
-                key: 'Enter',
-                run: (view: EditorView) => changeTaskState(view, 'DONE', false),
-            },
-            {
-                key: 'c',
-                run: (view: EditorView) =>
-                    changeTaskState(view, 'CANCELED', true),
             },
             {
                 key: 'd',
