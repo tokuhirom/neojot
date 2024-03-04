@@ -29,6 +29,9 @@
     onMount(() => {
         updateTasks();
     });
+    $: if (dataFileItems) {
+        updateTasks();
+    }
 
     function updateTasks() {
         const today = new Date();
