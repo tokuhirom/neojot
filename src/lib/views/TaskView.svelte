@@ -3,12 +3,7 @@
     import { type FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
     import LinkCards from '../link/LinkCards.svelte';
-    import {
-        calculateFreshness,
-        extractTasks,
-        sortTasks,
-        type Task,
-    } from '../task/Task';
+    import { extractTasks, sortTasks, type Task } from '../task/Task';
     import { emit } from '@tauri-apps/api/event';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import TaskItem from '../task/TaskItem.svelte';

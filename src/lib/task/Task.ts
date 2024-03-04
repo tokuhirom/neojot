@@ -1,5 +1,5 @@
 import type { FileItem } from '../file_item/FileItem';
-import { differenceInDays, startOfDay } from 'date-fns';
+import { differenceInDays } from 'date-fns';
 import { parse as parseDate2 } from 'date-fns';
 
 export type Task = {

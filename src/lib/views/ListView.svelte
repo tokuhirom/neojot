@@ -15,8 +15,6 @@
         type Task,
     } from '../task/Task';
     import { onMount } from 'svelte';
-    import { format } from 'date-fns';
-    import TaskIcon from '../task/TaskIcon.svelte';
     import TaskItem from '../task/TaskItem.svelte';
     import { emit } from '@tauri-apps/api/event';
 
