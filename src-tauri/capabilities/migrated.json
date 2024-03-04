@@ -13,6 +13,7 @@
     "resources:default",
     "menu:default",
     "tray:default",
+    "dialog:allow-message",
     "fs:allow-app-read",
     "fs:allow-appdata-write-recursive",
     "fs:allow-appdata-read-recursive",
@@ -23,6 +24,7 @@
       "allow": [
         {"path": "$APPDATA"},
         {"path": "$APPDATA/*"},
+        {"path": "$APPDATA/.git"},
         {"path": "$APPDATA/data/*"},
         {"path": "$APPDATA/calendar/*"},
         {"path": "$APPDATA/archived/*"},

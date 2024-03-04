@@ -1,6 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod git;
+
 use std::fs;
 use std::time::SystemTime;
 use serde::{Deserialize, Serialize};
@@ -11,6 +13,8 @@ use tauri::{App, Manager, Wry};
 use tauri::menu::{Menu, MenuBuilder, MenuItemBuilder, SubmenuBuilder};
 use tauri_plugin_autostart::MacosLauncher;
 
+use crate::git::git_init;
+use crate::git::git_add_commit_push;
 
 #[derive(Serialize, Deserialize)]
 struct FileItem {
@@ -30,6 +34,20 @@ fn get_title(content: &str) -> String {
         let mut lines = content.lines().clone();
         lines.next().unwrap_or("").to_string()
     };
+}
+
+#[tauri::command]
+fn tauri_git_init() -> Result<(), String> {
+    git_init()
+        .map_err(|e| format!("Failed to initialize repository: {}", e))?;
+    Ok(())
+}
+
+#[tauri::command]
+fn tauri_git_add_commit_push() -> Result<(), String> {
+    git_add_commit_push()
+        .map_err(|e| format!("Failed to operate repository: {}", e))?;
+    Ok(())
 }
 
 #[tauri::command]
@@ -229,6 +247,8 @@ fn main() -> anyhow::Result<()> {
             get_files,
             open_url,
             load_file_item,
+            tauri_git_init,
+            tauri_git_add_commit_push,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

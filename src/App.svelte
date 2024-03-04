@@ -17,6 +17,7 @@
     } from './lib/repository/NodeRepository';
     import type { FileItem } from './lib/file_item/FileItem';
     import ManualView from './lib/views/ManualView.svelte';
+    import { initGit } from './lib/git/GitCommands';
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
@@ -29,6 +30,8 @@
         if (dataFileItems.length > 0) {
             selectedItem = dataFileItems[0];
         }
+
+        await initGit();
     });
 
     let previousTabPane;
