@@ -16,15 +16,18 @@ export async function initGit() {
         }
     }
 
-    setInterval(async () => {
-        try {
-            await invoke('tauri_git_add_commit_push');
-        } catch (e) {
-            console.error(e);
-            await message(`Cannot do git operation: ${e}`, {
-                title: 'Tauri',
-                kind: 'error',
-            });
-        }
-    }, 1000);
+    setInterval(
+        async () => {
+            try {
+                await invoke('tauri_git_add_commit_push');
+            } catch (e) {
+                console.error(e);
+                await message(`Cannot do git operation: ${e}`, {
+                    title: 'Tauri',
+                    kind: 'error',
+                });
+            }
+        },
+        60 * 60 * 1000,
+    );
 }
