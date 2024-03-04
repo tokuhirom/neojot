@@ -19,7 +19,7 @@ export function buildKeywordRegex(keywords: string[]): RegExp {
         kw.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'),
     );
     // 英数字と特定の非英数字文字の間、または文字列の開始/終了にマッチするようにする
-    const boundary = '(?<![/\\w.-])';
+    const boundary = '(?<![[/\\w.-])';
     const endBoundary = '(?![/\\w.-])';
     return new RegExp(
         `${boundary}(${escapedKeywords.join('|')})${endBoundary}`,
