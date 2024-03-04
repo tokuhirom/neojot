@@ -131,7 +131,7 @@ export function extractTasks(fileItems: FileItem[]): Task[] {
         fileItem.content.split('\n').forEach((line, index) => {
             const taskP = parseTask(line, index + 1, fileItem);
             if (taskP) {
-                console.log(taskP);
+                // console.log(taskP);
                 tasks.push(taskP);
             }
         });
