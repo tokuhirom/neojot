@@ -16,6 +16,10 @@ const colorMap: Record<string, string> = {
     note: 'magenta',
 };
 
+function currentDate() {
+    return format(new Date(), 'yyyy-MM-dd(EEE)');
+}
+
 function replaceLine(
     view: EditorView,
     replacer: (type: string, param: string, title: string) => string,
@@ -108,11 +112,7 @@ export const todoPlugin = ViewPlugin.fromClass(
                     event.preventDefault();
                     event.stopPropagation();
                     replaceLine(view, (type, param, title) => {
-                        const currentDate = format(
-                            new Date(),
-                            'yyyy-MM-dd(EEE)',
-                        );
-                        return `CANCELED[Finished:${currentDate} ${param}]:${title}`;
+                        return `CANCELED[Finished:${currentDate()} ${param}]:${title}`;
                     });
                 } else if (event.key === 'Enter') {
                     console.log('Enter key pressed');
@@ -120,11 +120,31 @@ export const todoPlugin = ViewPlugin.fromClass(
                     event.stopPropagation();
 
                     replaceLine(view, (type, param, title) => {
-                        const currentDate = format(
-                            new Date(),
-                            'yyyy-MM-dd(EEE)',
-                        );
-                        return `DONE[Finished:${currentDate} ${param}]:${title}`;
+                        return `DONE[Finished:${currentDate()} ${param}]:${title}`;
+                    });
+                } else if (event.key === 's') {
+                    console.log('Enter key pressed');
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    replaceLine(view, (type, param, title) => {
+                        // if 'Scheduled:' is not included in param, add it.
+                        if (!param.match(/Scheduled:/)) {
+                            param = `Scheduled:${currentDate()} ${param}`;
+                        }
+                        return `${type}[${param}]:${title}`;
+                    });
+                } else if (event.key === 'd') {
+                    console.log('Enter key pressed');
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    replaceLine(view, (type, param, title) => {
+                        // if 'Deadline:' is not included in param, add it.
+                        if (!param.match(/Deadline:/)) {
+                            param = `Deadline:${currentDate()} ${param}`;
+                        }
+                        return `${type}[${param}]:${title}`;
                     });
                 }
             },

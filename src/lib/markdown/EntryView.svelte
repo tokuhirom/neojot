@@ -268,49 +268,6 @@
             return false;
         }
 
-        function insertTodoDate(view: EditorView, key: string): boolean {
-            const { state, dispatch } = view;
-
-            let { from } = state.selection.main;
-            const line = state.doc.lineAt(from);
-            const lineText = line.text;
-            const datePattern =
-                /^TODO(\[(((Scheduled|Deadline):\d{4}-\d{2}-\d{2}\([A-Z][a-z][a-z]\)\s*)*)])?:/;
-            const match = datePattern.exec(lineText);
-
-            if (
-                match &&
-                from <= line.from + match.index + match[0].length + 1
-            ) {
-                if (match[2] && match[2].includes(key)) {
-                    // This key is already included in this task.
-                    // ignore the key input.
-                    return true;
-                }
-                let replaceFrom = line.from;
-                let replaceTo = replaceFrom + match[0].length;
-
-                // 現在の日付を取得
-                const currentDate = format(new Date(), 'yyyy-MM-dd(EEE)');
-                // 新しい行の内容を準備
-                const completedTask = `TODO[${key}:${currentDate}${match[2] ? ' ' + match[2] : ''}]:`;
-
-                // 現在の行の後に新しい行を追加
-                dispatch(
-                    state.update({
-                        changes: {
-                            from: replaceFrom,
-                            to: replaceTo,
-                            insert: completedTask,
-                        },
-                        userEvent: 'input',
-                    }),
-                );
-                return true;
-            }
-            return false;
-        }
-
         const customKeymap: KeyBinding[] = [
             { key: 'Mod-z', run: undo, preventDefault: true },
             { key: 'Mod-Shift-z', run: redo, preventDefault: true },
@@ -340,14 +297,6 @@
             {
                 key: '-', // Cmd/Ctrl + -
                 run: (view) => updateDate(view, false),
-            },
-            {
-                key: 'd',
-                run: (view: EditorView) => insertTodoDate(view, 'Deadline'),
-            },
-            {
-                key: 's',
-                run: (view: EditorView) => insertTodoDate(view, 'Scheduled'),
             },
             ...searchKeymap,
             ...defaultKeymap, // 標準のキーマップを含める
