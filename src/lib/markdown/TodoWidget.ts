@@ -56,5 +56,38 @@ export const todoPlugin = ViewPlugin.fromClass(
     },
     {
         decorations: (v) => v.decorations,
+        eventHandlers: {
+            keydown: (event, view) => {
+                // when user press the 'n' key, update line to 'NOTE'
+                if (event.key === 'n') {
+                    console.log('n key pressed');
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    // replace the current line with 'NOTE'
+                    const { state } = view;
+                    const { from, to } = state.selection.main;
+                    const lineStart = state.doc.lineAt(from).from;
+                    const lineEnd = state.doc.lineAt(to).to;
+                    const lineText = state.doc.sliceString(lineStart, lineEnd);
+                    const modifiedText = lineText.replace(
+                        /^(DONE|TODO|CANCELED|PLAN|DOING|NOTE)\[(.*?)]:(.*)$/,
+                        (_all, type, param, title) => {
+                            console.log('type:', type);
+                            const newType = type === 'NOTE' ? 'TODO' : 'NOTE';
+                            return `${newType}[${param}]:${title}`;
+                        },
+                    );
+
+                    view.dispatch({
+                        changes: {
+                            from: lineStart,
+                            to: lineEnd,
+                            insert: modifiedText,
+                        },
+                    });
+                }
+            },
+        },
     },
 );

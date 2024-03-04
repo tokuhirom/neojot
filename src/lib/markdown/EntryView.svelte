@@ -407,10 +407,6 @@
                     changeTaskState(view, 'DOING', false),
             },
             {
-                key: 'n',
-                run: (view: EditorView) => changeTaskState(view, 'NOTE', false),
-            },
-            {
                 key: 'd',
                 run: (view: EditorView) => insertTodoDate(view, 'Deadline'),
             },
