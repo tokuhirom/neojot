@@ -402,11 +402,6 @@
                     changeTaskState(view, 'CANCELED', true),
             },
             {
-                key: 'i',
-                run: (view: EditorView) =>
-                    changeTaskState(view, 'DOING', false),
-            },
-            {
                 key: 'd',
                 run: (view: EditorView) => insertTodoDate(view, 'Deadline'),
             },

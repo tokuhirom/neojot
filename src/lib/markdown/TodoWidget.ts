@@ -94,6 +94,14 @@ export const todoPlugin = ViewPlugin.fromClass(
                         const newType = type === 'NOTE' ? 'TODO' : 'NOTE';
                         return `${newType}[${param}]:${title}`;
                     });
+                } else if (event.key === 'i') {
+                    console.log('i key pressed');
+                    event.preventDefault();
+                    event.stopPropagation();
+                    replaceLine(view, (type, param, title) => {
+                        const newType = type === 'DOING' ? 'TODO' : 'DOING';
+                        return `${newType}[${param}]:${title}`;
+                    });
                 }
             },
         },
