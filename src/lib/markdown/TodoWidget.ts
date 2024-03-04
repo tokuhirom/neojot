@@ -15,6 +15,33 @@ const colorMap: Record<string, string> = {
     note: 'magenta',
 };
 
+function replaceLine(
+    view: EditorView,
+    replacer: (type: string, param: string, title: string) => string,
+) {
+    // replace the current line with 'NOTE'
+    const { state } = view;
+    const { from, to } = state.selection.main;
+    const lineStart = state.doc.lineAt(from).from;
+    const lineEnd = state.doc.lineAt(to).to;
+    const lineText = state.doc.sliceString(lineStart, lineEnd);
+    const modifiedText = lineText.replace(
+        /^(DONE|TODO|CANCELED|PLAN|DOING|NOTE)\[(.*?)]:(.*)$/,
+        (_all, type, param, title) => {
+            console.log('type:', type);
+            return replacer(type, param, title);
+        },
+    );
+
+    view.dispatch({
+        changes: {
+            from: lineStart,
+            to: lineEnd,
+            insert: modifiedText,
+        },
+    });
+}
+
 export const todoPlugin = ViewPlugin.fromClass(
     class {
         decorations: RangeSet<Decoration>;
@@ -63,28 +90,9 @@ export const todoPlugin = ViewPlugin.fromClass(
                     console.log('n key pressed');
                     event.preventDefault();
                     event.stopPropagation();
-
-                    // replace the current line with 'NOTE'
-                    const { state } = view;
-                    const { from, to } = state.selection.main;
-                    const lineStart = state.doc.lineAt(from).from;
-                    const lineEnd = state.doc.lineAt(to).to;
-                    const lineText = state.doc.sliceString(lineStart, lineEnd);
-                    const modifiedText = lineText.replace(
-                        /^(DONE|TODO|CANCELED|PLAN|DOING|NOTE)\[(.*?)]:(.*)$/,
-                        (_all, type, param, title) => {
-                            console.log('type:', type);
-                            const newType = type === 'NOTE' ? 'TODO' : 'NOTE';
-                            return `${newType}[${param}]:${title}`;
-                        },
-                    );
-
-                    view.dispatch({
-                        changes: {
-                            from: lineStart,
-                            to: lineEnd,
-                            insert: modifiedText,
-                        },
+                    replaceLine(view, (type, param, title) => {
+                        const newType = type === 'NOTE' ? 'TODO' : 'NOTE';
+                        return `${newType}[${param}]:${title}`;
                     });
                 }
             },
