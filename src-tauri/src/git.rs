@@ -51,8 +51,19 @@ pub fn git_add_commit_push() -> anyhow::Result<()> {
     index.add_all(["*"].iter(), IndexAddOption::DEFAULT, None)?;
     index.write()?;
 
+    let oid = index.write_tree()?;
+    let tree = repo.find_tree(oid)?;
+    let diff = if let Some(oid) = find_last_commit(&repo)? {
+        let parent = repo.find_commit(oid)?;
+        let parent_tree = parent.tree()?;
+        repo.diff_tree_to_tree(Some(&parent_tree), Some(&tree), None)?
+    } else {
+        // 最初のコミットの場合は、常に差分があると見なします。
+        repo.diff_tree_to_tree(None, Some(&tree), None)?
+    };
+
     // if there's any change, commit it.
-    if index.iter().count() > 0 {
+    if diff.deltas().count() > 0 {
         log::info!("Committing changes");
         let oid = index.write_tree()?;
         let tree = repo.find_tree(oid)?;
@@ -79,6 +90,8 @@ pub fn git_add_commit_push() -> anyhow::Result<()> {
         } else {
             log::info!("[git] No remotes configured, skipping push");
         }
+    } else {
+        log::info!("No changes in the repository. Skipping commit and push.")
     }
 
     Ok(())
