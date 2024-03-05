@@ -5,7 +5,7 @@ import {
     ViewPlugin,
     ViewUpdate,
 } from '@codemirror/view';
-import { format } from 'date-fns';
+import { addDays, format, parse, subDays } from 'date-fns';
 
 const colorMap: Record<string, string> = {
     done: 'green',
@@ -18,6 +18,48 @@ const colorMap: Record<string, string> = {
 
 function currentDate() {
     return format(new Date(), 'yyyy-MM-dd(EEE)');
+}
+
+function replaceDate(event: KeyboardEvent, view: EditorView, key: string) {
+    const { state } = view;
+    const { from, to } = state.selection.main;
+    let extendedFrom = from - 15; // Extend the search area around the cursor to capture the date
+    let extendedTo = to + 15;
+    extendedFrom = extendedFrom < 0 ? 0 : extendedFrom; // Ensure we don't go below document start
+    extendedTo = extendedTo > state.doc.length ? state.doc.length : extendedTo; // Ensure we don't go past document end
+
+    const surroundingText = state.doc.sliceString(extendedFrom, extendedTo);
+    const dateRegex = /\d{4}-\d{2}-\d{2}\(\w{3}\)/g; // Match dates in the format YYYY-MM-DD(Day)
+    let match;
+    while ((match = dateRegex.exec(surroundingText)) !== null) {
+        const dateStr = match[0];
+        const date = parse(dateStr, 'yyyy-MM-dd(E)', new Date());
+        let updatedDate;
+        if (key === '+') {
+            updatedDate = addDays(date, 1);
+        } else if (key === '-') {
+            updatedDate = subDays(date, 1);
+        } else {
+            return; // If the key is neither '+' nor '-', do nothing
+        }
+        const formattedDate = format(updatedDate, 'yyyy-MM-dd(EEE)');
+        const startIndex = extendedFrom + match.index;
+        const endIndex = startIndex + dateStr.length;
+
+        // Update only if the cursor is within the matched date string
+        if (from >= startIndex && to <= endIndex) {
+            event.preventDefault();
+            event.stopPropagation();
+            view.dispatch({
+                changes: {
+                    from: startIndex,
+                    to: endIndex,
+                    insert: formattedDate,
+                },
+            });
+            break; // Assume only one date is to be updated per key press
+        }
+    }
 }
 
 function replaceLine(
@@ -104,12 +146,16 @@ export const todoPlugin = ViewPlugin.fromClass(
         decorations: (v) => v.decorations,
         eventHandlers: {
             keydown: (event, view) => {
-                if (
-                    event.ctrlKey ||
-                    event.shiftKey ||
-                    event.altKey ||
-                    event.metaKey
-                ) {
+                if (event.ctrlKey || event.altKey || event.metaKey) {
+                    return;
+                }
+
+                if (event.key === '+' || event.key === '-') {
+                    replaceDate(event, view, event.key);
+                    return;
+                }
+
+                if (event.shiftKey) {
                     return;
                 }
 

@@ -10,6 +10,7 @@ import {
 } from '@tauri-apps/plugin-fs';
 import { invoke } from '@tauri-apps/api/core';
 import { type FileItem } from '../file_item/FileItem';
+import { format } from 'date-fns';
 
 export type CalendarData = Record<number, string[]>;
 
@@ -38,15 +39,8 @@ export async function loadFileList(prefix: string): Promise<FileItem[]> {
 
 function createNewFileName() {
     const now = new Date();
-
-    const year = now.getFullYear();
-    const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    const day = now.getDate().toString().padStart(2, '0');
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const seconds = now.getSeconds().toString().padStart(2, '0');
-
-    return `data/${year}${month}${day}${hours}${minutes}${seconds}.md`;
+    const formattedDate = format(now, 'yyyyMMddHHmmss');
+    return `data/${formattedDate}.md`;
 }
 export async function createNewFileWithContent(src: string): Promise<FileItem> {
     const filename = createNewFileName();
@@ -101,15 +95,8 @@ export async function deleteArchivedFile(fileItem: FileItem) {
 
 function createImageFileName(ext: string) {
     const now = new Date();
-
-    const year = now.getFullYear();
-    const month = (now.getMonth() + 1).toString().padStart(2, '0');
-    const day = now.getDate().toString().padStart(2, '0');
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    const seconds = now.getSeconds().toString().padStart(2, '0');
-
-    return `images/${year}${month}${day}${hours}${minutes}${seconds}.${ext}`;
+    const formattedDate = format(now, 'yyyyMMddHHmmss');
+    return `images/${formattedDate}.${ext}`;
 }
 
 export async function readAndSaveImage(file: File): Promise<string> {

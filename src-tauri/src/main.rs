@@ -151,7 +151,7 @@ fn build_menu(app: &App) -> tauri::Result<Menu<Wry>> {
         .item(
             &MenuItemBuilder::new("Archive")
                 .id("archive")
-                .accelerator("Command+d")
+                .accelerator("f")
                 .build(app)?,
         )
         .build()?;

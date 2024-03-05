@@ -220,54 +220,6 @@
             return true;
         }
 
-        function updateDate(view: EditorView, increment: boolean): boolean {
-            const { state, dispatch } = view;
-            const { selection } = state;
-            const { from, to } = selection.main;
-
-            if (from !== to) {
-                // 選択範囲が空でない場合は何もしない
-                return false;
-            }
-
-            const line = state.doc.lineAt(from);
-            const dateRegex = /(\d{4}-\d{2}-\d{2})\([A-Z][a-z][a-z]\)/g; // グローバル検索に変更
-            let match;
-            let isCursorOnDate = false;
-
-            // 全ての日付パターンをチェック
-            while ((match = dateRegex.exec(line.text)) !== null) {
-                const matchStart = line.from + match.index;
-                const matchEnd = matchStart + match[0].length;
-                if (from >= matchStart && from <= matchEnd) {
-                    // カーソルが日付パターンの上にある
-                    isCursorOnDate = true;
-                    break;
-                }
-            }
-
-            if (isCursorOnDate && match) {
-                // カーソル位置に日付が含まれている場合
-                const date = parse(match[1], 'yyyy-MM-dd', new Date());
-                const updatedDate = addDays(date, increment ? 1 : -1);
-                const formattedDate = format(updatedDate, 'yyyy-MM-dd(EEE)');
-
-                // 日付を更新する
-                dispatch(
-                    state.update({
-                        changes: {
-                            from: line.from + match.index,
-                            to: line.from + match.index + match[0].length,
-                            insert: formattedDate,
-                        },
-                    }),
-                );
-                return true;
-            }
-
-            return false;
-        }
-
         const customKeymap: KeyBinding[] = [
             { key: 'Mod-z', run: undo, preventDefault: true },
             { key: 'Mod-Shift-z', run: redo, preventDefault: true },
@@ -290,14 +242,6 @@
             // task related -----------------------------------------
             { key: 'Mod-t', run: (view) => insertDateCommand(view, 'TODO') },
             { key: 'Mod-p', run: (view) => insertDateCommand(view, 'PLAN') },
-            {
-                key: '+', // Cmd/Ctrl + +
-                run: (view) => updateDate(view, true),
-            },
-            {
-                key: '-', // Cmd/Ctrl + -
-                run: (view) => updateDate(view, false),
-            },
             ...searchKeymap,
             ...defaultKeymap, // 標準のキーマップを含める
         ];
