@@ -31,6 +31,14 @@ function replaceLine(
     const lineStart = state.doc.lineAt(from).from;
     const lineEnd = state.doc.lineAt(to).to;
     const lineText = state.doc.sliceString(lineStart, lineEnd);
+    const match = /^(DONE|TODO|CANCELED|PLAN|DOING|NOTE)\[.*?\]:/.exec(
+        lineText,
+    );
+    if (!match || from > lineStart + match[0].length) {
+        // カーソル位置がパターンにマッチしない場合、または`:`の後ろにある場合は処理をスキップ
+        return;
+    }
+
     const modifiedText = lineText.replace(
         /^(DONE|TODO|CANCELED|PLAN|DOING|NOTE)\[(.*?)]:(.*)$/,
         (_all, type, param, title) => {
