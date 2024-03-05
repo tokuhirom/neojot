@@ -21,6 +21,7 @@ function currentDate() {
 }
 
 function replaceLine(
+    event: KeyboardEvent,
     view: EditorView,
     replacer: (type: string, param: string, title: string) => string,
 ) {
@@ -37,7 +38,12 @@ function replaceLine(
             return replacer(type, param, title);
         },
     );
+    if (modifiedText === lineText) {
+        return;
+    }
 
+    event.preventDefault();
+    event.stopPropagation();
     view.dispatch({
         changes: {
             from: lineStart,
@@ -90,44 +96,42 @@ export const todoPlugin = ViewPlugin.fromClass(
         decorations: (v) => v.decorations,
         eventHandlers: {
             keydown: (event, view) => {
+                if (
+                    event.ctrlKey ||
+                    event.shiftKey ||
+                    event.altKey ||
+                    event.metaKey
+                ) {
+                    return;
+                }
+
                 // when user press the 'n' key, update line to 'NOTE'
                 if (event.key === 'n') {
-                    console.log('n key pressed');
-                    event.preventDefault();
-                    event.stopPropagation();
-                    replaceLine(view, (type, param, title) => {
+                    replaceLine(event, view, (type, param, title) => {
                         const newType = type === 'NOTE' ? 'TODO' : 'NOTE';
                         return `${newType}[${param}]:${title}`;
                     });
                 } else if (event.key === 'i') {
-                    console.log('i key pressed');
-                    event.preventDefault();
-                    event.stopPropagation();
-                    replaceLine(view, (type, param, title) => {
+                    replaceLine(event, view, (type, param, title) => {
                         const newType = type === 'DOING' ? 'TODO' : 'DOING';
                         return `${newType}[${param}]:${title}`;
                     });
                 } else if (event.key === 'c') {
-                    console.log('c key pressed');
-                    event.preventDefault();
-                    event.stopPropagation();
-                    replaceLine(view, (type, param, title) => {
-                        return `CANCELED[Finished:${currentDate()} ${param}]:${title}`;
+                    replaceLine(event, view, (type, param, title) => {
+                        if (!param.match(/Finished:/)) {
+                            param = `Finished:${currentDate()} ${param}`;
+                        }
+                        return `CANCELED[${param}]:${title}`;
                     });
                 } else if (event.key === 'Enter') {
-                    console.log('Enter key pressed');
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    replaceLine(view, (type, param, title) => {
-                        return `DONE[Finished:${currentDate()} ${param}]:${title}`;
+                    replaceLine(event, view, (type, param, title) => {
+                        if (!param.match(/Finished:/)) {
+                            param = `Finished:${currentDate()} ${param}`;
+                        }
+                        return `DONE[${param}]:${title}`;
                     });
                 } else if (event.key === 's') {
-                    console.log('Enter key pressed');
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    replaceLine(view, (type, param, title) => {
+                    replaceLine(event, view, (type, param, title) => {
                         // if 'Scheduled:' is not included in param, add it.
                         if (!param.match(/Scheduled:/)) {
                             param = `Scheduled:${currentDate()} ${param}`;
@@ -135,11 +139,7 @@ export const todoPlugin = ViewPlugin.fromClass(
                         return `${type}[${param}]:${title}`;
                     });
                 } else if (event.key === 'd') {
-                    console.log('Enter key pressed');
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    replaceLine(view, (type, param, title) => {
+                    replaceLine(event, view, (type, param, title) => {
                         // if 'Deadline:' is not included in param, add it.
                         if (!param.match(/Deadline:/)) {
                             param = `Deadline:${currentDate()} ${param}`;
