@@ -150,6 +150,17 @@
     function enterViewerMode() {
         viewerMode = true;
     }
+
+    let fixedAreaHeight = 0; // 初期値を設定
+
+    $: if (selectedItem) {
+        const fixedAreaElement = document.querySelector(
+            '.fixed-area',
+        ) as HTMLElement | null;
+        if (fixedAreaElement) {
+            fixedAreaHeight = fixedAreaElement.offsetHeight;
+        }
+    }
 </script>
 
 <div class="list-view">
@@ -159,24 +170,31 @@
             viewerMode = false;
         }}
     >
-        {#each tasks as task}
-            <TaskItem {task} {handleOnClick} />
-        {/each}
-
-        <ClearableSearchBox bind:searchWord />
-        {#if searchResult && selectedItem}
-            {#each searchResult as result}
-                <FileListItem
-                    {onSelectItem}
-                    fileItem={result.fileItem}
-                    matchLines={result.lines}
-                    {searchWord}
-                    {selectedItem}
-                    {enterViewerMode}
-                    {viewerMode}
-                />
+        <div class="fixed-area">
+            {#each tasks as task}
+                <TaskItem {task} {handleOnClick} />
             {/each}
-        {/if}
+
+            <ClearableSearchBox bind:searchWord />
+        </div>
+        <div
+            class="scrollable-area"
+            style="height: calc(100vh - {fixedAreaHeight}px);"
+        >
+            {#if searchResult && selectedItem}
+                {#each searchResult as result}
+                    <FileListItem
+                        {onSelectItem}
+                        fileItem={result.fileItem}
+                        matchLines={result.lines}
+                        {searchWord}
+                        {selectedItem}
+                        {enterViewerMode}
+                        {viewerMode}
+                    />
+                {/each}
+            {/if}
+        </div>
     </div>
     <!-- eslint-disable-next-line -->
     <div class="log-view" on:click={() => (viewerMode = false)}>
@@ -208,6 +226,19 @@
         height: 100vh;
         padding-left: 8px;
         padding-right: 8px;
+    }
+
+    .fixed-area {
+        flex: 0 0 250px; /* Adjust width as needed */
+        overflow-y: visible; /* Ensures this area does not scroll */
+        padding-right: 9px;
+        padding-left: 4px;
+    }
+
+    .scrollable-area {
+        flex: 1; /* Takes the remaining space */
+        overflow-y: auto; /* Enables scrolling */
+        /*height: calc(100vh - 300px); !* Adjust height accordingly *!*/
     }
 
     .file-list {
