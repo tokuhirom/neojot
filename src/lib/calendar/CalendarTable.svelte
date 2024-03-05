@@ -1,13 +1,11 @@
 <script lang="ts">
     import { type CalendarDay, generateCalendar } from './calendar-utils.ts';
-    import {
-        type CalendarData,
-        readCalendarFile,
-    } from '../repository/NodeRepository';
+    import { type CalendarData } from '../repository/NodeRepository';
     import { onMount } from 'svelte';
     import type { FileItem } from '../file_item/FileItem';
     import { extractTasks, type Task } from '../task/Task';
     import { emit } from '@tauri-apps/api/event';
+    import { invoke } from '@tauri-apps/api/core';
 
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let allFileItems: FileItem[] = [];
@@ -21,16 +19,25 @@
 
     onMount(async () => {
         calendars = generateCalendar(year, month);
-        calendarData = await readCalendarFile(year, month);
+        loadCalendarMap();
         await reloadFiles();
     });
 
     $: if (year && month) {
         calendars = generateCalendar(year, month);
-        readCalendarFile(year, month).then((data) => {
-            calendarData = data;
-        });
+        loadCalendarMap();
         reloadFiles();
+    }
+
+    function loadCalendarMap() {
+        invoke('tauri_get_commits_by_day', {
+            year,
+            month,
+        }).then((res) => {
+            const calendarMap = res as Record<number, string[]>;
+            calendarData = calendarMap;
+            console.log(calendarMap);
+        });
     }
 
     let taskMap: Map<number, Task[]> = new Map();

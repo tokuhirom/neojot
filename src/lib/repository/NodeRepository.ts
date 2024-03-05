@@ -16,56 +16,6 @@ export type CalendarData = Record<number, string[]>;
 export async function saveMarkdownFile(filename: string, src: string) {
     // TODO atomic write
     await writeTextFile(filename, src, { baseDir: BaseDirectory.AppData });
-
-    await writeCalendarFile(filename.replace(/.+\//, ''));
-}
-
-async function writeCalendarFile(basename: string) {
-    const date = new Date();
-    const calendarFileName = generateCalendarFileNameByDate(date);
-
-    await mkdir_p('calendar');
-
-    const data = await readCalendarFile(
-        date.getFullYear(),
-        date.getMonth() + 1,
-    );
-    const ary = data[date.getDate()] || [];
-    if (!ary.includes(basename)) {
-        ary.push(basename);
-        data[date.getDate()] = ary;
-    }
-    await writeTextFile(calendarFileName, JSON.stringify(data), {
-        baseDir: BaseDirectory.AppData,
-    });
-}
-
-export async function readCalendarFile(
-    year: number,
-    month: number,
-): Promise<CalendarData> {
-    const filename = generateCalendarFileName(year, month);
-    console.log(`readCalendarFile: ${filename}`);
-    if (await exists(filename, { baseDir: BaseDirectory.AppData })) {
-        const json = await readTextFile(filename, {
-            baseDir: BaseDirectory.AppData,
-        });
-        return JSON.parse(json) as CalendarData;
-    } else {
-        console.log(`missing file: ${filename}`);
-        return {};
-    }
-}
-
-function generateCalendarFileNameByDate(date: Date) {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    return generateCalendarFileName(year, month);
-}
-
-function generateCalendarFileName(year: number, month: number): string {
-    const formattedMonth = month < 10 ? `0${month}` : month.toString();
-    return `calendar/${year}-${formattedMonth}.json`;
 }
 
 export async function loadMarkdownFile(name: string): Promise<string> {

@@ -3,6 +3,7 @@
 
 mod git;
 
+use std::collections::HashMap;
 use std::fs;
 use std::time::SystemTime;
 use serde::{Deserialize, Serialize};
@@ -13,7 +14,7 @@ use tauri::{App, Manager, Wry};
 use tauri::menu::{Menu, MenuBuilder, MenuItemBuilder, SubmenuBuilder};
 use tauri_plugin_autostart::MacosLauncher;
 
-use crate::git::git_init;
+use crate::git::{get_commits_by_day, git_init};
 use crate::git::git_add_commit_push;
 
 #[derive(Serialize, Deserialize)]
@@ -48,6 +49,12 @@ fn tauri_git_add_commit_push() -> Result<(), String> {
     git_add_commit_push()
         .map_err(|e| format!("Failed to operate repository: {}", e))?;
     Ok(())
+}
+
+#[tauri::command]
+fn tauri_get_commits_by_day(year: i32, month: u32) -> Result<HashMap<u32, Vec<String>>, String> {
+    return get_commits_by_day(year, month)
+        .map_err(|e| format!("Failed to operate repository: {}", e));
 }
 
 #[tauri::command]
@@ -249,6 +256,7 @@ fn main() -> anyhow::Result<()> {
             load_file_item,
             tauri_git_init,
             tauri_git_add_commit_push,
+            tauri_get_commits_by_day,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

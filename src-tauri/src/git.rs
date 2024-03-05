@@ -1,6 +1,8 @@
+use std::collections::HashMap;
 use std::path::PathBuf;
 use anyhow::anyhow;
-use git2::{IndexAddOption, Repository, Signature};
+use git2::{IndexAddOption, Repository, Signature, Time};
+use chrono::Datelike;
 
 fn push_changes(repo: &Repository) -> anyhow::Result<()> {
     let remotes = repo.remotes()?;
@@ -95,4 +97,53 @@ pub fn git_add_commit_push() -> anyhow::Result<()> {
     }
 
     Ok(())
+}
+
+pub fn get_commits_by_day(year: i32, month: u32) -> anyhow::Result<HashMap<u32, Vec<String>>> {
+    let path = get_data_dir()?;
+    log::info!("Running get_commits_by_day for {}-{} in {:?}", year, month, path);
+    let repo = Repository::open(path)?;
+
+    let mut result: HashMap<u32, Vec<String>> = HashMap::new();
+    let mut revwalk = repo.revwalk()?;
+    revwalk.push_head()?;
+
+    for oid in revwalk {
+        let commit = repo.find_commit(oid?)?;
+        let commit_time = Time::new(commit.time().seconds(), 0);
+        let Some(commit_datetime) = chrono::NaiveDateTime::from_timestamp_opt(commit_time.seconds(), 0) else {
+            log::warn!("Failed to convert commit time to NaiveDateTime: {:?}", commit_time);
+            continue;
+        };
+        let commit_date = commit_datetime.date();
+
+        // 指定された年と月にフィルタリング
+        if commit_date.year() == year && commit_date.month() == month as u32 {
+            let day = commit_date.day();
+            let mut filenames = vec![];
+
+            // コミット内の変更を取得
+            if let Ok(parent) = commit.parent(0) {
+                let diff = repo.diff_tree_to_tree(Some(&parent.tree()?), Some(&commit.tree()?), None)?;
+
+                diff.foreach(&mut |delta, _| {
+                    if let Some(file) = delta.new_file().path() {
+                        if file.extension() == Some(std::ffi::OsStr::new("md")) {
+                            if let Some(name) = file.file_name().and_then(|name| name.to_str()) {
+                                filenames.push(String::from(name));
+                            }
+                        }
+                    }
+                    true
+                }, None, None, None)?;
+            }
+
+            // 重複を除去してMapに追加
+            filenames.sort();
+            filenames.dedup();
+            result.entry(day).or_insert_with(Vec::new).extend(filenames);
+        }
+    }
+
+    Ok(result)
 }
