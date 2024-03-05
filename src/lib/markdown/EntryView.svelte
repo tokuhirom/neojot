@@ -28,7 +28,7 @@
     import { imageDecorator } from './ImageViewWidget';
     import { openSearchPanel, searchKeymap } from '@codemirror/search';
     import { mermaidPlugin } from './MermaidWidget';
-    import { addDays, format, parse } from 'date-fns';
+    import { format } from 'date-fns';
     import { linkPlugin } from './LinkPlugin';
     import { comeFromLinkHighlightPlugin } from './KeywordHighlight';
     import { languages } from '@codemirror/language-data';
