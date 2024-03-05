@@ -1,13 +1,15 @@
 <script lang="ts">
     import type { FileItem, MatchedLine } from './FileItem';
     import { emit, listen } from '@tauri-apps/api/event';
-    import { onDestroy } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
 
     export let onSelectItem: (fileItem: FileItem) => void;
     export let fileItem: FileItem;
     export let matchLines: MatchedLine[] | undefined;
     export let searchWord: string | undefined;
     export let selectedItem: FileItem;
+    export let enterViewerMode: () => void = () => {};
+    export let viewerMode: boolean = false;
 
     let searchWords: string[] | undefined = undefined;
 
@@ -27,6 +29,11 @@
     });
 
     function handleOnClick(e: Event) {
+        if (fileItem.filename === selectedItem.filename) {
+            enterViewerMode();
+            return;
+        }
+
         const elem = e.target as HTMLElement;
         onSelectItem(fileItem);
 
@@ -80,12 +87,29 @@
             return escapeHtml(match[0]);
         });
     }
+
+    let buttonElement;
+
+    $: if (selectedItem && selectedItem.filename === fileItem.filename) {
+        scrollToView();
+    }
+
+    function scrollToView() {
+        if (buttonElement) {
+            buttonElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+            });
+        }
+    }
 </script>
 
 <div>
     <button
+        bind:this={buttonElement}
         on:click={handleOnClick}
         class:active={selectedItem.filename === fileItem.filename}
+        class:viewer-mode={viewerMode}
         ><span class="title">{fileItem.title}</span>
         {#if matchLines && searchWords}
             {#each matchLines as line}
@@ -115,6 +139,10 @@
 
         text-align: left;
         overflow-x: hidden;
+    }
+
+    .viewer-mode.active {
+        border: 1px solid red;
     }
 
     .mtime {

@@ -14,7 +14,7 @@
         sortTasks,
         type Task,
     } from '../task/Task';
-    import { onMount } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     import TaskItem from '../task/TaskItem.svelte';
     import { emit } from '@tauri-apps/api/event';
 
@@ -25,6 +25,49 @@
     export let title2fileItem: Record<string, FileItem>;
     export let comefromLinks: Record<string, FileItem>;
     let tasks: Task[] = [];
+    let viewerMode = false;
+
+    function handleKeydown(event) {
+        if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
+            return;
+        }
+        if (!viewerMode) {
+            return;
+        }
+
+        switch (event.key) {
+            case 'ArrowDown':
+                // カーソル下キーが押された時の処理
+                console.log('Cursor down pressed');
+                if (selectedItem) {
+                    // selectedItem を dataFileItems の次の要素に変更する
+                    const index = dataFileItems.indexOf(selectedItem);
+                    if (index < dataFileItems.length - 1) {
+                        onSelectItem(dataFileItems[index + 1]);
+                    }
+                }
+                break;
+            case 'ArrowUp':
+                // カーソル上キーが押された時の処理
+                console.log('Cursor up pressed');
+                if (selectedItem) {
+                    // selectedItem を dataFileItems の前の要素に変更する
+                    const index = dataFileItems.indexOf(selectedItem);
+                    if (index > 0) {
+                        onSelectItem(dataFileItems[index - 1]);
+                    }
+                }
+                break;
+        }
+    }
+
+    onMount(() => {
+        window.addEventListener('keydown', handleKeydown);
+    });
+
+    onDestroy(() => {
+        window.removeEventListener('keydown', handleKeydown);
+    });
 
     onMount(() => {
         updateTasks();
@@ -90,6 +133,7 @@
     }
 
     function onCreateItem(fileItem: FileItem) {
+        viewerMode = false;
         dataFileItems.unshift(fileItem);
         allFileItems.unshift(fileItem);
         dataFileItems = dataFileItems;
@@ -99,12 +143,22 @@
 
     function handleOnClick(task: Task) {
         onSelectItem(task.fileItem);
+        viewerMode = false;
         emit('go-to-line-number', task.lineNumber);
+    }
+
+    function enterViewerMode() {
+        viewerMode = true;
     }
 </script>
 
 <div class="list-view">
-    <div class="file-list">
+    <div
+        class="file-list"
+        on:blur={() => {
+            viewerMode = false;
+        }}
+    >
         {#each tasks as task}
             <TaskItem {task} {handleOnClick} />
         {/each}
@@ -118,11 +172,14 @@
                     matchLines={result.lines}
                     {searchWord}
                     {selectedItem}
+                    {enterViewerMode}
+                    {viewerMode}
                 />
             {/each}
         {/if}
     </div>
-    <div class="log-view">
+    <!-- eslint-disable-next-line -->
+    <div class="log-view" on:click={() => (viewerMode = false)}>
         {#if selectedItem !== undefined}
             <EntryView
                 file={selectedItem}
