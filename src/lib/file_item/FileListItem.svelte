@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { FileItem, MatchedLine } from './FileItem';
     import { emit, listen } from '@tauri-apps/api/event';
-    import { onDestroy, onMount } from 'svelte';
+    import { onDestroy } from 'svelte';
 
     export let onSelectItem: (fileItem: FileItem) => void;
     export let fileItem: FileItem;
