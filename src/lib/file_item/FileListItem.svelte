@@ -2,6 +2,7 @@
     import type { FileItem, MatchedLine } from './FileItem';
     import { emit, listen } from '@tauri-apps/api/event';
     import { onDestroy } from 'svelte';
+    import { format } from 'date-fns';
 
     export let onSelectItem: (fileItem: FileItem) => void;
     export let fileItem: FileItem;
@@ -45,14 +46,8 @@
 
     function formatEpochSeconds() {
         const epochSeconds = fileItem.mtime;
-        const date = new Date(epochSeconds * 1000); // エポックミリ秒に変換
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // 月は0から始まるため、1を足す
-        const day = date.getDate().toString().padStart(2, '0');
-        const hours = date.getHours().toString().padStart(2, '0');
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-
-        return `${year}-${month}-${day} ${hours}:${minutes}`;
+        const date = new Date(epochSeconds * 1000);
+        return format(date, 'yyyy-MM-dd HH:mm');
     }
 
     function highlightKeyword(line: string, keywords: string[]): string {
