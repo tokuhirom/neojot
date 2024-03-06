@@ -1,21 +1,24 @@
-import { defineConfig } from "vite";
-import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { defineConfig } from 'vite';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
-  plugins: [svelte()],
-
-  // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
-  //
-  // 1. prevent vite from obscuring rust errors
-  clearScreen: false,
-  // 2. tauri expects a fixed port, fail if that port is not available
-  server: {
-    port: 1421,
-    strictPort: true,
-    watch: {
-      // 3. tell vite to ignore watching `src-tauri`
-      ignored: ["**/src-tauri/**"],
+    plugins: [svelte()],
+    // https://docs.excalidraw.com/docs/@excalidraw/excalidraw/integration
+    define: {
+        'process.env.IS_PREACT': JSON.stringify('true'),
     },
-  },
+    // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
+    //
+    // 1. prevent vite from obscuring rust errors
+    clearScreen: false,
+    // 2. tauri expects a fixed port, fail if that port is not available
+    server: {
+        port: 1421,
+        strictPort: true,
+        watch: {
+            // 3. tell vite to ignore watching `src-tauri`
+            ignored: ['**/src-tauri/**'],
+        },
+    },
 }));

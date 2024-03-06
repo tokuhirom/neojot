@@ -17,6 +17,7 @@
     import { onDestroy, onMount } from 'svelte';
     import TaskItem from '../task/TaskItem.svelte';
     import { emit } from '@tauri-apps/api/event';
+    import Excalidraw from '../excalidraw/Excalidraw.svelte';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -209,6 +210,7 @@
                 {comefromLinks}
                 search={(keyword) => (searchWord = keyword)}
             />
+            <Excalidraw />
             <LinkCards
                 file={selectedItem}
                 {allFileItems}
