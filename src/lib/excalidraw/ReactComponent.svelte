@@ -22,8 +22,7 @@
 
 <style>
     .reactComponent {
-        /* TODO fix height */
-        height: 75vh;
+        height: 100%;
         width: 100%;
     }
 </style>

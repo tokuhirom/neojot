@@ -4,6 +4,7 @@
     import type { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types.js';
     import type {
         AppState,
+        BinaryFiles,
         ExcalidrawImperativeAPI,
         ExcalidrawInitialDataState,
     } from '@excalidraw/excalidraw/types/types.js';
@@ -11,6 +12,11 @@
     import { createEventDispatcher } from 'svelte';
 
     export let initialData: ExcalidrawInitialDataState = {};
+    export let onChangeData: (
+        elements: ExcalidrawElement[],
+        appState: AppState,
+        files: BinaryFiles,
+    ) => void;
     let excalidrawAPI: ExcalidrawImperativeAPI;
 
     function setAPI(api: ExcalidrawImperativeAPI) {
@@ -25,25 +31,12 @@
         blob: Blob;
     }>();
 
-    function onChange(elements: ExcalidrawElement[], state: AppState) {
-        dispatcher('change', { elements, state });
-        console.log(`called onChange ${excalidrawAPI}`);
-        if (excalidrawAPI) {
-            const elements = excalidrawAPI.getSceneElementsIncludingDeleted();
-            const appState = excalidrawAPI.getAppState();
-
-            // 描画データとアプリケーションの状態を含むオブジェクトをJSON形式で保存または出力
-            const excalidrawData = JSON.stringify({
-                type: 'excalidraw',
-                version: 2,
-                source: 'https://excalidraw.com',
-                elements,
-                appState,
-            });
-            console.log(excalidrawData);
-
-            // または、このデータをファイルとして保存するなどの処理をここに追加
-        }
+    function onChange(
+        elements: ExcalidrawElement[],
+        appState: AppState,
+        files: BinaryFiles,
+    ) {
+        onChangeData(elements, appState, files);
     }
     const reactMainMenu = React.createElement(MainMenu, null, [
         React.createElement(MainMenu.DefaultItems.SaveAsImage, {
@@ -60,4 +53,5 @@
     excalidrawAPI={setAPI}
     langCode="en-EN"
     children={reactMainMenu}
+    isCollaborating={false}
 />

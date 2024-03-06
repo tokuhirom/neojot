@@ -18,6 +18,7 @@
     import TaskItem from '../task/TaskItem.svelte';
     import { emit } from '@tauri-apps/api/event';
     import Excalidraw from '../excalidraw/Excalidraw.svelte';
+    import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -200,23 +201,26 @@
     <!-- eslint-disable-next-line -->
     <div class="log-view" on:click={() => (viewerMode = false)}>
         {#if selectedItem !== undefined}
-            <EntryView
-                file={selectedItem}
-                {allFileItems}
-                {onSelectItem}
-                {onSaved}
-                {onCreateItem}
-                {title2fileItem}
-                {comefromLinks}
-                search={(keyword) => (searchWord = keyword)}
-            />
-            <Excalidraw />
-            <LinkCards
-                file={selectedItem}
-                {allFileItems}
-                {onSelectItem}
-                {onCreateItem}
-            />
+            {#if selectedItem.filename.endsWith('.excalidraw.md')}
+                <ExcalidrawView {selectedItem} />
+            {:else}
+                <EntryView
+                    file={selectedItem}
+                    {allFileItems}
+                    {onSelectItem}
+                    {onSaved}
+                    {onCreateItem}
+                    {title2fileItem}
+                    {comefromLinks}
+                    search={(keyword) => (searchWord = keyword)}
+                />
+                <LinkCards
+                    file={selectedItem}
+                    {allFileItems}
+                    {onSelectItem}
+                    {onCreateItem}
+                />
+            {/if}
         {/if}
     </div>
 </div>

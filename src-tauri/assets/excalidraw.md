@@ -48,7 +48,8 @@ tags: [excalidraw]
       "name": true,
       "outline": true
     }
-  }
+  },
+  "files": {}
 }
 ```
 %%
