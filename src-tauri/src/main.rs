@@ -5,6 +5,7 @@ mod git;
 
 use std::collections::HashMap;
 use std::fs;
+use std::path::PathBuf;
 use std::time::SystemTime;
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
@@ -26,7 +27,16 @@ struct FileItem {
     content: String,
 }
 
-fn get_title(content: &str) -> String {
+fn get_title(path: PathBuf, content: &str) -> String {
+    if path.to_str().unwrap().ends_with(".excalidraw.md") {
+        log::info!("excalidraw: {:?}", path);
+        // get basename without extension
+        let basename = path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
+        // remove .excalidraw from basename
+        let basename = basename.trim_end_matches(".excalidraw");
+        return format!("Draw {}", basename);
+    }
+
     let re = Regex::new(r"^#+\s+(.*)").unwrap(); // cache?
 
     return if let Some(captures) = re.captures(content) {
@@ -78,7 +88,7 @@ fn load_file_item(filename: String) -> Result<FileItem, String> {
     let datadir = dirs::data_dir().ok_or("Data directory not found")?;
     let path = datadir.join("com.github.tokuhirom.neojot").join(filename.clone());
 
-    let metadata = fs::metadata(&path)
+    let metadata = fs::metadata(&path.clone())
         .map_err(|e| format!("Failed to read file metadata: {}", e))?;
 
     let mtime = metadata.modified()
@@ -89,7 +99,7 @@ fn load_file_item(filename: String) -> Result<FileItem, String> {
 
     match fs::read_to_string(&path) {
         Ok(content) => {
-            let title = get_title(content.as_str());
+            let title = get_title(path, content.as_str());
 
             Ok(FileItem {
                 filename,
