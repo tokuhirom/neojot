@@ -17,7 +17,6 @@
     import { onDestroy, onMount } from 'svelte';
     import TaskItem from '../task/TaskItem.svelte';
     import { emit } from '@tauri-apps/api/event';
-    import Excalidraw from '../excalidraw/Excalidraw.svelte';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
 
     export let allFileItems: FileItem[] = [];

@@ -17,6 +17,7 @@
         appState: AppState,
         files: BinaryFiles,
     ) => void;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let excalidrawAPI: ExcalidrawImperativeAPI;
 
     function setAPI(api: ExcalidrawImperativeAPI) {
