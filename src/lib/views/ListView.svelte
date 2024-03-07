@@ -93,34 +93,39 @@
 
     let searchWord = '';
 
+    function searchLinesByWord(fileItem: FileItem, searchWord: string) {
+        const lines: MatchedLine[] = [];
+        if (searchWord.length > 0) {
+            const contentLines = fileItem.content.split(/\n/);
+            const lowerWords = searchWord.toLowerCase().split(/\s+/);
+            contentLines.filter((line, index) => {
+                if (
+                    lowerWords.some((word) =>
+                        line.toLowerCase().includes(word),
+                    ) &&
+                    !(
+                        (line.startsWith('# ') || line.startsWith('<<< ')) &&
+                        line.toLowerCase().includes(searchWord.toLowerCase())
+                    )
+                ) {
+                    lines.push({
+                        content: line,
+                        lineNumber: index + 1,
+                    } as MatchedLine);
+                }
+            });
+        }
+        return lines;
+    }
+
     $: if (dataFileItems || searchWord) {
         const r: SearchResult[] = [];
         dataFileItems.forEach((fileItem) => {
             if (shouldShowFileItem(fileItem, searchWord)) {
-                const lines: MatchedLine[] = [];
-                if (searchWord.length > 0) {
-                    const contentLines = fileItem.content.split(/\n/);
-                    const lowerWords = searchWord.toLowerCase().split(/\s+/);
-                    contentLines.filter((line, index) => {
-                        if (
-                            lowerWords.some((word) =>
-                                line.toLowerCase().includes(word),
-                            ) &&
-                            !(
-                                (line.startsWith('# ') ||
-                                    line.startsWith('<<< ')) &&
-                                line
-                                    .toLowerCase()
-                                    .includes(searchWord.toLowerCase())
-                            )
-                        ) {
-                            lines.push({
-                                content: line,
-                                lineNumber: index + 1,
-                            } as MatchedLine);
-                        }
-                    });
-                }
+                const lines: MatchedLine[] = searchLinesByWord(
+                    fileItem,
+                    searchWord,
+                );
                 r.push({ lines: lines, fileItem });
             }
         });
