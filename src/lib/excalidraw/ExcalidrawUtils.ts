@@ -20,10 +20,18 @@ export async function loadExcalidrawImage(
     fileItem: FileItem,
 ): Promise<string | undefined> {
     if (fileItem.filename.endsWith('.excalidraw.md')) {
-        const blob = await readFile(fileItem.filename.replace('.md', '.png'), {
-            baseDir: BaseDirectory.AppData,
-        });
-        return await uint8ArrayToDataUrl(blob);
+        try {
+            const blob = await readFile(
+                fileItem.filename.replace('.md', '.png'),
+                {
+                    baseDir: BaseDirectory.AppData,
+                },
+            );
+            return await uint8ArrayToDataUrl(blob);
+        } catch (e) {
+            console.error(e);
+            return undefined;
+        }
     } else {
         return undefined;
     }

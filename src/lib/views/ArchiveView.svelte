@@ -10,6 +10,10 @@
     export let selectedItem: FileItem | undefined = undefined;
     export let archivedFileItems: FileItem[] = [];
 
+    function unselectEntry() {
+        onSelectItem(undefined);
+    }
+
     async function deleteSelectedEntry() {
         if (selectedItem) {
             onSelectItem(await archiveOrDeleteEntry(selectedItem));
@@ -26,6 +30,7 @@
 
 <div class="container">
     {#if selectedItem}
+        <button on:click={unselectEntry}>Back to list</button>
         <button class="delete-btn" on:click={deleteSelectedEntry}>Delete</button
         >
         <button class="delete-btn" on:click={unarchiveSelectedEntry}
@@ -51,5 +56,10 @@
         margin: 9px;
         border: #646cff 3px solid;
         width: 100%;
+    }
+
+    button {
+        margin: 9px;
+        height: 30px;
     }
 </style>

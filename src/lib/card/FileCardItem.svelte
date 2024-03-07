@@ -22,6 +22,10 @@
             title = undefined;
             content = undefined;
             imgSrc = await loadExcalidrawImage(file);
+            if (imgSrc === undefined) {
+                console.error('Failed to load excalidraw image');
+                title = '**Excalidraw image failed to load**';
+            }
         } else {
             title = file.title;
             content = file.content
