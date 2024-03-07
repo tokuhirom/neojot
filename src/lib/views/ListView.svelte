@@ -18,6 +18,8 @@
     import TaskItem from '../task/TaskItem.svelte';
     import { emit } from '@tauri-apps/api/event';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
+    import type { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
+    import { getExcalidrawTexts } from '../excalidraw/ExcalidrawUtils';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -98,22 +100,48 @@
         if (searchWord.length > 0) {
             const contentLines = fileItem.content.split(/\n/);
             const lowerWords = searchWord.toLowerCase().split(/\s+/);
-            contentLines.filter((line, index) => {
-                if (
-                    lowerWords.some((word) =>
-                        line.toLowerCase().includes(word),
-                    ) &&
-                    !(
-                        (line.startsWith('# ') || line.startsWith('<<< ')) &&
-                        line.toLowerCase().includes(searchWord.toLowerCase())
-                    )
-                ) {
-                    lines.push({
-                        content: line,
-                        lineNumber: index + 1,
-                    } as MatchedLine);
-                }
-            });
+            if (fileItem.filename.endsWith('.excalidraw.md')) {
+                // ```json から ``` までの間に入っている JSON を取り出して parse する
+                const json = fileItem.content.match(
+                    /```json\n([\s\S]+?)\n```/m,
+                )?.[1];
+                console.log(json);
+                const excalidraw = JSON.parse(json);
+                const elements = excalidraw.elements as ExcalidrawElement[];
+                const texts: string[] = getExcalidrawTexts(elements);
+d                texts.filter((text) => {
+                    if (
+                        lowerWords.some((word) =>
+                            text.toLowerCase().includes(word),
+                        )
+                    ) {
+                        lines.push({
+                            content: text,
+                            lineNumber: undefined,
+                        } as MatchedLine);
+                    }
+                });
+            } else {
+                contentLines.filter((line, index) => {
+                    if (
+                        lowerWords.some((word) =>
+                            line.toLowerCase().includes(word),
+                        ) &&
+                        !(
+                            (line.startsWith('# ') ||
+                                line.startsWith('<<< ')) &&
+                            line
+                                .toLowerCase()
+                                .includes(searchWord.toLowerCase())
+                        )
+                    ) {
+                        lines.push({
+                            content: line,
+                            lineNumber: index + 1,
+                        } as MatchedLine);
+                    }
+                });
+            }
         }
         return lines;
     }

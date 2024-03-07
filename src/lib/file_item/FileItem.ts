@@ -1,6 +1,6 @@
 export type MatchedLine = {
     content: string;
-    lineNumber: number;
+    lineNumber: number | undefined;
 };
 
 export type FileItem = {
