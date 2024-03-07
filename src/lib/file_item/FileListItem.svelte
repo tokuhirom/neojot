@@ -115,7 +115,11 @@
             {/each}
         {/if}
         <span class="mtime">{formatEpochSeconds()}</span>
-        <span class="filename">{fileItem.filename.replace(/.+\//, '')}</span>
+        <span class="filename" title={fileItem.filename}
+            >{fileItem.filename
+                .replace(/.+\//, '')
+                .replace(/\.excalidraw\./, '.e..')}</span
+        >
     </button>
 </div>
 
