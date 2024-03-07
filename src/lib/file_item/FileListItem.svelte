@@ -106,6 +106,11 @@
     onMount(async () => {
         imgSrc = await loadExcalidrawImage(fileItem);
     });
+    $: if (fileItem) {
+        loadExcalidrawImage(fileItem).then((src) => {
+            imgSrc = src;
+        });
+    }
 </script>
 
 <div>
