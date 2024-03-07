@@ -88,7 +88,7 @@
         display: block;
     }
     .todo {
-        color: cornflowerblue !important;
+        color: midnightblue !important;
     }
 
     .positive.plan {
@@ -101,6 +101,10 @@
     }
     .positive.todo {
         background-color: bisque !important;
+        color: black;
+    }
+    .negative {
+        background-color: #a9a9a9 !important;
         color: black;
     }
 </style>
