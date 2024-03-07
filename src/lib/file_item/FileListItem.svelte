@@ -105,6 +105,8 @@
     onMount(async () => {
         if (fileItem.filename.endsWith('.excalidraw.md')) {
             imgSrc = await loadExcalidrawImage();
+        } else {
+            imgSrc = undefined;
         }
     });
 
