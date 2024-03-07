@@ -4,6 +4,8 @@
     export let onClick: () => void;
     export let backgroundColor = '#f6f6f6';
     export let color = '#0f0f0f';
+
+    export let imgSrc: string | undefined;
 </script>
 
 <button
@@ -12,8 +14,16 @@
     style:color
     on:click|preventDefault={onClick}
 >
-    <span class="title">{title}</span>
-    <span class="content">{content}</span>
+    {#if imgSrc}
+        <img
+            src={imgSrc}
+            alt="excalidraw image"
+            style="max-width: 100%;max-height: 100%; border: 1px solid #000;"
+        />
+    {:else}
+        <span class="title">{title}</span>
+        <span class="content">{content}</span>
+    {/if}
 </button>
 
 <style>

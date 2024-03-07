@@ -5,6 +5,7 @@
     import { format } from 'date-fns';
     import { BaseDirectory, readFile } from '@tauri-apps/plugin-fs';
     import { uint8ArrayToDataUrl } from '../markdown/ImageViewWidget';
+    import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
 
     export let onSelectItem: (fileItem: FileItem) => void;
     export let fileItem: FileItem;
@@ -103,20 +104,8 @@
     let imgSrc: string | undefined;
 
     onMount(async () => {
-        if (fileItem.filename.endsWith('.excalidraw.md')) {
-            imgSrc = await loadExcalidrawImage();
-        } else {
-            imgSrc = undefined;
-        }
+        imgSrc = await loadExcalidrawImage(fileItem);
     });
-
-    async function loadExcalidrawImage(): Promise<string> {
-        const blob = await readFile(fileItem.filename.replace('.md', '.png'), {
-            baseDir: BaseDirectory.AppData,
-        });
-        console.log(blob);
-        return await uint8ArrayToDataUrl(blob);
-    }
 </script>
 
 <div>

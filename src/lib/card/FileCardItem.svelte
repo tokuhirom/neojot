@@ -1,6 +1,8 @@
 <script lang="ts">
     import type { FileItem } from '../file_item/FileItem';
     import CardItem from './CardItem.svelte';
+    import { onMount } from 'svelte';
+    import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
 
     export let file: FileItem;
     export let onSelectItem: (fileItem: FileItem) => void;
@@ -10,6 +12,12 @@
     function onClick() {
         onSelectItem(file);
     }
+
+    let imgSrc: string | undefined;
+
+    onMount(async () => {
+        imgSrc = await loadExcalidrawImage(file);
+    });
 </script>
 
 <CardItem
@@ -18,4 +26,5 @@
     {color}
     title={file.title.replace(/TODO: /, '☐️').replace(/DONE: /, '☑')}
     content={file.content.split('\n').slice(1).join('\n')}
+    {imgSrc}
 />
