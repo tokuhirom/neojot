@@ -289,6 +289,8 @@
                 {dataFileItems}
                 {selectedItem}
                 {onSelectItem}
+                {title2fileItem}
+                {comefromLinks}
             />
         {/if}
     </div>
