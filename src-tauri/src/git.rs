@@ -111,11 +111,11 @@ pub fn get_commits_by_day(year: i32, month: u32) -> anyhow::Result<HashMap<u32, 
     for oid in revwalk {
         let commit = repo.find_commit(oid?)?;
         let commit_time = Time::new(commit.time().seconds(), 0);
-        let Some(commit_datetime) = chrono::NaiveDateTime::from_timestamp_opt(commit_time.seconds(), 0) else {
+        let Some(commit_datetime) = chrono::DateTime::from_timestamp(commit_time.seconds(), 0) else {
             log::warn!("Failed to convert commit time to NaiveDateTime: {:?}", commit_time);
             continue;
         };
-        let commit_date = commit_datetime.date();
+        let commit_date = commit_datetime.date_naive();
 
         // 指定された年と月にフィルタリング
         if commit_date.year() == year && commit_date.month() == month as u32 {
