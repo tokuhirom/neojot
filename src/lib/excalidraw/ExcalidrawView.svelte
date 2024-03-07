@@ -5,11 +5,29 @@
     import type {
         AppState,
         BinaryFiles,
+        ExcalidrawImperativeAPI,
     } from '@excalidraw/excalidraw/types/types';
     import { saveMarkdownFile } from '../repository/NodeRepository';
     import { getExcalidrawTexts } from './ExcalidrawUtils';
+    import { exportToBlob } from '@excalidraw/excalidraw';
+    import { BaseDirectory, writeFile } from '@tauri-apps/plugin-fs';
 
     export let selectedItem: FileItem;
+    let excalidrawApi: ExcalidrawImperativeAPI;
+
+    let prevFilename = selectedItem?.filename;
+    $: if (selectedItem) {
+        // clear current drawing and load new drawing from the file
+        console.log('Restore...');
+        if (excalidrawApi && prevFilename !== selectedItem.filename) {
+            const data = parseData();
+            excalidrawApi.updateScene({
+                elements: data?.elements || [],
+                appState: data?.appState || {},
+            });
+            prevFilename = selectedItem.filename;
+        }
+    }
 
     function parseData() {
         // selectedItem.content から ```json と ``` で囲まれた部分をとりだし、JSON.parse して返す
@@ -30,6 +48,8 @@
         elements: ExcalidrawElement[],
         appState: AppState,
         files: BinaryFiles,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        _excalidrawAPI: ExcalidrawImperativeAPI,
     ) {
         // 描画データとアプリケーションの状態を含むオブジェクトをJSON形式で保存または出力
         const excalidrawData = JSON.stringify({
@@ -65,16 +85,43 @@
         if (start === -1 || end === -1) {
             return;
         }
-        selectedItem.content =
+        content =
             content.substring(0, start + 7) +
             '\n' +
             excalidrawData +
             '\n' +
             content.substring(end);
 
-        // ファイルに保存する
-        await saveMarkdownFile(selectedItem.filename, selectedItem.content);
+        if (content !== selectedItem.content) {
+            // selectedItem.content が変更された場合のみ保存する
+            selectedItem.content = content;
+
+            // ファイルに保存する
+            await saveMarkdownFile(selectedItem.filename, selectedItem.content);
+
+            // save diagram as a png file.
+            const blob = await exportToBlob({
+                elements,
+                appState,
+                files,
+                mimeType: 'image/png',
+            });
+
+            // convert blob to Uint8Array
+            const arrayBuffer = await blob.arrayBuffer();
+            // convert ArrayBuffer into Uint8Array
+            const uint8Array = new Uint8Array(arrayBuffer);
+            await writeFile(
+                selectedItem.filename.replace('.md', '.png'),
+                uint8Array,
+                { baseDir: BaseDirectory.AppData },
+            );
+        }
+    }
+
+    function onSetAPI(api: ExcalidrawImperativeAPI) {
+        excalidrawApi = api;
     }
 </script>
 
-<Excalidraw initialData={parseData()} {onChangeData} />
+<Excalidraw initialData={parseData()} {onChangeData} {onSetAPI} />

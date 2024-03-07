@@ -71,6 +71,14 @@ export async function archiveFile(fileItem: FileItem) {
             newPathBaseDir: BaseDirectory.AppData,
         },
     );
+    if (fileItem.filename.endsWith('.excalidraw.md')) {
+        await remove(
+            fileItem.filename.replace('.excalidraw.md', '.excalidraw.png'),
+            {
+                baseDir: BaseDirectory.AppData,
+            },
+        );
+    }
 }
 
 export async function unarchiveFile(fileItem: FileItem) {

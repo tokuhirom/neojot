@@ -1,8 +1,10 @@
 <script lang="ts">
     import type { FileItem, MatchedLine } from './FileItem';
     import { emit, listen } from '@tauri-apps/api/event';
-    import { onDestroy } from 'svelte';
+    import { onDestroy, onMount } from 'svelte';
     import { format } from 'date-fns';
+    import { BaseDirectory, readFile } from '@tauri-apps/plugin-fs';
+    import { uint8ArrayToDataUrl } from '../markdown/ImageViewWidget';
 
     export let onSelectItem: (fileItem: FileItem) => void;
     export let fileItem: FileItem;
@@ -97,6 +99,22 @@
             });
         }
     }
+
+    let imgSrc: string | undefined;
+
+    onMount(async () => {
+        if (fileItem.filename.endsWith('.excalidraw.md')) {
+            imgSrc = await loadExcalidrawImage();
+        }
+    });
+
+    async function loadExcalidrawImage(): Promise<string> {
+        const blob = await readFile(fileItem.filename.replace('.md', '.png'), {
+            baseDir: BaseDirectory.AppData,
+        });
+        console.log(blob);
+        return await uint8ArrayToDataUrl(blob);
+    }
 </script>
 
 <div>
@@ -113,6 +131,13 @@
                     {@html highlightKeyword(line.content, searchWords)}</span
                 >
             {/each}
+        {/if}
+        {#if imgSrc}
+            <img
+                alt="excalidraw"
+                style="max-height: 100px; max-width: 100%"
+                src={imgSrc}
+            />
         {/if}
         <span class="mtime">{formatEpochSeconds()}</span>
         <span class="filename" title={fileItem.filename}

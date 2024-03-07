@@ -16,13 +16,15 @@
         elements: ExcalidrawElement[],
         appState: AppState,
         files: BinaryFiles,
+        excalidrawAPI: ExcalidrawImperativeAPI,
     ) => void;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    export let onSetAPI: (api: ExcalidrawImperativeAPI) => void;
     let excalidrawAPI: ExcalidrawImperativeAPI;
 
     function setAPI(api: ExcalidrawImperativeAPI) {
         console.log('SET API');
         excalidrawAPI = api;
+        onSetAPI(api);
         dispatcher('init');
     }
 
@@ -37,7 +39,7 @@
         appState: AppState,
         files: BinaryFiles,
     ) {
-        onChangeData(elements, appState, files);
+        onChangeData(elements, appState, files, excalidrawAPI);
     }
     const reactMainMenu = React.createElement(MainMenu, null, [
         React.createElement(MainMenu.DefaultItems.SaveAsImage, {
