@@ -43,7 +43,9 @@
         </button>
 
         {#if selectedItem.filename.endsWith('.excalidraw.md')}
-            <ExcalidrawView {selectedItem} />
+            <div class="excalidraw-container">
+                <ExcalidrawView {selectedItem} />
+            </div>
         {:else}
             <EntryView
                 file={selectedItem}
@@ -81,5 +83,10 @@
         font-weight: bold;
         margin-top: 9px;
         margin-bottom: 20px;
+    }
+
+    .excalidraw-container {
+        width: 100%;
+        height: 80vh;
     }
 </style>
