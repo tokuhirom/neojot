@@ -4,6 +4,7 @@
     import LinkCards from '../link/LinkCards.svelte';
     import FileCardItem from '../card/FileCardItem.svelte';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
+    import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -41,22 +42,26 @@
             Back to List
         </button>
 
-        <EntryView
-            file={selectedItem}
-            {allFileItems}
-            {onSelectItem}
-            {onSaved}
-            {onCreateItem}
-            {title2fileItem}
-            {comefromLinks}
-            search={undefined}
-        />
-        <LinkCards
-            file={selectedItem}
-            {allFileItems}
-            {onSelectItem}
-            {onCreateItem}
-        />
+        {#if selectedItem.filename.endsWith('.excalidraw.md')}
+            <ExcalidrawView {selectedItem} />
+        {:else}
+            <EntryView
+                file={selectedItem}
+                {allFileItems}
+                {onSelectItem}
+                {onSaved}
+                {onCreateItem}
+                {title2fileItem}
+                {comefromLinks}
+                search={undefined}
+            />
+            <LinkCards
+                file={selectedItem}
+                {allFileItems}
+                {onSelectItem}
+                {onCreateItem}
+            />
+        {/if}
     {:else}
         {#each filteredFileItems as file}
             <FileCardItem {onSelectItem} {file} />

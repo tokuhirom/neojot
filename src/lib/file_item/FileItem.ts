@@ -1,3 +1,6 @@
+import { BaseDirectory, readFile } from '@tauri-apps/plugin-fs';
+import { uint8ArrayToDataUrl } from '../markdown/ImageViewWidget';
+
 export type MatchedLine = {
     content: string;
     lineNumber: number | undefined;
@@ -75,18 +78,53 @@ type CacheEntry = {
     links: string[];
 };
 
-const cache: Record<string, CacheEntry> = {};
+const bracketCache: Record<string, CacheEntry> = {};
 
 export function extractBracketsWithCache(fileItem: FileItem) {
-    const r = cache[fileItem.filename];
+    const r = bracketCache[fileItem.filename];
     if (r && r.mtime === fileItem.mtime) {
         return r.links;
     } else {
         const links = extractBrackets(fileItem.content);
-        cache[fileItem.filename] = {
+        bracketCache[fileItem.filename] = {
             mtime: fileItem.mtime,
             links: links,
         };
         return links;
+    }
+}
+
+type ImageCacheItem = {
+    mtime: number;
+    imgSrc: string | undefined;
+};
+const imageCache = new Map<string, ImageCacheItem>();
+
+export async function cachedLoadImage(
+    fileItem: FileItem,
+): Promise<string | undefined> {
+    const cacheItem = imageCache.get(fileItem.filename);
+    if (cacheItem && cacheItem.mtime === fileItem.mtime) {
+        return cacheItem.imgSrc;
+    } else {
+        const imgSrc = await loadImage(fileItem);
+        imageCache.set(fileItem.filename, {
+            mtime: fileItem.mtime,
+            imgSrc,
+        });
+        return imgSrc;
+    }
+}
+
+async function loadImage(fileItem: FileItem): Promise<string | undefined> {
+    const match = fileItem.content.match(/!\[.*]\((.*)\)/);
+    if (match) {
+        const url = match[1];
+        const value = await readFile(url.replace('../', ''), {
+            baseDir: BaseDirectory.AppData,
+        });
+        return await uint8ArrayToDataUrl(value);
+    } else {
+        return undefined;
     }
 }
