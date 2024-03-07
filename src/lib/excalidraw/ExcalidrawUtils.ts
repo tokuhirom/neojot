@@ -23,7 +23,6 @@ export async function loadExcalidrawImage(
         const blob = await readFile(fileItem.filename.replace('.md', '.png'), {
             baseDir: BaseDirectory.AppData,
         });
-        console.log(blob);
         return await uint8ArrayToDataUrl(blob);
     } else {
         return undefined;
