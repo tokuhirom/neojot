@@ -141,6 +141,11 @@
                 }
             }),
         );
+        unlistenCallbackPromises.push(
+            await listen('do_new_excalidraw', async () => {
+                await reloadFiles();
+            }),
+        );
     });
     onDestroy(async () => {
         for (let unlistenCallbackPromise of unlistenCallbackPromises) {

@@ -5,7 +5,9 @@ mod git;
 
 use std::collections::HashMap;
 use std::fs;
+use std::path::PathBuf;
 use std::time::SystemTime;
+use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use simplelog::ColorChoice;
 use url::Url;
@@ -25,7 +27,16 @@ struct FileItem {
     content: String,
 }
 
-fn get_title(content: &str) -> String {
+fn get_title(path: PathBuf, content: &str) -> String {
+    if path.to_str().unwrap().ends_with(".excalidraw.md") {
+        log::info!("excalidraw: {:?}", path);
+        // get basename without extension
+        let basename = path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
+        // remove .excalidraw from basename
+        let basename = basename.trim_end_matches(".excalidraw");
+        return format!("Draw {}", basename);
+    }
+
     let re = Regex::new(r"^#+\s+(.*)").unwrap(); // cache?
 
     return if let Some(captures) = re.captures(content) {
@@ -77,7 +88,7 @@ fn load_file_item(filename: String) -> Result<FileItem, String> {
     let datadir = dirs::data_dir().ok_or("Data directory not found")?;
     let path = datadir.join("com.github.tokuhirom.neojot").join(filename.clone());
 
-    let metadata = fs::metadata(&path)
+    let metadata = fs::metadata(&path.clone())
         .map_err(|e| format!("Failed to read file metadata: {}", e))?;
 
     let mtime = metadata.modified()
@@ -88,7 +99,7 @@ fn load_file_item(filename: String) -> Result<FileItem, String> {
 
     match fs::read_to_string(&path) {
         Ok(content) => {
-            let title = get_title(content.as_str());
+            let title = get_title(path, content.as_str());
 
             Ok(FileItem {
                 filename,
@@ -141,11 +152,18 @@ fn get_files(prefix: String) -> Result<Vec<FileItem>, String> {
 }
 
 fn build_menu(app: &App) -> tauri::Result<Menu<Wry>> {
+    let app_menu = SubmenuBuilder::new(app, "App")
+        .build()?;
     let file_menu = SubmenuBuilder::new(app, "File")
         .item(
             &MenuItemBuilder::new("New File")
                 .id("new_file")
                 .accelerator("Command+n")
+                .build(app)?
+        )
+        .item(
+            &MenuItemBuilder::new("New Excalidraw")
+                .id("new_excalidraw")
                 .build(app)?
         )
         .item(
@@ -211,7 +229,7 @@ fn build_menu(app: &App) -> tauri::Result<Menu<Wry>> {
         ).build()?;
 
     let menu = MenuBuilder::new(app)
-        .items(&[&file_menu, &edit_menu, &view_menu])
+        .items(&[&app_menu, &file_menu, &edit_menu, &view_menu])
         .build()?;
 
     Ok(menu)
@@ -242,10 +260,22 @@ fn main() -> anyhow::Result<()> {
             let menu = build_menu(app)?;
             app.set_menu(menu)?;
             app.on_menu_event(move |app, event| {
-                let action_name = format!("do_{}", event.id().0);
-                log::info!("Forwarding menu item: {:?}", action_name);
-                if let Err(err) = app.emit(&action_name, "DUMMY".to_string()) {
-                    log::error!("Cannot emit message for action '{}': {:?}", action_name, err);
+                if event.id().0 == "new_excalidraw" {
+                    match create_new_excalidraw() {
+                        Ok(fname) => {
+                            log::info!("New Excalidraw created");
+                            if let Err(err) = app.emit("do_new_excalidraw", fname) {
+                                log::error!("Cannot emit message for action 'do_new_excalidraw': {:?}", err);
+                            }
+                        },
+                        Err(err) => log::error!("Failed to create new Excalidraw: {:?}", err)
+                    }
+                } else {
+                    let action_name = format!("do_{}", event.id().0);
+                    log::info!("Forwarding menu item: {:?}", action_name);
+                    if let Err(err) = app.emit(&action_name, "DUMMY".to_string()) {
+                        log::error!("Cannot emit message for action '{}': {:?}", action_name, err);
+                    }
                 }
             });
             Ok(())
@@ -262,4 +292,17 @@ fn main() -> anyhow::Result<()> {
         .expect("error while running tauri application");
 
     Ok(())
+}
+
+fn create_new_excalidraw() -> anyhow::Result<String> {
+    // Create `data/yyyyMMddHHmmss.excalidraw.md`.
+    let now = chrono::Local::now();
+    let filename = format!("data/{}.excalidraw.md", now.format("%Y%m%d%H%M%S"));
+    let datadir = dirs::data_dir().ok_or(anyhow!("Data directory not found"))?;
+    let path = datadir.join("com.github.tokuhirom.neojot").join(filename.clone());
+
+    // write the dummy content
+    let content = include_str!("../assets/excalidraw.md");
+    fs::write(&path, content)?;
+    Ok(filename)
 }
