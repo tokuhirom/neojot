@@ -109,7 +109,7 @@
                 const excalidraw = JSON.parse(json);
                 const elements = excalidraw.elements as ExcalidrawElement[];
                 const texts: string[] = getExcalidrawTexts(elements);
-d                texts.filter((text) => {
+                texts.filter((text) => {
                     if (
                         lowerWords.some((word) =>
                             text.toLowerCase().includes(word),
