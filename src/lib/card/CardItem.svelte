@@ -18,9 +18,10 @@
         <span class="title">{title}</span>
     {/if}
     {#if imgSrc}
+        <!-- eslint-disable-next-line a11y-img-redundant-alt -->
         <img
             src={imgSrc}
-            alt="excalidraw image"
+            alt="excalidraw"
             style="max-width: 100%;max-height: 100%; border: 1px solid #000;"
         />
     {/if}

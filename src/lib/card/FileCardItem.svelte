@@ -3,8 +3,6 @@
     import CardItem from './CardItem.svelte';
     import { onMount } from 'svelte';
     import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
-    import { BaseDirectory, readFile } from '@tauri-apps/plugin-fs';
-    import { uint8ArrayToDataUrl } from '../markdown/ImageViewWidget';
 
     export let file: FileItem;
     export let onSelectItem: (fileItem: FileItem) => void;

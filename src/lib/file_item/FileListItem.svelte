@@ -3,8 +3,6 @@
     import { emit, listen } from '@tauri-apps/api/event';
     import { onDestroy, onMount } from 'svelte';
     import { format } from 'date-fns';
-    import { BaseDirectory, readFile } from '@tauri-apps/plugin-fs';
-    import { uint8ArrayToDataUrl } from '../markdown/ImageViewWidget';
     import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
 
     export let onSelectItem: (fileItem: FileItem) => void;
