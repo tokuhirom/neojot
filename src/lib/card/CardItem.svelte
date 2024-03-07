@@ -1,6 +1,6 @@
 <script lang="ts">
-    export let title: string;
-    export let content: string;
+    export let title: string | undefined;
+    export let content: string | undefined;
     export let onClick: () => void;
     export let backgroundColor = '#f6f6f6';
     export let color = '#0f0f0f';
@@ -14,14 +14,17 @@
     style:color
     on:click|preventDefault={onClick}
 >
+    {#if title}
+        <span class="title">{title}</span>
+    {/if}
     {#if imgSrc}
         <img
             src={imgSrc}
             alt="excalidraw image"
             style="max-width: 100%;max-height: 100%; border: 1px solid #000;"
         />
-    {:else}
-        <span class="title">{title}</span>
+    {/if}
+    {#if title}
         <span class="content">{content}</span>
     {/if}
 </button>
