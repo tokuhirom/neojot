@@ -37,10 +37,10 @@
         align-items: flex-start; /* 左寄せにします（テキストが左揃えの場合） */
         justify-content: flex-start; /* アイテムを上に寄せます */
         float: left;
-        width: 100px;
+        width: 150px;
+        height: 180px;
         margin: 9px;
         padding: 9px;
-        height: 120px;
         overflow-y: hidden;
         border-radius: 2px;
         text-align: left;
@@ -54,6 +54,7 @@
     }
 
     .content {
-        font-size: 10px;
+        margin-top: 4px;
+        font-size: 16px;
     }
 </style>
