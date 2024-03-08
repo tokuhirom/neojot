@@ -20,6 +20,7 @@
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
     import type { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
     import { getExcalidrawTexts } from '../excalidraw/ExcalidrawUtils';
+    import { invoke } from '@tauri-apps/api/core';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -147,7 +148,20 @@
     }
 
     $: if (dataFileItems || searchWord) {
+        searchFileItems().then((r) => {
+            searchResult = r;
+        });
+    }
+
+    async function searchFileItems(): Promise<SearchResult[]> {
         const r: SearchResult[] = [];
+        const migemoWords = searchWord.split(/\s+/).map(
+            async (word) =>
+                await invoke('gen_migemo_regex', {
+                    word: word.toLowerCase(),
+                }),
+        );
+        console.log(migemoWords);
         dataFileItems.forEach((fileItem) => {
             if (shouldShowFileItem(fileItem, searchWord)) {
                 const lines: MatchedLine[] = searchLinesByWord(
@@ -157,8 +171,7 @@
                 r.push({ lines: lines, fileItem });
             }
         });
-
-        searchResult = r;
+        return r;
     }
 
     function onSaved() {
