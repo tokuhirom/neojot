@@ -30,6 +30,7 @@
             title = file.title;
             content = file.content
                 .replace(/^<<< .*?$/gms, '')
+                .replace(/\[\[(.*?)]]/g, '$1')
                 .split('\n')
                 .slice(1)
                 .join('\n');
