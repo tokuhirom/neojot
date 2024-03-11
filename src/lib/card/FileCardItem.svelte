@@ -18,6 +18,13 @@
     let imgSrc: string | undefined;
 
     onMount(async () => {
+        await loadFile();
+    });
+    $: if (file) {
+        loadFile();
+    }
+
+    async function loadFile() {
         if (file.filename.endsWith('.excalidraw.md')) {
             title = undefined;
             content = undefined;
@@ -39,7 +46,7 @@
             // 次に data scheme で imgSrc に格納します
             imgSrc = await cachedLoadImage(file);
         }
-    });
+    }
 </script>
 
 <CardItem {onClick} {backgroundColor} {color} {title} {content} {imgSrc} />

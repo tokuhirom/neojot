@@ -21,6 +21,7 @@
     import type { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
     import { getExcalidrawTexts } from '../excalidraw/ExcalidrawUtils';
     import { invoke } from '@tauri-apps/api/core';
+    import { makeMigemoRegexes } from '../search/Migemo';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -96,24 +97,26 @@
 
     let searchWord = '';
 
-    function searchLinesByWord(fileItem: FileItem, searchWord: string) {
+    async function searchLinesByWord(
+        fileItem: FileItem,
+        searchWord: string,
+        migemoRegexes: RegExp[],
+    ) {
         const lines: MatchedLine[] = [];
         if (searchWord.length > 0) {
             const contentLines = fileItem.content.split(/\n/);
-            const lowerWords = searchWord.toLowerCase().split(/\s+/);
             if (fileItem.filename.endsWith('.excalidraw.md')) {
                 // ```json から ``` までの間に入っている JSON を取り出して parse する
                 const json = fileItem.content.match(
                     /```json\n([\s\S]+?)\n```/m,
                 )?.[1];
-                console.log(json);
                 const excalidraw = JSON.parse(json);
                 const elements = excalidraw.elements as ExcalidrawElement[];
                 const texts: string[] = getExcalidrawTexts(elements);
                 texts.filter((text) => {
                     if (
-                        lowerWords.some((word) =>
-                            text.toLowerCase().includes(word),
+                        migemoRegexes.some((regex) =>
+                            regex.test(text.toLowerCase()),
                         )
                     ) {
                         lines.push({
@@ -125,8 +128,8 @@
             } else {
                 contentLines.filter((line, index) => {
                     if (
-                        lowerWords.some((word) =>
-                            line.toLowerCase().includes(word),
+                        migemoRegexes.some((regex) =>
+                            regex.test(line.toLowerCase()),
                         ) &&
                         !(
                             (line.startsWith('# ') ||
@@ -147,30 +150,31 @@
         return lines;
     }
 
-    $: if (dataFileItems || searchWord) {
+    $: if (dataFileItems || migemoRegexes) {
         searchFileItems().then((r) => {
             searchResult = r;
         });
     }
 
+    let migemoRegexes: RegExp[] = [];
+    $: if (searchWord) {
+        makeMigemoRegexes(searchWord).then((r) => {
+            migemoRegexes = r;
+        });
+    }
+
     async function searchFileItems(): Promise<SearchResult[]> {
         const r: SearchResult[] = [];
-        const migemoWords = searchWord.split(/\s+/).map(
-            async (word) =>
-                await invoke('gen_migemo_regex', {
-                    word: word.toLowerCase(),
-                }),
-        );
-        console.log(migemoWords);
-        dataFileItems.forEach((fileItem) => {
-            if (shouldShowFileItem(fileItem, searchWord)) {
-                const lines: MatchedLine[] = searchLinesByWord(
+        for (const fileItem of dataFileItems) {
+            if (shouldShowFileItem(fileItem, searchWord, migemoRegexes)) {
+                const lines: MatchedLine[] = await searchLinesByWord(
                     fileItem,
                     searchWord,
+                    migemoRegexes,
                 );
                 r.push({ lines: lines, fileItem });
             }
-        });
+        }
         return r;
     }
 
@@ -249,6 +253,7 @@
                         fileItem={result.fileItem}
                         matchLines={result.lines}
                         {searchWord}
+                        {migemoRegexes}
                         {selectedItem}
                         {enterViewerMode}
                         {viewerMode}

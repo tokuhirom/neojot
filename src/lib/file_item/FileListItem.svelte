@@ -12,6 +12,7 @@
     export let selectedItem: FileItem;
     export let enterViewerMode: () => void = () => {};
     export let viewerMode: boolean = false;
+    export let migemoRegexes: RegExp[] | undefined = undefined;
 
     let searchWords: string[] | undefined = undefined;
 
@@ -51,7 +52,14 @@
         return format(date, 'yyyy-MM-dd HH:mm');
     }
 
-    function highlightKeyword(line: string, keywords: string[]): string {
+    function highlightKeyword(
+        line: string,
+        migemoRegexes: RegExp[] | undefined,
+    ): string {
+        if (!migemoRegexes) {
+            return line;
+        }
+
         // HTMLエンティティにエスケープする関数
         const escapeHtml = (text: string) =>
             text
@@ -61,21 +69,17 @@
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
 
-        // 特殊文字をエスケープする関数
-        const escapeRegExp = (text: string) =>
-            text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-
         // エスケープされたキーワード用の正規表現を構築
         const regex = new RegExp(
-            keywords
-                .map((keyword) => '(' + escapeRegExp(keyword) + ')')
-                .join('|') + '(.)',
+            migemoRegexes.map((re) => '(' + re.source + ')').join('|') +
+                '|' +
+                '(.)',
             'gi',
         );
 
         // エスケープされたキーワードをマッチさせ、強調表示
         return line.replace(regex, (match) => {
-            for (let i = 1; i < keywords.length + 1; i++) {
+            for (let i = 1; i < migemoRegexes.length + 1; i++) {
                 if (match[i]) {
                     return `<span class="keyword" style="color: red">${escapeHtml(match)}</span>`;
                 }
@@ -122,7 +126,7 @@
             {#each matchLines as line}
                 <span class="match-line" data-lineNumber={line.lineNumber}>
                     <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                    {@html highlightKeyword(line.content, searchWords)}</span
+                    {@html highlightKeyword(line.content, migemoRegexes)}</span
                 >
             {/each}
         {/if}

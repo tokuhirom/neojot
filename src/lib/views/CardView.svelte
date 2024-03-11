@@ -5,6 +5,7 @@
     import FileCardItem from '../card/FileCardItem.svelte';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
+    import { makeMigemoRegexes } from '../search/Migemo';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -16,9 +17,16 @@
     let filteredFileItems: FileItem[];
     let searchWord = '';
 
-    $: if (dataFileItems || searchWord) {
+    let migemoRegexes: RegExp[] = [];
+    $: if (searchWord) {
+        makeMigemoRegexes(searchWord).then((r) => {
+            migemoRegexes = r;
+        });
+    }
+
+    $: if (dataFileItems || migemoRegexes) {
         filteredFileItems = dataFileItems.filter((it) =>
-            shouldShowFileItem(it, searchWord),
+            shouldShowFileItem(it, searchWord, migemoRegexes),
         );
     }
 

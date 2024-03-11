@@ -18,6 +18,7 @@ use regex::Regex;
 use tauri::{App, Manager, Wry};
 use tauri::menu::{Menu, MenuBuilder, MenuItemBuilder, SubmenuBuilder};
 use tauri_plugin_autostart::MacosLauncher;
+use regex::escape;
 
 use crate::git::{get_commits_by_day, git_init};
 use crate::git::git_add_commit_push;
@@ -58,6 +59,12 @@ lazy_static! {
 
 #[tauri::command]
 fn gen_migemo_regex(word: String) -> String {
+    if word.ends_with(|c: char| !c.is_ascii_alphabetic()) {
+        // 末尾がアルファベット以外の場合、エスケープして返す
+        // workaround for https://github.com/oguna/rustmigemo/issues/3
+        return escape(&word);
+    }
+
     let migemo = MIGEMO.lock().unwrap(); // Mutexをロックして `Migemo` インスタンスを取得
     return migemo.get_migemo(word);
 }

@@ -36,29 +36,21 @@ export function extractTitle(content: string) {
 export function shouldShowFileItem(
     fileItem: FileItem,
     searchWord: string,
+    migemoRegexes: RegExp[],
 ): boolean {
     if (searchWord.length == 0) {
         return true;
     }
 
-    const lowerCaseSearchWord = searchWord.toLowerCase();
     const lowerCaseTitle = fileItem.title.toLowerCase();
     const lowerCaseContent = fileItem.content.toLowerCase();
 
-    const words = lowerCaseSearchWord
-        .split(/\s+/)
-        .filter((it) => it.length > 0);
-    let result = true;
-    for (const word of words) {
-        if (
-            !lowerCaseTitle.includes(word) &&
-            !lowerCaseContent.includes(word)
-        ) {
-            result = false;
-            break;
+    for (const re of migemoRegexes) {
+        if (!re.test(lowerCaseTitle) && !re.test(lowerCaseContent)) {
+            return false;
         }
     }
-    return result;
+    return true;
 }
 
 export function extractBrackets(content: string): string[] {
