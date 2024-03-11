@@ -2,12 +2,15 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod git;
+mod migemo;
 
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
+use std::sync::Mutex;
 use std::time::SystemTime;
 use anyhow::anyhow;
+use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
 use simplelog::ColorChoice;
 use url::Url;
@@ -18,6 +21,7 @@ use tauri_plugin_autostart::MacosLauncher;
 
 use crate::git::{get_commits_by_day, git_init};
 use crate::git::git_add_commit_push;
+use crate::migemo::Migemo;
 
 #[derive(Serialize, Deserialize)]
 struct FileItem {
@@ -46,6 +50,16 @@ fn get_title(path: PathBuf, content: &str) -> String {
         let mut lines = content.lines().clone();
         lines.next().unwrap_or("").to_string()
     };
+}
+
+lazy_static! {
+    static ref MIGEMO: Mutex<Migemo> = Mutex::new(Migemo::new());
+}
+
+#[tauri::command]
+fn gen_migemo_regex(word: String) -> String {
+    let migemo = MIGEMO.lock().unwrap(); // Mutexをロックして `Migemo` インスタンスを取得
+    return migemo.get_migemo(word);
 }
 
 #[tauri::command]
@@ -287,6 +301,7 @@ fn main() -> anyhow::Result<()> {
             tauri_git_init,
             tauri_git_add_commit_push,
             tauri_get_commits_by_day,
+            gen_migemo_regex,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
