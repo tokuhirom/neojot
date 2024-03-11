@@ -201,6 +201,15 @@
     let fixedAreaHeight = 0; // 初期値を設定
 
     $: if (selectedItem) {
+        updateFixedAreaHeight();
+    }
+
+    onMount(() => {
+        requestAnimationFrame(() => {
+            updateFixedAreaHeight();
+        });
+    });
+    function updateFixedAreaHeight() {
         const fixedAreaElement = document.querySelector(
             '.fixed-area',
         ) as HTMLElement | null;
