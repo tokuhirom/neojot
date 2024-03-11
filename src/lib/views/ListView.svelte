@@ -20,7 +20,6 @@
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
     import type { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
     import { getExcalidrawTexts } from '../excalidraw/ExcalidrawUtils';
-    import { invoke } from '@tauri-apps/api/core';
     import { makeMigemoRegexes } from '../search/Migemo';
 
     export let allFileItems: FileItem[] = [];
