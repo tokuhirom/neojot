@@ -277,6 +277,7 @@
         flex: 1; /* Takes the remaining space */
         overflow-y: auto; /* Enables scrolling */
         /*height: calc(100vh - 300px); !* Adjust height accordingly *!*/
+        min-height: 200px;
     }
 
     .file-list {
