@@ -113,7 +113,15 @@ export function buildLinks(
         twoHopItems.add(src.title); // src を追加
         dsts.forEach((dst) => twoHopItems.add(dst.title)); // dst を追加
     });
+    const linksFilenameSet = new Set<string>();
     const uniqueLinks = links
+        .filter((item) => {
+            if (!linksFilenameSet.has(item.filename)) {
+                linksFilenameSet.add(item.filename);
+                return true;
+            }
+            return false; // Exclude this item, since it's a duplicate
+        })
         .filter((item) => !twoHopItems.has(item.title))
         .filter((it) => it.title !== selectedLowerTitle);
 
