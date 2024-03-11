@@ -204,8 +204,12 @@
         const fixedAreaElement = document.querySelector(
             '.fixed-area',
         ) as HTMLElement | null;
-        if (fixedAreaElement) {
-            fixedAreaHeight = fixedAreaElement.offsetHeight;
+        const clearableSearchBox = document.querySelector(
+            '.clearable-search-box',
+        ) as HTMLElement | null;
+        if (fixedAreaElement && clearableSearchBox) {
+            fixedAreaHeight =
+                fixedAreaElement.offsetHeight + clearableSearchBox.offsetHeight;
         }
     }
 </script>
@@ -221,7 +225,8 @@
             {#each tasks as task}
                 <TaskItem {task} {handleOnClick} />
             {/each}
-
+        </div>
+        <div class="clearable-search-box">
             <ClearableSearchBox bind:searchWord />
         </div>
         <div
@@ -281,7 +286,8 @@
 
     .fixed-area {
         flex: 0 0 250px; /* Adjust width as needed */
-        overflow-y: visible; /* Ensures this area does not scroll */
+        max-height: 30%;
+        overflow-y: scroll; /* Ensures this area does not scroll */
         padding-right: 9px;
         padding-left: 4px;
     }
