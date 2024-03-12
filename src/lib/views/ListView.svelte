@@ -150,17 +150,23 @@
     }
 
     $: if (dataFileItems || migemoRegexes) {
-        searchFileItems().then((r) => {
-            searchResult = r;
-        });
+        searchFileItems()
+            .then((r) => {
+                searchResult = r;
+            })
+            .catch((e) => {
+                console.error('Cannot update search result', e);
+            });
     }
 
     let migemoRegexes: RegExp[] = [];
-    $: if (searchWord) {
-        makeMigemoRegexes(searchWord).then((r) => {
+    $: makeMigemoRegexes(searchWord)
+        .then((r) => {
             migemoRegexes = r;
+        })
+        .catch((e) => {
+            console.error('Cannot update migemo regexes', e);
         });
-    }
 
     async function searchFileItems(): Promise<SearchResult[]> {
         const r: SearchResult[] = [];

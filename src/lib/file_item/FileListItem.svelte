@@ -56,18 +56,19 @@
         line: string,
         migemoRegexes: RegExp[] | undefined,
     ): string {
-        if (!migemoRegexes) {
+        if (!migemoRegexes || migemoRegexes.length == 0) {
             return line;
         }
 
         // HTMLエンティティにエスケープする関数
-        const escapeHtml = (text: string) =>
-            text
+        const escapeHtml = (text: string) => {
+            return text
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#039;');
+        };
 
         // エスケープされたキーワード用の正規表現を構築
         const regex = new RegExp(
