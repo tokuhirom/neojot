@@ -28,7 +28,6 @@ tauri-plugin-autostart = "2.0.0-beta.2"
 regex = "1.10.3"
 git2 = "0.18.2"
 chrono = "0.4.35"
-rustmigemo = { git = "https://github.com/oguna/rustmigemo.git", rev = "baf377c499879b1176d89a881a0de4659fddb220" }
 lazy_static = "1.4.0"
 
 [features]
