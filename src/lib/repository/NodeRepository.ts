@@ -110,15 +110,54 @@ function createImageFileName(ext: string) {
 export async function readAndSaveImage(file: File): Promise<string> {
     await mkdir_p('images');
 
-    const arrayBuffer = await file.arrayBuffer();
+    // 画像をCanvasに読み込む
+    const img = await loadImage(file);
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx?.drawImage(img, 0, 0);
+
+    // Canvasの内容をJPEG形式でArrayBufferとして取得
+    const arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+        canvas.toBlob(
+            (blob) => {
+                if (blob) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        if (reader.result instanceof ArrayBuffer) {
+                            resolve(reader.result);
+                        } else {
+                            reject(new Error('Expected ArrayBuffer'));
+                        }
+                    };
+                    reader.onerror = () =>
+                        reject(new Error('Error reading blob as ArrayBuffer'));
+                    reader.readAsArrayBuffer(blob);
+                } else {
+                    reject(new Error('Failed to convert canvas to blob'));
+                }
+            },
+            'image/jpeg',
+            0.85,
+        ); // JPEG品質を指定
+    });
+
     const buffer = new Uint8Array(arrayBuffer);
-
-    const ext = file.type.split('/')[1];
-
-    const path = createImageFileName(ext);
+    const path = createImageFileName('jpg'); // 拡張子をJPEGに固定
 
     await writeFile(path, buffer, { baseDir: BaseDirectory.AppData });
     return path;
+}
+
+// ファイルから画像を読み込むヘルパー関数
+function loadImage(file: File): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = URL.createObjectURL(file);
+    });
 }
 
 async function mkdir_p(path: string) {
