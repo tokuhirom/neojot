@@ -1,7 +1,7 @@
-import type { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
 import { BaseDirectory, readFile } from '@tauri-apps/plugin-fs';
 import { uint8ArrayToDataUrl } from '../markdown/ImageViewWidget';
 import type { FileItem } from '../file_item/FileItem';
+import type { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
 
 export function getExcalidrawTexts(elements: ExcalidrawElement[]): string[] {
     const texts: string[] = [];
@@ -19,10 +19,10 @@ export function getExcalidrawTexts(elements: ExcalidrawElement[]): string[] {
 export async function loadExcalidrawImage(
     fileItem: FileItem,
 ): Promise<string | undefined> {
-    if (fileItem.filename.endsWith('.excalidraw.md')) {
+    if (fileItem.filename.endsWith('.excalidraw')) {
         try {
             const blob = await readFile(
-                fileItem.filename.replace('.md', '.png'),
+                makeExcalidrawThumbnailFilename(fileItem.filename),
                 {
                     baseDir: BaseDirectory.AppData,
                 },
@@ -35,4 +35,11 @@ export async function loadExcalidrawImage(
     } else {
         return undefined;
     }
+}
+
+export function makeExcalidrawThumbnailFilename(filename: string): string {
+    return filename
+        .replace('data/', 'excalidraw-thumbnails/')
+        .replace('archived/', 'excalidraw-thumbnails/')
+        .replace('.excalidraw', '.jpg');
 }

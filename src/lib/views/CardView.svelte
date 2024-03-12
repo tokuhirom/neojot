@@ -50,7 +50,7 @@
             Back to List
         </button>
 
-        {#if selectedItem.filename.endsWith('.excalidraw.md')}
+        {#if selectedItem.filename.endsWith('.excalidraw')}
             <div class="excalidraw-container">
                 <ExcalidrawView {selectedItem} />
             </div>

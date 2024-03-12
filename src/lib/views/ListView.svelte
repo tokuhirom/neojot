@@ -19,8 +19,8 @@
     import { emit } from '@tauri-apps/api/event';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
     import type { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
-    import { getExcalidrawTexts } from '../excalidraw/ExcalidrawUtils';
     import { makeMigemoRegexes } from '../search/Migemo';
+    import { getExcalidrawTexts } from '../excalidraw/ExcalidrawUtils';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -104,11 +104,8 @@
         const lines: MatchedLine[] = [];
         if (searchWord.length > 0) {
             const contentLines = fileItem.content.split(/\n/);
-            if (fileItem.filename.endsWith('.excalidraw.md')) {
-                // ```json から ``` までの間に入っている JSON を取り出して parse する
-                const json = fileItem.content.match(
-                    /```json\n([\s\S]+?)\n```/m,
-                )?.[1];
+            if (fileItem.filename.endsWith('.excalidraw')) {
+                const json = fileItem.content;
                 const excalidraw = JSON.parse(json);
                 const elements = excalidraw.elements as ExcalidrawElement[];
                 const texts: string[] = getExcalidrawTexts(elements);
@@ -270,7 +267,7 @@
     <!-- eslint-disable-next-line -->
     <div class="log-view" on:click={() => (viewerMode = false)}>
         {#if selectedItem !== undefined}
-            {#if selectedItem.filename.endsWith('.excalidraw.md')}
+            {#if selectedItem.filename.endsWith('.excalidraw')}
                 <ExcalidrawView {selectedItem} />
             {:else}
                 <EntryView

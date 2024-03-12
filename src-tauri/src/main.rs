@@ -28,13 +28,20 @@ struct FileItem {
 }
 
 fn get_title(path: PathBuf, content: &str) -> String {
-    if path.to_str().unwrap().ends_with(".excalidraw.md") {
+    if path.to_str().unwrap().ends_with(".excalidraw") {
         log::info!("excalidraw: {:?}", path);
         // get basename without extension
         let basename = path.file_stem().and_then(|s| s.to_str()).unwrap_or("");
-        // remove .excalidraw from basename
-        let basename = basename.trim_end_matches(".excalidraw");
-        return format!("Draw {}", basename);
+
+        // read file as JSON and get title from it
+        // title is in "neojot:title" field.
+        let json: serde_json::Value = serde_json::from_str(content).unwrap();
+        if let Some(title) = json.get("neojot:title") {
+            return title.as_str().unwrap().to_string();
+        } else {
+            let basename = basename.trim_end_matches(".excalidraw");
+            return format!("Draw {}", basename);
+        }
     }
 
     let re = Regex::new(r"^#+\s+(.*)").unwrap(); // cache?
@@ -127,7 +134,8 @@ fn get_files(prefix: String) -> Result<Vec<FileItem>, String> {
         for entry in entries.filter_map(Result::ok) {
             // log::info!("entry: {:?}", entry);
             let path = entry.path();
-            if path.is_file() && path.extension().and_then(|s| s.to_str()) == Some("md") {
+            let ext = path.extension().and_then(|s| s.to_str());
+            if path.is_file() && (ext == Some("md") || ext == Some("excalidraw")) {
                 let filename = path.file_name()
                     .and_then(|s| s.to_str())
                     .ok_or("Failed to get filename".to_string())?
@@ -295,14 +303,14 @@ fn main() -> anyhow::Result<()> {
 }
 
 fn create_new_excalidraw() -> anyhow::Result<String> {
-    // Create `data/yyyyMMddHHmmss.excalidraw.md`.
+    // Create `data/yyyyMMddHHmmss.excalidraw`.
     let now = chrono::Local::now();
-    let filename = format!("data/{}.excalidraw.md", now.format("%Y%m%d%H%M%S"));
+    let filename = format!("data/{}.excalidraw", now.format("%Y%m%d%H%M%S"));
     let datadir = dirs::data_dir().ok_or(anyhow!("Data directory not found"))?;
     let path = datadir.join("com.github.tokuhirom.neojot").join(filename.clone());
 
     // write the dummy content
-    let content = include_str!("../assets/excalidraw.md");
+    let content = include_str!("../assets/excalidraw");
     fs::write(&path, content)?;
     Ok(filename)
 }

@@ -7,8 +7,8 @@
         BinaryFiles,
         ExcalidrawImperativeAPI,
     } from '@excalidraw/excalidraw/types/types';
-    import { saveMarkdownFile } from '../repository/NodeRepository';
-    import { getExcalidrawTexts } from './ExcalidrawUtils';
+    import { mkdir_p, saveMarkdownFile } from '../repository/NodeRepository';
+    import { makeExcalidrawThumbnailFilename } from './ExcalidrawUtils';
     import { exportToBlob } from '@excalidraw/excalidraw';
     import { BaseDirectory, writeFile } from '@tauri-apps/plugin-fs';
     import { emit } from '@tauri-apps/api/event';
@@ -31,14 +31,7 @@
     }
 
     function parseData() {
-        // selectedItem.content から ```json と ``` で囲まれた部分をとりだし、JSON.parse して返す
-        const content = selectedItem.content;
-        const start = content.indexOf('```json');
-        const end = content.indexOf('```', start + 1);
-        if (start === -1 || end === -1) {
-            return null;
-        }
-        const json = content.substring(start + 7, end);
+        const json = selectedItem.content;
         const data = JSON.parse(json);
         // なぜか collabolators が残っているとエラーになるので削除。謎。。
         delete data.appState['collaborators'];
@@ -62,40 +55,9 @@
             files,
         });
 
-        let content = selectedItem.content;
-
-        // content の # Text Elements の直後から %% までの間を texts を改行で連結したものに置き換える
-        {
-            const texts = getExcalidrawTexts(elements);
-            const start = content.indexOf('# Text Elements');
-            const end = content.indexOf('%%', start + 1);
-            if (start === -1 || end === -1) {
-                return;
-            }
-            content =
-                content.substring(0, start + 15) +
-                '\n' +
-                texts.join('\n') +
-                '\n' +
-                content.substring(end);
-        }
-
-        // selectedItem.content のうち ```json と ``` で囲まれた部分を置き換える。
-        const start = content.indexOf('```json');
-        const end = content.indexOf('```', start + 1);
-        if (start === -1 || end === -1) {
-            return;
-        }
-        content =
-            content.substring(0, start + 7) +
-            '\n' +
-            excalidrawData +
-            '\n' +
-            content.substring(end);
-
-        if (content !== selectedItem.content) {
+        if (excalidrawData !== selectedItem.content) {
             // selectedItem.content が変更された場合のみ保存する
-            selectedItem.content = content;
+            selectedItem.content = excalidrawData;
 
             // ファイルに保存する
             await saveMarkdownFile(selectedItem.filename, selectedItem.content);
@@ -107,15 +69,16 @@
                 elements,
                 appState,
                 files,
-                mimeType: 'image/png',
+                mimeType: 'image/jpeg',
             });
 
             // convert blob to Uint8Array
             const arrayBuffer = await blob.arrayBuffer();
             // convert ArrayBuffer into Uint8Array
             const uint8Array = new Uint8Array(arrayBuffer);
+            await mkdir_p('excalidraw-thumbnails');
             await writeFile(
-                selectedItem.filename.replace('.md', '.png'),
+                makeExcalidrawThumbnailFilename(selectedItem.filename),
                 uint8Array,
                 { baseDir: BaseDirectory.AppData },
             );

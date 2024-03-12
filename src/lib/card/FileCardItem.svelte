@@ -25,8 +25,8 @@
     }
 
     async function loadFile() {
-        if (file.filename.endsWith('.excalidraw.md')) {
-            title = undefined;
+        if (file.filename.endsWith('.excalidraw')) {
+            title = file.title;
             content = undefined;
             imgSrc = await loadExcalidrawImage(file);
             if (imgSrc === undefined) {

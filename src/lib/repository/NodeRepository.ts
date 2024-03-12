@@ -71,7 +71,7 @@ export async function archiveFile(fileItem: FileItem) {
             newPathBaseDir: BaseDirectory.AppData,
         },
     );
-    if (fileItem.filename.endsWith('.excalidraw.md')) {
+    if (fileItem.filename.endsWith('.excalidraw')) {
         await remove(
             fileItem.filename.replace('.excalidraw.md', '.excalidraw.png'),
             {
@@ -160,7 +160,7 @@ function loadImage(file: File): Promise<HTMLImageElement> {
     });
 }
 
-async function mkdir_p(path: string) {
+export async function mkdir_p(path: string) {
     if (!(await exists(path, { baseDir: BaseDirectory.AppData }))) {
         await mkdir(path, { baseDir: BaseDirectory.AppData });
     }
