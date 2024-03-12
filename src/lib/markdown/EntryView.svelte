@@ -220,8 +220,17 @@
             return true;
         }
 
+        // 本来はメニューが反応してarchiveされるべきだが、エディタ上でのMod-dが何者かに横取り
+        // されていて処理できないっぽいので、ここで処理する
+        function archive() {
+            console.log('archive');
+            emit('do_archive', { filename: file.filename });
+            return true;
+        }
+
         const customKeymap: KeyBinding[] = [
             { key: 'Mod-z', run: undo, preventDefault: true },
+            { key: 'Mod-d', run: archive, preventDefault: true },
             { key: 'Mod-Shift-z', run: redo, preventDefault: true },
             {
                 key: 'Mod-b',
