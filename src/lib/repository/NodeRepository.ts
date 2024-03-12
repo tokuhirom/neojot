@@ -57,7 +57,7 @@ export async function archiveFile(fileItem: FileItem) {
     const content = await readTextFile(fileItem.filename, {
         baseDir: BaseDirectory.AppData,
     });
-    if (content.match(/^#\s+$/)) {
+    if (content.match(/^#?\s*$/)) {
         console.log('EMPTY FILE');
         await remove(fileItem.filename, { baseDir: BaseDirectory.AppData });
         return;
