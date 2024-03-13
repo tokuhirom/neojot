@@ -17,6 +17,7 @@
     let excalidrawApi: ExcalidrawImperativeAPI;
 
     let prevFilename = selectedItem?.filename;
+
     $: if (selectedItem) {
         // clear current drawing and load new drawing from the file
         console.log('Restore...');
@@ -50,6 +51,7 @@
             type: 'excalidraw',
             version: 2,
             source: 'https://excalidraw.com',
+            'neojot:title': selectedItem.title,
             elements,
             appState,
             files,
@@ -90,4 +92,31 @@
     }
 </script>
 
-<Excalidraw initialData={parseData()} {onChangeData} {onSetAPI} />
+<div class="container">
+    <input class="title-input" type="text" bind:value={selectedItem.title} />
+    <div class="excalidraw">
+        <Excalidraw initialData={parseData()} {onChangeData} {onSetAPI} />
+    </div>
+</div>
+
+<style>
+    .container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh; /* 画面の高さいっぱいに */
+    }
+
+    .title-input {
+        /* inputの高さを設定 */
+        height: 50px; /* 適切な高さに設定 */
+        padding: 0 10px; /* 見た目を整えるためのパディング */
+        box-sizing: border-box; /* パディングとボーダーを高さに含める */
+        border: 1px solid #ccc; /* ボーダーを設定 */
+        margin: 8px 0; /* 余白を設定 */
+    }
+
+    .excalidraw {
+        flex-grow: 1; /* 残りのスペースをすべて使用 */
+        overflow: hidden; /* 子要素がコンテナを超えた場合にスクロールバーを非表示に */
+    }
+</style>
