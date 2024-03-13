@@ -64,7 +64,6 @@
     ) {
         const lines: MatchedLine[] = [];
         if (searchWord.length > 0) {
-            const contentLines = fileItem.content.split(/\n/);
             if (fileItem.filename.endsWith('.excalidraw')) {
                 const json = fileItem.content;
                 const excalidraw = JSON.parse(json);
@@ -83,6 +82,7 @@
                     }
                 });
             } else {
+                const contentLines = fileItem.content.split(/\n/);
                 contentLines.filter((line, index) => {
                     if (
                         migemoRegexes.some((regex) =>
