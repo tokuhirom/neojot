@@ -28,6 +28,6 @@ export async function initGit() {
                 });
             }
         },
-        60 * 60 * 1000,
+        10 * 60 * 1000,
     );
 }
