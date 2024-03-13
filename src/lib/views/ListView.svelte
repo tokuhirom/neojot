@@ -21,6 +21,7 @@
     import type { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
     import { makeMigemoRegexes } from '../search/Migemo';
     import { getExcalidrawTexts } from '../excalidraw/ExcalidrawUtils';
+    import FileList from '../file_item/FileList.svelte';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -87,98 +88,7 @@
         });
     }
 
-    type SearchResult = {
-        lines: MatchedLine[];
-        fileItem: FileItem;
-    };
-
-    let searchResult: SearchResult[];
-
     let searchWord = '';
-
-    async function searchLinesByWord(
-        fileItem: FileItem,
-        searchWord: string,
-        migemoRegexes: RegExp[],
-    ) {
-        const lines: MatchedLine[] = [];
-        if (searchWord.length > 0) {
-            const contentLines = fileItem.content.split(/\n/);
-            if (fileItem.filename.endsWith('.excalidraw')) {
-                const json = fileItem.content;
-                const excalidraw = JSON.parse(json);
-                const elements = excalidraw.elements as ExcalidrawElement[];
-                const texts: string[] = getExcalidrawTexts(elements);
-                texts.filter((text) => {
-                    if (
-                        migemoRegexes.some((regex) =>
-                            regex.test(text.toLowerCase()),
-                        )
-                    ) {
-                        lines.push({
-                            content: text,
-                            lineNumber: undefined,
-                        } as MatchedLine);
-                    }
-                });
-            } else {
-                contentLines.filter((line, index) => {
-                    if (
-                        migemoRegexes.some((regex) =>
-                            regex.test(line.toLowerCase()),
-                        ) &&
-                        !(
-                            (line.startsWith('# ') ||
-                                line.startsWith('<<< ')) &&
-                            line
-                                .toLowerCase()
-                                .includes(searchWord.toLowerCase())
-                        )
-                    ) {
-                        lines.push({
-                            content: line,
-                            lineNumber: index + 1,
-                        } as MatchedLine);
-                    }
-                });
-            }
-        }
-        return lines;
-    }
-
-    $: if (dataFileItems || migemoRegexes) {
-        searchFileItems()
-            .then((r) => {
-                searchResult = r;
-            })
-            .catch((e) => {
-                console.error('Cannot update search result', e);
-            });
-    }
-
-    let migemoRegexes: RegExp[] = [];
-    $: makeMigemoRegexes(searchWord)
-        .then((r) => {
-            migemoRegexes = r;
-        })
-        .catch((e) => {
-            console.error('Cannot update migemo regexes', e);
-        });
-
-    async function searchFileItems(): Promise<SearchResult[]> {
-        const r: SearchResult[] = [];
-        for (const fileItem of dataFileItems) {
-            if (shouldShowFileItem(fileItem, searchWord, migemoRegexes)) {
-                const lines: MatchedLine[] = await searchLinesByWord(
-                    fileItem,
-                    searchWord,
-                    migemoRegexes,
-                );
-                r.push({ lines: lines, fileItem });
-            }
-        }
-        return r;
-    }
 
     function onSaved() {
         selectedItem = selectedItem;
@@ -248,20 +158,14 @@
             class="scrollable-area"
             style="height: calc(100vh - {fixedAreaHeight}px);"
         >
-            {#if searchResult && selectedItem}
-                {#each searchResult as result}
-                    <FileListItem
-                        {onSelectItem}
-                        fileItem={result.fileItem}
-                        matchLines={result.lines}
-                        {searchWord}
-                        {migemoRegexes}
-                        {selectedItem}
-                        {enterViewerMode}
-                        {viewerMode}
-                    />
-                {/each}
-            {/if}
+            <FileList
+                {dataFileItems}
+                {searchWord}
+                {selectedItem}
+                {onSelectItem}
+                {viewerMode}
+                {enterViewerMode}
+            />
         </div>
     </div>
     <!-- eslint-disable-next-line -->
