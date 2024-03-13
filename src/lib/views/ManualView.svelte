@@ -65,6 +65,17 @@ Tasks are prioritized based on a scoring system to ensure important tasks are hi
 - **NOTE**: Positive if scheduled date is within 1 day.
 
 Tasks with a positive score are deemed important and are displayed at the top of the task list, ensuring you always know what needs attention.
+
+## Special Markdown Features
+
+### Images
+
+Insert images using the following syntax:
+
+- \`![Alt Text](File path or URL)\`
+- \`![[image.png|100]]\` - Display the image, with width to 100px.
+- \`![[image.png|100x200]]\` - Display the image width as 100px x 200px.
+
 `;
 
     let htmlContent: string | Promise<string> = '';

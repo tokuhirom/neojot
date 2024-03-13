@@ -29,7 +29,11 @@ export function uint8ArrayToDataUrl(
 }
 
 class ImageViewWidget extends WidgetType {
-    constructor(readonly src: string) {
+    constructor(
+        readonly src: string,
+        readonly width: string | undefined,
+        readonly height: string | undefined,
+    ) {
         super();
     }
 
@@ -49,8 +53,14 @@ class ImageViewWidget extends WidgetType {
             img.src = this.src;
         }
         img.alt = this.src;
-        img.style.maxWidth = '100%';
-        img.style.maxHeight = '400px';
+        if (this.width) {
+            img.style.maxWidth = this.width + 'px';
+        } else {
+            img.style.maxWidth = '400px';
+        }
+        if (this.height) {
+            img.style.maxHeight = this.height + 'px';
+        }
 
         const wrapper = document.createElement('div');
         wrapper.appendChild(img);
@@ -59,7 +69,11 @@ class ImageViewWidget extends WidgetType {
 
     eq(other: ImageViewWidget) {
         // ソースが同じであれば、trueを返して再生成をスキップ
-        return this.src === other.src;
+        return (
+            this.src === other.src &&
+            this.width === other.width &&
+            this.height === other.height
+        );
     }
 
     ignoreEvent() {
@@ -87,19 +101,33 @@ export const imageDecorator: ViewPlugin<{
 
         buildDecorations(view: EditorView): RangeSet<RangeValue> {
             const builder = new RangeSetBuilder();
-            const re = /!\[.*?]\((.*?)\)/g;
+            // ![image](../images/20240313092940.jpg)
+            // ![[image.png|100]] のときに、100 は width のみ指定。height は自動調整
+            // ![[image.png|100x100]] のときに、100x100 は width x height を指定
+            // いずれのパターンも対応する regexp を用意する
+            const re =
+                /!\[.*?]\((?<n1>.*?)\)|!\[\[(?<n2>[^|]+)\|(?<width>[0-9]+)(?:x(?<height>[0-9]+))?]]/g;
+            // const re = /!\[.*?]\((.*?)\)/g;
             for (const { from, to } of view.visibleRanges) {
                 const text = view.state.doc.sliceString(from, to);
                 let match;
                 while ((match = re.exec(text))) {
-                    const imgSrc = match[1];
-                    const widget = new ImageViewWidget(imgSrc);
-                    const pos = from + match.index + match[0].length;
-                    builder.add(
-                        pos,
-                        pos,
-                        Decoration.widget({ widget, side: 1 }),
-                    );
+                    if (match.groups) {
+                        const imgSrc = match.groups['n1'] || match.groups['n2'];
+                        const width = match.groups['width'];
+                        const height = match.groups['height'];
+                        const widget = new ImageViewWidget(
+                            imgSrc,
+                            width,
+                            height,
+                        );
+                        const pos = from + match.index + match[0].length;
+                        builder.add(
+                            pos,
+                            pos,
+                            Decoration.widget({ widget, side: 1 }),
+                        );
+                    }
                 }
             }
             return builder.finish();
