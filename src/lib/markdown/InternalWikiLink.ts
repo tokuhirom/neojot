@@ -26,7 +26,7 @@ export const internalLinkDecorator = ViewPlugin.fromClass(
 
         buildDecorations(view: EditorView): RangeSet<RangeValue> {
             const builder = new RangeSetBuilder();
-            const re = /\[\[(.*?)]]/g; // 内部リンクの正規表現
+            const re = /\[\[([^|]+?)]]/g; // 内部リンクの正規表現
             for (const { from, to } of view.visibleRanges) {
                 const text = view.state.doc.sliceString(from, to);
                 let match;
