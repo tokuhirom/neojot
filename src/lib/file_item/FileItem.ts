@@ -36,7 +36,7 @@ export function extractTitle(content: string) {
 export function shouldShowFileItem(
     fileItem: FileItem,
     searchWord: string,
-    migemoRegexes: RegExp[],
+    regExps: RegExp[],
 ): boolean {
     if (searchWord.length == 0) {
         return true;
@@ -45,7 +45,7 @@ export function shouldShowFileItem(
     const lowerCaseTitle = fileItem.title.toLowerCase();
     const lowerCaseContent = fileItem.content.toLowerCase();
 
-    for (const re of migemoRegexes) {
+    for (const re of regExps) {
         if (!re.test(lowerCaseTitle) && !re.test(lowerCaseContent)) {
             return false;
         }
