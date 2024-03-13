@@ -57,6 +57,7 @@ export function buildLinks(
     fileItems: FileItem[],
 ): Links {
     console.log('Starting buildLinks');
+    const t0 = Date.now();
 
     const lowerTitle2fileItem: Record<string, FileItem> = {};
     for (const fileItem of fileItems) {
@@ -130,7 +131,7 @@ export function buildLinks(
     );
     twoHopLinks.sort((a, b) => b.src.mtime - a.src.mtime);
 
-    console.log('Finished buildLinks');
+    console.log(`Finished buildLinks. ${Date.now() - t0}ms`);
 
     return {
         links: uniqueLinks,
