@@ -15,6 +15,7 @@
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
     import FileList from '../file_item/FileList.svelte';
     import MenuView from './MenuView.svelte';
+    import { createNewFileWithContent } from '../repository/NodeRepository';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -130,6 +131,37 @@
                 fixedAreaElement.offsetHeight + clearableSearchBox.offsetHeight;
         }
     }
+
+    function findOrCreateEntry(pageName: string) {
+        const lowerPageName = pageName.toLowerCase();
+
+        for (let title of Object.keys(comefromLinks)) {
+            if (title.toLowerCase() === lowerPageName) {
+                onSelectItem(comefromLinks[title]);
+                searchWord = pageName;
+                return;
+            }
+        }
+
+        for (let title of Object.keys(title2fileItem)) {
+            if (title.toLowerCase() === lowerPageName) {
+                onSelectItem(title2fileItem[title]);
+                searchWord = pageName;
+                return;
+            }
+        }
+
+        // create new entry
+        console.log(
+            `Page '${pageName}' is not found. Trying to create new entry...${allFileItems.length}`,
+        );
+        createNewFileWithContent(`# ${pageName}\n\n`).then(
+            (fileItem: FileItem) => {
+                onCreateItem(fileItem);
+                searchWord = pageName;
+            },
+        );
+    }
 </script>
 
 <div class="list-view">
@@ -187,7 +219,7 @@
         {/if}
     </div>
     <div class="menu">
-        <MenuView />
+        <MenuView {findOrCreateEntry} />
     </div>
 </div>
 

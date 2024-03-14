@@ -10,6 +10,9 @@
     import BasicCodeMirror6 from '../markdown/BasicCodeMirror6.svelte';
     import type { EditorView } from '@codemirror/view';
     import { Transaction } from '@codemirror/state';
+    import { internalLinkPlugin } from '../markdown/InternalWikiLink';
+
+    export let findOrCreateEntry: (pageName: string) => void;
 
     let view: EditorView;
 
@@ -50,7 +53,7 @@
         });
     }
 
-    let extensions = [];
+    let extensions = [internalLinkPlugin(findOrCreateEntry)];
 </script>
 
 <div class="wrapper">
