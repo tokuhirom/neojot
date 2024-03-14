@@ -308,7 +308,6 @@
     let prevFileName = '';
 
     $: if (file) {
-        console.log(view);
         if (view) {
             if (prevFileName !== file.filename) {
                 console.log(

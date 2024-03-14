@@ -28,7 +28,6 @@
         let startState = EditorState.create({
             doc: initialContent,
             extensions: [
-                ...extensions,
                 history(),
                 todoPlugin,
                 imageDecorator,
@@ -57,6 +56,7 @@
                         }
                     }
                 }),
+                ...extensions,
             ],
         });
 
