@@ -1,5 +1,4 @@
 <script lang="ts">
-    // open '00menu.md' and read the content.
     import {
         BaseDirectory,
         exists,
@@ -14,10 +13,11 @@
     import { nord } from 'cm6-theme-nord';
     import { taskPlugin } from '../markdown/TaskPlugin';
     import type { FileItem } from '../file_item/FileItem';
+    import type { Task } from '../task/Task';
 
     export let findOrCreateEntry: (pageName: string) => void;
     export let dataFileItems: FileItem[];
-    export let openTask: (task: string) => void;
+    export let openTask: (task: Task) => void;
 
     let view: EditorView;
 
@@ -61,7 +61,7 @@
     let extensions = [
         internalLinkPlugin(findOrCreateEntry),
         nord,
-        taskPlugin(dataFileItems, openTask),
+        taskPlugin(() => dataFileItems, openTask),
     ];
 </script>
 

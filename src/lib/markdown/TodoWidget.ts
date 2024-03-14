@@ -146,7 +146,6 @@ export const todoPlugin = ViewPlugin.fromClass(
         decorations: (v) => v.decorations,
         eventHandlers: {
             keydown: (event, view) => {
-                console.log(`TodoWidget: keydown '${event.key}'`);
                 if (event.ctrlKey || event.altKey || event.metaKey) {
                     return;
                 }
@@ -159,7 +158,6 @@ export const todoPlugin = ViewPlugin.fromClass(
                 if (event.shiftKey) {
                     return;
                 }
-                console.log(`TodoWidget: keydown '${event.key}'`);
 
                 // when user press the 'n' key, update line to 'NOTE'
                 if (event.key === 'n') {

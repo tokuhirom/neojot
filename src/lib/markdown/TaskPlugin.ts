@@ -14,52 +14,59 @@ import {
     type Task,
 } from '../task/Task';
 import type { FileItem } from '../file_item/FileItem';
+import { listen } from '@tauri-apps/api/event';
+import TaskWidgetInner from './TaskWidgetInner.svelte';
 
 class TaskWidget extends WidgetType {
+    private needsRendering: boolean = true;
+    private taskWidgetInner: TaskWidgetInner | undefined;
+
     constructor(
-        private dataFileItems: FileItem[],
+        private getDataFileItems: () => FileItem[],
         private openTask: (task: Task) => void,
     ) {
         super();
+
+        listen('sort_file_list', (event) => {
+            const payload = event.payload as { fileItem: FileItem };
+            if (this.taskWidgetInner) {
+                if (
+                    payload.fileItem.content.match(/[A-Z]\[.+]/) ||
+                    this.needsRendering
+                ) {
+                    this.taskWidgetInner.$$set({
+                        dataFileItems: this.getDataFileItems(),
+                    });
+                    this.needsRendering = false;
+                }
+            }
+        });
     }
 
     toDOM() {
-        const today = new Date();
-        const tasks = sortTasks(extractTasks(this.dataFileItems)).filter(
-            (task) => {
-                return calculateFreshness(task, today) >= 0;
-            },
-        );
-        console.log(tasks);
-
         const container = document.createElement('div');
         container.className = 'task-widget';
-        for (const task of tasks) {
-            this.buildTaskElement(container, task);
-        }
-        // container.textContent = 'Tasks Placeholder';
+        const dataFileItems = this.getDataFileItems();
+        this.renderTasks(container, dataFileItems);
+        this.needsRendering = dataFileItems.length == 0;
         return container;
     }
 
-    private buildTaskElement(container: HTMLDivElement, task: Task) {
-        const div = document.createElement('div');
-        div.innerText = getTaskIcon(task) + ' ' + task.title;
-        div.addEventListener('click', (event) => {
-            event.stopPropagation();
-            event.preventDefault();
-
-            // open task
-            console.log(
-                `open task: ${task.title} ${task.lineNumber} ${task.fileItem.filename}`,
-            );
-            this.openTask(task);
+    private renderTasks(container: HTMLDivElement, dataFileItems: FileItem[]) {
+        this.taskWidgetInner = new TaskWidgetInner({
+            target: container,
+            props: {
+                dataFileItems,
+                onClick: (task: Task) => {
+                    this.openTask(task);
+                },
+            },
         });
-        container.appendChild(div);
     }
 }
 
 export function taskPlugin(
-    dataFileItems: FileItem[],
+    getDataFileItems: () => FileItem[],
     openTask: (task: Task) => void,
 ) {
     return ViewPlugin.fromClass(
@@ -98,7 +105,10 @@ export function taskPlugin(
                             pos,
                             pos,
                             Decoration.widget({
-                                widget: new TaskWidget(dataFileItems, openTask),
+                                widget: new TaskWidget(
+                                    getDataFileItems,
+                                    openTask,
+                                ),
                                 side: 1,
                                 attributes: {
                                     style: 'color: yellow',

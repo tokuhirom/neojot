@@ -51,7 +51,7 @@
             }
             await saveMarkdownFile(file.filename, text);
             file.mtime = Math.floor(Date.now() / 1000);
-            await emit('sort_file_list');
+            await emit('sort_file_list', { fileItem: file });
             onSaved();
         }
     }
