@@ -12,7 +12,7 @@
     import { imageDecorator } from './ImageViewWidget';
     import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
     import { languages } from '@codemirror/language-data';
-    import { oneDark, oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
+    import { oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
     import { mermaidPlugin } from './MermaidWidget';
     import { syntaxHighlighting } from '@codemirror/language';
 

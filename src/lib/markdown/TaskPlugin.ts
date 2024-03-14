@@ -34,7 +34,7 @@ class TaskWidget extends WidgetType {
 
         const container = document.createElement('div');
         container.className = 'task-widget';
-        for (let task of tasks) {
+        for (const task of tasks) {
             this.buildTaskElement(container, task);
         }
         // container.textContent = 'Tasks Placeholder';
