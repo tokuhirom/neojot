@@ -219,7 +219,7 @@
         {/if}
     </div>
     <div class="menu">
-        <MenuView {findOrCreateEntry} />
+        <MenuView {findOrCreateEntry} {dataFileItems} />
     </div>
 </div>
 

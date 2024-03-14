@@ -96,3 +96,8 @@ button {
 .highlight-keyword {
     color: deepskyblue;
 }
+
+.task-widget {
+    border: #24c8db 1px solid;
+    padding: 4px;
+}

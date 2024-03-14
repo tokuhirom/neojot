@@ -12,8 +12,11 @@
     import { Transaction } from '@codemirror/state';
     import { internalLinkPlugin } from '../markdown/InternalWikiLink';
     import { nord } from 'cm6-theme-nord';
+    import { taskPlugin } from '../markdown/TaskPlugin';
+    import type { FileItem } from '../file_item/FileItem';
 
     export let findOrCreateEntry: (pageName: string) => void;
+    export let dataFileItems: FileItem[];
 
     let view: EditorView;
 
@@ -54,7 +57,11 @@
         });
     }
 
-    let extensions = [internalLinkPlugin(findOrCreateEntry), nord];
+    let extensions = [
+        internalLinkPlugin(findOrCreateEntry),
+        nord,
+        taskPlugin(dataFileItems),
+    ];
 </script>
 
 <div class="wrapper">
