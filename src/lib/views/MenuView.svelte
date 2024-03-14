@@ -11,6 +11,7 @@
     import type { EditorView } from '@codemirror/view';
     import { Transaction } from '@codemirror/state';
     import { internalLinkPlugin } from '../markdown/InternalWikiLink';
+    import { nord } from 'cm6-theme-nord';
 
     export let findOrCreateEntry: (pageName: string) => void;
 
@@ -53,7 +54,7 @@
         });
     }
 
-    let extensions = [internalLinkPlugin(findOrCreateEntry)];
+    let extensions = [internalLinkPlugin(findOrCreateEntry), nord];
 </script>
 
 <div class="wrapper">

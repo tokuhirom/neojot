@@ -36,7 +36,6 @@
                     base: markdownLanguage, // enable github flavored markdown
                     codeLanguages: languages,
                 }),
-                oneDark,
                 mermaidPlugin(),
                 syntaxHighlighting(oneDarkHighlightStyle),
                 EditorView.lineWrapping,

@@ -28,6 +28,7 @@
     import { languages } from '@codemirror/language-data';
     import BasicCodeMirror6 from './BasicCodeMirror6.svelte';
     import { internalLinkPlugin } from './InternalWikiLink';
+    import { oneDark } from '@codemirror/theme-one-dark';
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
@@ -288,6 +289,7 @@
     }
 
     let extensions = [
+        oneDark,
         internalLinkPlugin((pageName) => {
             findOrCreateEntry(pageName);
         }),
