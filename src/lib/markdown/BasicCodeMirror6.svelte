@@ -9,7 +9,6 @@
     } from '@codemirror/state';
     import { history } from '@codemirror/commands';
     import { todoPlugin } from './TodoWidget';
-    import { internalLinkDecorator } from './InternalWikiLink';
     import { imageDecorator } from './ImageViewWidget';
     import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
     import { languages } from '@codemirror/language-data';
@@ -32,7 +31,6 @@
                 ...extensions,
                 history(),
                 todoPlugin,
-                internalLinkDecorator,
                 imageDecorator,
                 markdown({
                     base: markdownLanguage, // enable github flavored markdown

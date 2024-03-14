@@ -27,6 +27,7 @@
     import { comeFromLinkHighlightPlugin } from './KeywordHighlight';
     import { languages } from '@codemirror/language-data';
     import BasicCodeMirror6 from './BasicCodeMirror6.svelte';
+    import { internalLinkPlugin } from './InternalWikiLink';
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
@@ -287,6 +288,9 @@
     }
 
     let extensions = [
+        internalLinkPlugin((pageName) => {
+            findOrCreateEntry(pageName);
+        }),
         linkPlugin((keyword) => {
             search(keyword);
         }),
@@ -297,20 +301,6 @@
         EditorView.domEventHandlers({ paste: handlePaste }),
         keymap.of(customKeymap),
         autocompletion({ override: [myCompletion] }),
-        EditorView.domEventHandlers({
-            click: (event) => {
-                const { target } = event;
-                if (
-                    target instanceof HTMLElement &&
-                    target.closest('.internal-link')
-                ) {
-                    console.log(`Internal link clicked: ${target.innerText}`);
-
-                    event.preventDefault();
-                    findOrCreateEntry(target.innerText);
-                }
-            },
-        }),
     ];
 
     let prevFileName = '';
