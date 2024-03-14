@@ -37,11 +37,8 @@
     export let comefromLinks: Record<string, FileItem>;
     export let search: (keyword: string) => void | undefined;
 
-    async function save() {
+    async function onUpdateText(text: string) {
         console.log(`SAVING: ${file.filename}`);
-        let state = view.state;
-        let doc = state.doc;
-        let text = doc.toString();
         if (file.content !== text) {
             file.content = text;
 
@@ -300,19 +297,6 @@
         EditorView.domEventHandlers({ paste: handlePaste }),
         keymap.of(customKeymap),
         autocompletion({ override: [myCompletion] }),
-        EditorView.updateListener.of(async (update) => {
-            if (update.changes) {
-                let isUserInput = update.transactions.some(
-                    (tr) =>
-                        tr.annotation(Transaction.userEvent) !== 'program' &&
-                        tr.docChanged,
-                );
-                if (isUserInput) {
-                    console.log(`テキストが変更されました ${isUserInput}`);
-                    await save();
-                }
-            }
-        }),
         EditorView.domEventHandlers({
             click: (event) => {
                 const { target } = event;
@@ -367,8 +351,12 @@
 </script>
 
 <div class="wrapper">
-    <BasicCodeMirror6 bind:view {extensions} initialContent={file.content} />
-    <!--    <div bind:this={myElement}></div>-->
+    <BasicCodeMirror6
+        bind:view
+        {extensions}
+        initialContent={file.content}
+        {onUpdateText}
+    />
 </div>
 
 <style>

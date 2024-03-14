@@ -2,7 +2,11 @@
     import { createEventDispatcher, onMount } from 'svelte';
     import { EditorView } from '@codemirror/view';
     import { invoke } from '@tauri-apps/api/core';
-    import { EditorState, type Extension } from '@codemirror/state';
+    import {
+        EditorState,
+        type Extension,
+        Transaction,
+    } from '@codemirror/state';
     import { history } from '@codemirror/commands';
     import { todoPlugin } from './TodoWidget';
     import { internalLinkDecorator } from './InternalWikiLink';
@@ -17,6 +21,7 @@
     export let view: EditorView;
     export let initialContent: string;
     export let extensions: Extension[];
+    export let onUpdateText: (string) => Promise<void>;
 
     const dispatch = createEventDispatcher();
 
@@ -37,6 +42,24 @@
                 mermaidPlugin(),
                 syntaxHighlighting(oneDarkHighlightStyle),
                 EditorView.lineWrapping,
+                EditorView.updateListener.of(async (update) => {
+                    if (update.changes) {
+                        let isUserInput = update.transactions.some(
+                            (tr) =>
+                                tr.annotation(Transaction.userEvent) !==
+                                    'program' && tr.docChanged,
+                        );
+                        if (isUserInput) {
+                            console.log(
+                                `テキストが変更されました ${isUserInput}`,
+                            );
+                            let state = view.state;
+                            let doc = state.doc;
+                            let text = doc.toString();
+                            await onUpdateText(text);
+                        }
+                    }
+                }),
             ],
         });
 

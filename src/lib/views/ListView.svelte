@@ -14,6 +14,7 @@
     import { emit } from '@tauri-apps/api/event';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
     import FileList from '../file_item/FileList.svelte';
+    import MenuView from './MenuView.svelte';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -185,6 +186,9 @@
             {/if}
         {/if}
     </div>
+    <div class="menu">
+        <MenuView />
+    </div>
 </div>
 
 <style>
@@ -230,5 +234,9 @@
         margin-block-end: 0;
         height: 100vh;
         overflow-y: scroll;
+    }
+
+    .menu {
+        flex: 0 0 250px;
     }
 </style>
