@@ -1,6 +1,11 @@
 <script lang="ts">
     // open '00menu.md' and read the content.
-    import { BaseDirectory, exists, readTextFile } from '@tauri-apps/plugin-fs';
+    import {
+        BaseDirectory,
+        exists,
+        readTextFile,
+        writeTextFile,
+    } from '@tauri-apps/plugin-fs';
     import { onMount } from 'svelte';
     import BasicCodeMirror6 from '../markdown/BasicCodeMirror6.svelte';
     import type { EditorView } from '@codemirror/view';
@@ -37,13 +42,24 @@
         }
     }
 
-    // TODO: 更新したら、00menu.md を更新する。
+    // save 00menu.md
+    async function onUpdateText(text: string) {
+        console.log('onUpdateText', text);
+        await writeTextFile('00menu.md', text, {
+            baseDir: BaseDirectory.AppData,
+        });
+    }
 
     let extensions = [];
 </script>
 
 <div class="wrapper">
-    <BasicCodeMirror6 bind:view initialContent={menu} {extensions} />
+    <BasicCodeMirror6
+        bind:view
+        initialContent={menu}
+        {extensions}
+        {onUpdateText}
+    />
 </div>
 
 <style>
