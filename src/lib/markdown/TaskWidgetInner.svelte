@@ -29,3 +29,20 @@
         </button>
     {/each}
 </div>
+
+<style>
+    button {
+        display: block;
+        text-align: left;
+        align-items: center;
+        margin: 3px;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    button:hover {
+        background-color: #2f4f4f;
+    }
+</style>
