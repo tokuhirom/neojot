@@ -17,6 +17,7 @@
 
     export let findOrCreateEntry: (pageName: string) => void;
     export let dataFileItems: FileItem[];
+    export let openTask: (task: string) => void;
 
     let view: EditorView;
 
@@ -60,7 +61,7 @@
     let extensions = [
         internalLinkPlugin(findOrCreateEntry),
         nord,
-        taskPlugin(dataFileItems),
+        taskPlugin(dataFileItems, openTask),
     ];
 </script>
 
