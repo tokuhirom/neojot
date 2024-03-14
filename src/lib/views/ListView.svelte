@@ -1,11 +1,6 @@
 <script lang="ts">
     import EntryView from '../markdown/EntryView.svelte';
-    import FileListItem from '../file_item/FileListItem.svelte';
-    import {
-        type FileItem,
-        type MatchedLine,
-        shouldShowFileItem,
-    } from '../file_item/FileItem';
+    import { type FileItem } from '../file_item/FileItem';
     import LinkCards from '../link/LinkCards.svelte';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import {
@@ -18,9 +13,6 @@
     import TaskItem from '../task/TaskItem.svelte';
     import { emit } from '@tauri-apps/api/event';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
-    import type { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
-    import { makeMigemoRegexes } from '../search/Migemo';
-    import { getExcalidrawTexts } from '../excalidraw/ExcalidrawUtils';
     import FileList from '../file_item/FileList.svelte';
 
     export let allFileItems: FileItem[] = [];
