@@ -6,13 +6,7 @@ import {
     WidgetType,
 } from '@codemirror/view';
 import { RangeSetBuilder } from '@codemirror/state';
-import {
-    calculateFreshness,
-    extractTasks,
-    getTaskIcon,
-    sortTasks,
-    type Task,
-} from '../task/Task';
+import { type Task } from '../task/Task';
 import type { FileItem } from '../file_item/FileItem';
 import { listen } from '@tauri-apps/api/event';
 import TaskWidgetInner from './TaskWidgetInner.svelte';

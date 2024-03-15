@@ -1,13 +1,20 @@
 <script lang="ts">
     import { createEventDispatcher, onMount } from 'svelte';
-    import { EditorView } from '@codemirror/view';
+    import { EditorView, type KeyBinding, keymap } from '@codemirror/view';
     import { invoke } from '@tauri-apps/api/core';
     import {
         EditorState,
         type Extension,
         Transaction,
     } from '@codemirror/state';
-    import { history } from '@codemirror/commands';
+    import {
+        defaultKeymap,
+        history,
+        indentLess,
+        indentMore,
+        redo,
+        undo,
+    } from '@codemirror/commands';
     import { todoPlugin } from './TodoWidget';
     import { imageDecorator } from './ImageViewWidget';
     import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
@@ -15,14 +22,40 @@
     import { oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
     import { mermaidPlugin } from './MermaidWidget';
     import { syntaxHighlighting } from '@codemirror/language';
+    import { openSearchPanel, searchKeymap } from '@codemirror/search';
+    import { insertDateCommand } from './KeyHandler';
 
     let container;
     export let view: EditorView;
     export let initialContent: string;
     export let extensions: Extension[];
     export let onUpdateText: (string) => Promise<void>;
+    export let keymaps: KeyBinding[];
 
     const dispatch = createEventDispatcher();
+
+    const customKeymap: KeyBinding[] = [
+        ...keymaps,
+        { key: 'Mod-z', run: undo, preventDefault: true },
+        { key: 'Mod-Shift-z', run: redo, preventDefault: true },
+        {
+            key: 'Tab',
+            preventDefault: true,
+            run: indentMore,
+        },
+        {
+            key: 'Shift-Tab',
+            preventDefault: true,
+            run: indentLess,
+        },
+        { key: 'Mod-f', run: openSearchPanel, preventDefault: true },
+        { key: 'Mod-r', run: openSearchPanel, preventDefault: true }, // replace?
+        // task related -----------------------------------------
+        { key: 'Mod-t', run: (view) => insertDateCommand(view, 'TODO') },
+        { key: 'Mod-p', run: (view) => insertDateCommand(view, 'PLAN') },
+        ...searchKeymap,
+        ...defaultKeymap, // 標準のキーマップを含める
+    ];
 
     function debounce(func, delay) {
         let timeout;
@@ -46,6 +79,7 @@
         let startState = EditorState.create({
             doc: initialContent,
             extensions: [
+                keymap.of(customKeymap),
                 history(),
                 todoPlugin,
                 imageDecorator,

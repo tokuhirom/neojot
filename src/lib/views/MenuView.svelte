@@ -14,6 +14,7 @@
     import { taskPlugin } from '../markdown/TaskPlugin';
     import type { FileItem } from '../file_item/FileItem';
     import type { Task } from '../task/Task';
+    import { openInternalLink } from '../markdown/KeyHandler';
 
     export let findOrCreateEntry: (pageName: string) => void;
     export let dataFileItems: FileItem[];
@@ -63,6 +64,14 @@
         nord,
         taskPlugin(() => dataFileItems, openTask),
     ];
+
+    let keymaps = [
+        {
+            key: 'Mod-b',
+            run: (view: EditorView) =>
+                openInternalLink(view, findOrCreateEntry),
+        },
+    ];
 </script>
 
 <div class="wrapper">
@@ -71,6 +80,7 @@
         initialContent={menu}
         {extensions}
         {onUpdateText}
+        {keymaps}
     />
 </div>
 

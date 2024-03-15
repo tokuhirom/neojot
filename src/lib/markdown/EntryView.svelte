@@ -5,30 +5,21 @@
         saveMarkdownFile,
     } from '../repository/NodeRepository';
     import { onDestroy, onMount } from 'svelte';
-    import {
-        defaultKeymap,
-        indentLess,
-        indentMore,
-        redo,
-        undo,
-    } from '@codemirror/commands';
     import { Transaction } from '@codemirror/state';
-    import { EditorView, type KeyBinding, keymap } from '@codemirror/view';
+    import { EditorView } from '@codemirror/view';
     import { extractTitle, type FileItem } from '../file_item/FileItem';
     import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event';
     import {
         autocompletion,
         type CompletionContext,
     } from '@codemirror/autocomplete';
-    import { invoke } from '@tauri-apps/api/core';
-    import { openSearchPanel, searchKeymap } from '@codemirror/search';
-    import { format } from 'date-fns';
     import { linkPlugin } from './LinkPlugin';
     import { comeFromLinkHighlightPlugin } from './KeywordHighlight';
     import { languages } from '@codemirror/language-data';
     import BasicCodeMirror6 from './BasicCodeMirror6.svelte';
     import { internalLinkPlugin } from './InternalWikiLink';
     import { oneDark } from '@codemirror/theme-one-dark';
+    import { openInternalLink } from './KeyHandler';
 
     export let file: FileItem;
     export let allFileItems: FileItem[];
@@ -38,6 +29,15 @@
     export let title2fileItem: Record<string, FileItem>;
     export let comefromLinks: Record<string, FileItem>;
     export let search: (keyword: string) => void | undefined;
+
+    let keymaps = [
+        { key: 'Mod-d', run: archive, preventDefault: true },
+        {
+            key: 'Mod-b',
+            run: (view: EditorView) =>
+                openInternalLink(view, findOrCreateEntry),
+        },
+    ];
 
     async function onUpdateText(text: string) {
         console.log(`SAVING: ${file.filename}`);
@@ -122,52 +122,6 @@
         return null;
     };
 
-    function openInternalLink(view: EditorView) {
-        const { from, to } = view.state.selection.main;
-        if (from === to) {
-            // カーソル位置のみをチェック
-            const line = view.state.doc.lineAt(from);
-            const lineText = line.text;
-            const lineOffset = from - line.from; // 行内オフセットを計算
-
-            // カーソル位置から内部リンクを探す
-            const linkRegex = /\[\[.*?]]|https?:\/\/\S+/g;
-            let match: RegExpExecArray | null;
-            while ((match = linkRegex.exec(lineText)) !== null) {
-                if (
-                    match.index <= lineOffset &&
-                    match.index + match[0].length >= lineOffset
-                ) {
-                    if (match[0].startsWith('http')) {
-                        const url = match[0];
-                        console.log(`opening url: ${url}`);
-                        invoke('open_url', { url });
-                        return true;
-                    } else {
-                        // 内部リンクの場合はページを開く
-                        const pageName = match[0].slice(2, -2); // リンク名の取得
-                        findOrCreateEntry(pageName);
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    function insertDateCommand(view, key: string) {
-        const dateStr =
-            `${key}[Scheduled:` + format(new Date(), 'yyyy-MM-dd(EEE)') + ']: ';
-        const from = view.state.selection.main.from;
-        const to = from + dateStr.length;
-
-        view.dispatch({
-            changes: { from: from, insert: dateStr },
-            selection: { anchor: to },
-        });
-        return true;
-    }
-
     // 本来はメニューが反応してarchiveされるべきだが、エディタ上でのMod-dが何者かに横取り
     // されていて処理できないっぽいので、ここで処理する
     function archive() {
@@ -175,33 +129,6 @@
         emit('do_archive', { filename: file.filename });
         return true;
     }
-
-    const customKeymap: KeyBinding[] = [
-        { key: 'Mod-z', run: undo, preventDefault: true },
-        { key: 'Mod-d', run: archive, preventDefault: true },
-        { key: 'Mod-Shift-z', run: redo, preventDefault: true },
-        {
-            key: 'Mod-b',
-            run: openInternalLink,
-        },
-        {
-            key: 'Tab',
-            preventDefault: true,
-            run: indentMore,
-        },
-        {
-            key: 'Shift-Tab',
-            preventDefault: true,
-            run: indentLess,
-        },
-        { key: 'Mod-f', run: openSearchPanel, preventDefault: true },
-        { key: 'Mod-r', run: openSearchPanel, preventDefault: true }, // replace?
-        // task related -----------------------------------------
-        { key: 'Mod-t', run: (view) => insertDateCommand(view, 'TODO') },
-        { key: 'Mod-p', run: (view) => insertDateCommand(view, 'PLAN') },
-        ...searchKeymap,
-        ...defaultKeymap, // 標準のキーマップを含める
-    ];
 
     const handlePaste = (event) => {
         let handled = false;
@@ -301,7 +228,6 @@
             findOrCreateEntry,
         ),
         EditorView.domEventHandlers({ paste: handlePaste }),
-        keymap.of(customKeymap),
         autocompletion({ override: [myCompletion] }),
     ];
 
@@ -347,6 +273,7 @@
         {extensions}
         initialContent={file.content}
         {onUpdateText}
+        {keymaps}
     />
 </div>
 
