@@ -17,6 +17,7 @@
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let title2fileItem: Record<string, FileItem>;
     export let comefromLinks: Record<string, FileItem>;
+    export let existsEntry: (title: string) => boolean;
     let viewerMode = false;
 
     function handleKeydown(event) {
@@ -177,6 +178,7 @@
                     {title2fileItem}
                     {comefromLinks}
                     search={(keyword) => (searchWord = keyword)}
+                    {existsEntry}
                 />
                 <LinkCards
                     file={selectedItem}
@@ -188,7 +190,12 @@
         {/if}
     </div>
     <div class="menu">
-        <MenuView {findOrCreateEntry} {dataFileItems} {openTask} />
+        <MenuView
+            {findOrCreateEntry}
+            {dataFileItems}
+            {openTask}
+            {existsEntry}
+        />
     </div>
 </div>
 

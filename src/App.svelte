@@ -163,20 +163,6 @@
         selectedItem = fileItem;
     }
 
-    function extractGotoLinks(content: string): string[] {
-        const pattern = /^>>>\s+(.+?)$/gm;
-        const matches = [];
-        let match;
-        while ((match = pattern.exec(content)) !== null) {
-            // マッチした部分（キーワード）を配列に追加
-            matches.push(match[1]); // match[1]は、'>>> 'に続く部分にマッチします
-        }
-        if (matches.length > 0) {
-            console.log(matches);
-        }
-        return matches;
-    }
-
     function extractComeFromLinks(content: string): string[] {
         const pattern = /^<<<\s+(.+?)$/gm;
         const matches = [];
@@ -187,16 +173,26 @@
         return matches;
     }
 
+    // title2fileItem はページ名補完用。
+    // なので、本来はMap じゃなくて Array で十分だったりする。
+    // むしろ、タイトルの配列で十分かも。
+    // TODO: title2fileItem の整理
     let title2fileItem: Record<string, FileItem> = {};
+    let lowerTitle2fileItem: Record<string, FileItem> = {};
     $: if (allFileItems) {
         const map: Record<string, FileItem> = {};
+        const lowerMap: Record<string, FileItem> = {};
         allFileItems.forEach((fileItem) => {
             map[fileItem.title] = fileItem;
-            extractGotoLinks(fileItem.content).forEach((goto) => {
+            lowerMap[fileItem.title.toLowerCase()] = fileItem;
+            // find `<<< FOOBAR` links
+            extractComeFromLinks(fileItem.content).forEach((goto) => {
                 map[goto] = fileItem;
+                lowerMap[goto.toLowerCase()] = fileItem;
             });
         });
         title2fileItem = map;
+        lowerTitle2fileItem = lowerMap;
     }
 
     let comefromLinks: Record<string, FileItem> = {};
@@ -208,6 +204,10 @@
             });
         });
         comefromLinks = map;
+    }
+
+    function existsEntry(title: string): boolean {
+        return lowerTitle2fileItem[title.toLowerCase()] !== undefined;
     }
 </script>
 
@@ -252,6 +252,7 @@
                 {onSelectItem}
                 {title2fileItem}
                 {comefromLinks}
+                {existsEntry}
             />
         {:else if tabPane === 'archive'}
             <ArchiveView
@@ -269,6 +270,7 @@
                 {onSelectItem}
                 {title2fileItem}
                 {comefromLinks}
+                {existsEntry}
             />
         {:else if tabPane === 'calendar'}
             <CalendarView
@@ -278,6 +280,7 @@
                 {selectedItem}
                 {title2fileItem}
                 {comefromLinks}
+                {existsEntry}
             />
         {:else if tabPane === 'manual'}
             <ManualView />
@@ -291,6 +294,7 @@
                 {onSelectItem}
                 {title2fileItem}
                 {comefromLinks}
+                {existsEntry}
             />
         {/if}
     </div>

@@ -26,9 +26,11 @@
     export let onSelectItem: (fileItem: FileItem) => void;
     export let onCreateItem: (fileItem: FileItem) => void;
     export let onSaved: () => void;
+    // for completion
     export let title2fileItem: Record<string, FileItem>;
     export let comefromLinks: Record<string, FileItem>;
     export let search: (keyword: string) => void | undefined;
+    export let existsEntry: (title: string) => boolean;
 
     let keymaps = [
         { key: 'Mod-d', run: archive, preventDefault: true },
@@ -219,7 +221,7 @@
 
     let extensions = [
         oneDark,
-        internalLinkPlugin((pageName) => {
+        internalLinkPlugin(existsEntry, (pageName) => {
             findOrCreateEntry(pageName);
         }),
         linkPlugin((keyword) => {

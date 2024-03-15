@@ -89,8 +89,20 @@ button {
 
 .internal-link {
     cursor: pointer;
-    text-decoration: underline;
+    text-decoration: none;
     color: cornflowerblue;
+}
+
+.internal-link span {
+    color: cornflowerblue;
+    text-decoration: none;
+}
+
+.internal-link.not-exists {
+    color: #757575;
+}
+.internal-link.not-exists span {
+    color: #757575;
 }
 
 .highlight-keyword {

@@ -16,6 +16,7 @@
     export let onSelectItem: (FileItem) => void;
     export let title2fileItem: Record<string, FileItem>;
     export let comefromLinks: Record<string, FileItem>;
+    export let existsEntry: (title: string) => boolean;
     let tasks: Task[] = [];
     let filteredTasks: Task[] = [];
 
@@ -74,6 +75,7 @@
                 {title2fileItem}
                 {comefromLinks}
                 search={() => {}}
+                {existsEntry}
             />
             <LinkCards
                 file={selectedItem}
