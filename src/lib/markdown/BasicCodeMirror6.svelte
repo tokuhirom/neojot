@@ -24,6 +24,24 @@
 
     const dispatch = createEventDispatcher();
 
+    function debounce(func, delay) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    }
+
+    const debouncedUpdateText = debounce(async () => {
+        console.log(`テキストが変更されました`);
+        let state = view.state;
+        let doc = state.doc;
+        let text = doc.toString();
+        await onUpdateText(text);
+    }, 500); // 500ミリ秒のデバウンス遅延
+
     onMount(() => {
         let startState = EditorState.create({
             doc: initialContent,
@@ -46,13 +64,7 @@
                                     'program' && tr.docChanged,
                         );
                         if (isUserInput) {
-                            console.log(
-                                `テキストが変更されました ${isUserInput}`,
-                            );
-                            let state = view.state;
-                            let doc = state.doc;
-                            let text = doc.toString();
-                            await onUpdateText(text);
+                            await debouncedUpdateText();
                         }
                     }
                 }),
