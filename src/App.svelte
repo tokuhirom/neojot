@@ -18,6 +18,10 @@
     import type { FileItem } from './lib/file_item/FileItem';
     import ManualView from './lib/views/ManualView.svelte';
     import { initGit } from './lib/git/GitCommands';
+    import {
+        cachedExtractAliases,
+        cachedExtractAutoLinks,
+    } from './lib/file_item/AutoLinks';
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
@@ -165,28 +169,6 @@
         selectedItem = fileItem;
     }
 
-    function extractAliases(fileItem: FileItem): string[] {
-        const content = fileItem.content;
-        const pattern = /^ALIAS:\s+(.+?)$/gm;
-        const matches = [];
-        let match;
-        while ((match = pattern.exec(content)) !== null) {
-            matches.push(match[1]);
-        }
-        return matches;
-    }
-
-    function extractAutolinks(fileItem: FileItem): string[] {
-        const content = fileItem.content;
-        const pattern = /^AUTOLINK:\s+(.+?)$/gm;
-        const matches = [];
-        let match;
-        while ((match = pattern.exec(content)) !== null) {
-            matches.push(match[1]);
-        }
-        return matches;
-    }
-
     // タイトルの補完用に使う配列
     let pageTitles: string[];
     // Target of auto links.
@@ -201,7 +183,7 @@
         dataFileItems.forEach((fileItem) => {
             lowerMap[fileItem.title.toLowerCase()] = fileItem;
 
-            const aliases = extractAliases(fileItem);
+            const aliases = cachedExtractAliases(fileItem);
             newPageTitles.push(fileItem.title);
             if (aliases.length > 0) {
                 newPageTitles.push(...aliases);
@@ -210,7 +192,7 @@
                 });
             }
 
-            const autoLinks = extractAutolinks(fileItem);
+            const autoLinks = cachedExtractAutoLinks(fileItem);
             if (autoLinks.length > 0) {
                 newAutoLinks.push(...autoLinks);
                 autoLinks.forEach((link) => {
