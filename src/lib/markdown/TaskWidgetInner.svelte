@@ -7,6 +7,7 @@
         type Task,
     } from '../task/Task';
     import type { FileItem } from '../file_item/FileItem';
+    import { format } from 'date-fns';
 
     export let onClick: (task: Task) => void;
     export let dataFileItems: FileItem[];
@@ -25,6 +26,14 @@
     {#each tasks as task}
         <button on:click={() => onClick(task)}>
             {getTaskIcon(task)}
+            {#if task.type === 'PLAN' && task.scheduled}
+                {format(task.scheduled, 'yyyy-MM-dd')}
+            {/if}
+            {#if task.deadline}
+                <span class="deadline"
+                    >{format(task.deadline, 'yyyy-MM-dd')}</span
+                >
+            {/if}
             {task.title}
         </button>
     {/each}
@@ -44,5 +53,8 @@
 
     button:hover {
         background-color: #2f4f4f;
+    }
+    .deadline {
+        color: orangered;
     }
 </style>
