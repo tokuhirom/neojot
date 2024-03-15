@@ -4,7 +4,7 @@
     import ArchiveView from './lib/views/ArchiveView.svelte';
     import TaskView from './lib/views/TaskView.svelte';
     import CalendarView from './lib/views/CalendarView.svelte';
-    import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+    import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event';
     import { onDestroy, onMount } from 'svelte';
     import ConfigurationView from './lib/views/ConfigurationView.svelte';
     import {
@@ -132,6 +132,8 @@
                 dataFileItems = dataFileItems; // reload ListView's file list.
 
                 selectedItem = fileItem;
+
+                await emit('clear_search_keyword');
             }),
         );
         unlistenCallbackPromises.push(

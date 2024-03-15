@@ -1,5 +1,13 @@
 <script>
-    export let searchWord = ''; // 検索ボックスのテキストを保持する変数
+    import { listen } from '@tauri-apps/api/event';
+
+    export let searchWord = '';
+
+    listen('clear_search_keyword', () => {
+        if (searchWord !== '') {
+            searchWord = '';
+        }
+    });
 </script>
 
 <div class="clearable-search-box">
