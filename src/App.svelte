@@ -165,7 +165,8 @@
         selectedItem = fileItem;
     }
 
-    function extractAliases(content: string): string[] {
+    function extractAliases(fileItem: FileItem): string[] {
+        const content = fileItem.content;
         const pattern = /^ALIAS:\s+(.+?)$/gm;
         const matches = [];
         let match;
@@ -175,7 +176,8 @@
         return matches;
     }
 
-    function extractAutolinks(content: string): string[] {
+    function extractAutolinks(fileItem: FileItem): string[] {
+        const content = fileItem.content;
         const pattern = /^AUTOLINK:\s+(.+?)$/gm;
         const matches = [];
         let match;
@@ -187,45 +189,39 @@
 
     // タイトルの補完用に使う配列
     let pageTitles: string[];
-    $: if (dataFileItems) {
-        const t1 = Date.now();
-        const newPageTitles = [];
-        dataFileItems.forEach((fileItem) => {
-            newPageTitles.push(fileItem.title);
-            newPageTitles.push(...extractAliases(fileItem.content));
-        });
-        console.log(`pageTitles: ${Date.now() - t1}ms`);
-        pageTitles = newPageTitles;
-    }
-
     // Target of auto links.
     let autoLinks: string[];
-    $: if (dataFileItems) {
-        const t1 = Date.now();
-        const newAutoLinks = [];
-        dataFileItems.forEach((fileItem) => {
-            newAutoLinks.push(...extractAutolinks(fileItem.content));
-        });
-        console.log(`autoLinks: ${Date.now() - t1}ms`);
-        autoLinks = newAutoLinks;
-    }
-
+    // For findEntryByTitle
     let lowerTitle2fileItem: Record<string, FileItem> = {};
     $: if (dataFileItems) {
         const t1 = Date.now();
         const lowerMap: Record<string, FileItem> = {};
+        const newAutoLinks = [];
+        const newPageTitles = [];
         dataFileItems.forEach((fileItem) => {
             lowerMap[fileItem.title.toLowerCase()] = fileItem;
-            // find `ALIAS: FOOBAR` links
-            extractAliases(fileItem.content).forEach((alias) => {
-                lowerMap[alias.toLowerCase()] = fileItem;
-            });
-            extractAutolinks(fileItem.content).forEach((alias) => {
-                lowerMap[alias.toLowerCase()] = fileItem;
-            });
+
+            const aliases = extractAliases(fileItem);
+            newPageTitles.push(fileItem.title);
+            if (aliases.length > 0) {
+                newPageTitles.push(...aliases);
+                aliases.forEach((alias) => {
+                    lowerMap[alias.toLowerCase()] = fileItem;
+                });
+            }
+
+            const autoLinks = extractAutolinks(fileItem);
+            if (autoLinks.length > 0) {
+                newAutoLinks.push(...autoLinks);
+                autoLinks.forEach((link) => {
+                    lowerMap[link.toLowerCase()] = fileItem;
+                });
+            }
         });
         console.log(`lowerTitle2fileItem: ${Date.now() - t1}ms`);
         lowerTitle2fileItem = lowerMap;
+        autoLinks = newAutoLinks;
+        pageTitles = newPageTitles;
     }
 
     function findEntryByTitle(title: string): FileItem | undefined {
