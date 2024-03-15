@@ -21,7 +21,7 @@ function currentDate() {
     return format(new Date(), 'yyyy-MM-dd(EEE)');
 }
 
-function replaceDate(event: KeyboardEvent, view: EditorView, key: string) {
+function replaceDate(view: EditorView, key: string): boolean {
     const { state } = view;
     const { from, to } = state.selection.main;
     let extendedFrom = from - 15; // Extend the search area around the cursor to capture the date
@@ -41,7 +41,7 @@ function replaceDate(event: KeyboardEvent, view: EditorView, key: string) {
         } else if (key === '-') {
             updatedDate = subDays(date, 1);
         } else {
-            return; // If the key is neither '+' nor '-', do nothing
+            return false; // If the key is neither '+' nor '-', do nothing
         }
         const formattedDate = format(updatedDate, 'yyyy-MM-dd(EEE)');
         const startIndex = extendedFrom + match.index;
@@ -49,8 +49,6 @@ function replaceDate(event: KeyboardEvent, view: EditorView, key: string) {
 
         // Update only if the cursor is within the matched date string
         if (from >= startIndex && to <= endIndex) {
-            event.preventDefault();
-            event.stopPropagation();
             view.dispatch({
                 changes: {
                     from: startIndex,
@@ -58,9 +56,10 @@ function replaceDate(event: KeyboardEvent, view: EditorView, key: string) {
                     insert: formattedDate,
                 },
             });
-            break; // Assume only one date is to be updated per key press
+            return true;
         }
     }
+    return false;
 }
 function replaceLine(
     view: EditorView,
@@ -91,8 +90,6 @@ function replaceLine(
         return false;
     }
 
-    event.preventDefault();
-    event.stopPropagation();
     view.dispatch({
         changes: {
             from: lineStart,
@@ -144,18 +141,6 @@ export const todoPlugin = ViewPlugin.fromClass(
     },
     {
         decorations: (v) => v.decorations,
-        eventHandlers: {
-            keydown: (event, view) => {
-                if (event.ctrlKey || event.altKey || event.metaKey) {
-                    return;
-                }
-
-                if (event.key === '+' || event.key === '-') {
-                    replaceDate(event, view, event.key);
-                    return;
-                }
-            },
-        },
     },
 );
 
@@ -176,6 +161,14 @@ export const taskKeymap: KeyBinding[] = [
     // task related -----------------------------------------
     { key: 'Mod-t', run: (view) => insertDateCommand(view, 'TODO') },
     { key: 'Mod-p', run: (view) => insertDateCommand(view, 'PLAN') },
+    {
+        key: '+',
+        run: (view) => replaceDate(view, '+'),
+    },
+    {
+        key: '-',
+        run: (view) => replaceDate(view, '-'),
+    },
     {
         key: 'Enter',
         run: (view) =>
