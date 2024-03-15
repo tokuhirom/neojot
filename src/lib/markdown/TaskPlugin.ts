@@ -48,7 +48,7 @@ class TaskWidget extends WidgetType {
                     this.needsRendering = false;
                 }
             }
-        }, 500);
+        }, 1000);
 
         listen('sort_file_list', (event) => {
             const payload = event.payload as { fileItem: FileItem };
