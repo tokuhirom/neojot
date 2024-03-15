@@ -211,10 +211,10 @@
     }
 
     let lowerTitle2fileItem: Record<string, FileItem> = {};
-    $: if (allFileItems) {
+    $: if (dataFileItems) {
         const t1 = Date.now();
         const lowerMap: Record<string, FileItem> = {};
-        allFileItems.forEach((fileItem) => {
+        dataFileItems.forEach((fileItem) => {
             lowerMap[fileItem.title.toLowerCase()] = fileItem;
             // find `ALIAS: FOOBAR` links
             extractAliases(fileItem.content).forEach((alias) => {
