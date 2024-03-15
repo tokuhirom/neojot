@@ -46,7 +46,7 @@
             console.log('00menu.md does not exist');
             // TODO: メニューをクリックできるように
             // TODO: TODO とかの使い方をメニューに入れる
-            return `# NeoJot\n\n- [[Home]]\n- [[About]]\n`;
+            return `# NeoJot\n\n- [[Home]]\n- [[About]]\n\n%tasks\n`;
         }
     }
 
