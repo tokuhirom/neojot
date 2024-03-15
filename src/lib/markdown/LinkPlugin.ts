@@ -22,7 +22,7 @@ class LinkPlugin {
 
     computeDecorations(view: EditorView): RangeSet<Decoration> {
         const builder = new RangeSetBuilder<Decoration>();
-        const regex = /^(?:<<<|>>>)\s+(.+)$/gm; // ここでの正規表現は必要に応じて調整してください
+        const regex = /^ALIAS:\s+(.+)$/gm;
         for (const { from, to } of view.visibleRanges) {
             const text = view.state.doc.sliceString(from, to);
             let match;
@@ -32,9 +32,6 @@ class LinkPlugin {
                 const linkDecoration = Decoration.mark({
                     class: 'link-plugin-link',
                     attributes: {
-                        title: match[0].startsWith('<<<')
-                            ? 'come-from'
-                            : 'goto',
                         'data-keyword': match[1],
                     },
                 });

@@ -21,9 +21,7 @@ NeoJot encourages linking notes to foster connections between ideas, expand know
 
 #### Link Notes for Enhanced Connectivity
 
-- **Come-From Links**: Use the syntax \`<<< NoteTitle\` to link all instances of "NoteTitle" within your notes, facilitating easy navigation.
-
-- **Go-To Links** (Future Feature): \`>>> NoteTitle\` will enable quick searches for "NoteTitle".
+- **Alias**: Use the syntax \`ALIAS: NoteTitle\` to link all instances of "NoteTitle" within your notes, facilitating easy navigation.
 
 - **Wiki-Style Links**: \`[[NoteTitle]]\` creates or links to a note with the title "NoteTitle".
 

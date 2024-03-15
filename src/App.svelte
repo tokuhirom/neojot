@@ -165,12 +165,12 @@
         selectedItem = fileItem;
     }
 
-    function extractComeFromLinks(content: string): string[] {
-        const pattern = /^<<<\s+(.+?)$/gm;
+    function extractAliases(content: string): string[] {
+        const pattern = /^ALIAS:\s+(.+?)$/gm;
         const matches = [];
         let match;
         while ((match = pattern.exec(content)) !== null) {
-            matches.push(match[1]); // match[1]は、'>>> 'に続く部分にマッチします
+            matches.push(match[1]);
         }
         return matches;
     }
@@ -184,9 +184,9 @@
         const lowerMap: Record<string, FileItem> = {};
         allFileItems.forEach((fileItem) => {
             lowerMap[fileItem.title.toLowerCase()] = fileItem;
-            // find `<<< FOOBAR` links
-            extractComeFromLinks(fileItem.content).forEach((goto) => {
-                lowerMap[goto.toLowerCase()] = fileItem;
+            // find `ALIAS: FOOBAR` links
+            extractAliases(fileItem.content).forEach((alias) => {
+                lowerMap[alias.toLowerCase()] = fileItem;
             });
         });
         lowerTitle2fileItem = lowerMap;
@@ -196,7 +196,7 @@
     $: if (dataFileItems) {
         const map: Record<string, FileItem> = {};
         dataFileItems.forEach((fileItem) => {
-            extractComeFromLinks(fileItem.content).forEach((link) => {
+            extractAliases(fileItem.content).forEach((link) => {
                 map[link] = fileItem;
             });
         });
