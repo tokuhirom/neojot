@@ -65,6 +65,11 @@ class TaskWidget extends WidgetType {
         container.className = 'task-widget';
         const dataFileItems = this.getDataFileItems();
         this.renderTasks(container, dataFileItems);
+        if (dataFileItems.length == 0) {
+            setTimeout(() => {
+                this.renderTasks(container, this.getDataFileItems());
+            }, 1000);
+        }
         needsRendering = dataFileItems.length == 0;
         return container;
     }
