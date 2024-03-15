@@ -276,5 +276,7 @@
 
     .menu {
         flex: 0 0 250px;
+        height: 100vh;
+        overflow-y: scroll;
     }
 </style>
