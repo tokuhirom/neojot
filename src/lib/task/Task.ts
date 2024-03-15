@@ -128,16 +128,34 @@ export function extractTasks(fileItems: FileItem[]): Task[] {
     const tasks: Task[] = [];
 
     fileItems.forEach((fileItem) => {
-        fileItem.content.split('\n').forEach((line, index) => {
-            const taskP = parseTask(line, index + 1, fileItem);
-            if (taskP) {
-                // console.log(taskP);
-                tasks.push(taskP);
-            }
-        });
+        tasks.push(...cachedExtractTaskFromFileItem(fileItem));
     });
 
     return tasks;
+}
+
+// cache for the extracted tasks
+type TaskCacheEntry = {
+    tasks: Task[];
+    mtime: number;
+};
+const taskCache = new Map<string, TaskCacheEntry>();
+function cachedExtractTaskFromFileItem(fileItem: FileItem): Task[] {
+    const mtime = fileItem.mtime;
+    const cache = taskCache.get(fileItem.filename);
+    if (cache && cache.mtime === mtime) {
+        return cache.tasks;
+    }
+    const tasks = extractTaskFromFileItem(fileItem);
+    taskCache.set(fileItem.filename, { tasks, mtime });
+    return tasks;
+}
+
+function extractTaskFromFileItem(fileItem: FileItem): Task[] {
+    return fileItem.content
+        .split('\n')
+        .map((line, index) => parseTask(line, index + 1, fileItem))
+        .filter((it) => it) as Task[];
 }
 
 export function sortTasks(tasks: Task[]): Task[] {
