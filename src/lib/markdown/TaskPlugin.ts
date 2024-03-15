@@ -10,51 +10,54 @@ import { type Task } from '../task/Task';
 import type { FileItem } from '../file_item/FileItem';
 import { listen } from '@tauri-apps/api/event';
 import TaskWidgetInner from './TaskWidgetInner.svelte';
-import { debounce } from '../utils/Debounce';
+
+let needsRendering = true;
+const taskWidgetInners: TaskWidgetInner[] = [];
+let globalGetDataFileItems: () => FileItem[];
+
+function debounce(
+    func: (fileItem: FileItem) => void,
+    delay: number,
+): (fileItem: FileItem) => void {
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    return function (fileitem: FileItem): void {
+        clearTimeout(timeoutId as ReturnType<typeof setTimeout>);
+        timeoutId = setTimeout(() => {
+            func(fileitem);
+        }, delay);
+    };
+}
+
+const debouncedUpdateTask = debounce((fileItem: FileItem) => {
+    if (taskWidgetInners.length > 0) {
+        if (fileItem.content.match(/[A-Z]\[.+]/) || needsRendering) {
+            needsRendering = false;
+            console.log(
+                `TaskPlugin: sort_file_list event received: ${taskWidgetInners.length}`,
+            );
+            const dataFileItems = globalGetDataFileItems();
+            taskWidgetInners.forEach((taskWidgetInner) => {
+                taskWidgetInner.$$set({
+                    dataFileItems,
+                });
+            });
+        }
+    }
+}, 1000);
+
+listen('sort_file_list', (event) => {
+    const payload = event.payload as { fileItem: FileItem };
+    const fileItem = payload.fileItem;
+    debouncedUpdateTask(fileItem);
+});
 
 class TaskWidget extends WidgetType {
-    private needsRendering: boolean = true;
-    private taskWidgetInner: TaskWidgetInner | undefined;
-
     constructor(
         private getDataFileItems: () => FileItem[],
         private openTask: (task: Task) => void,
     ) {
         super();
-
-        function debounce(
-            func: (fileItem: FileItem) => void,
-            delay: number,
-        ): (fileItem: FileItem) => void {
-            let timeoutId: ReturnType<typeof setTimeout> | null = null;
-            return function (fileitem: FileItem): void {
-                clearTimeout(timeoutId as ReturnType<typeof setTimeout>);
-                timeoutId = setTimeout(() => {
-                    func(fileitem);
-                }, delay);
-            };
-        }
-
-        const debouncedUpdateTask = debounce((fileItem: FileItem) => {
-            console.log('TaskPlugin: sort_file_list event received');
-            if (this.taskWidgetInner) {
-                if (
-                    fileItem.content.match(/[A-Z]\[.+]/) ||
-                    this.needsRendering
-                ) {
-                    this.taskWidgetInner.$$set({
-                        dataFileItems: this.getDataFileItems(),
-                    });
-                    this.needsRendering = false;
-                }
-            }
-        }, 1000);
-
-        listen('sort_file_list', (event) => {
-            const payload = event.payload as { fileItem: FileItem };
-            const fileItem = payload.fileItem;
-            debouncedUpdateTask(fileItem);
-        });
+        globalGetDataFileItems = getDataFileItems;
     }
 
     toDOM() {
@@ -62,12 +65,12 @@ class TaskWidget extends WidgetType {
         container.className = 'task-widget';
         const dataFileItems = this.getDataFileItems();
         this.renderTasks(container, dataFileItems);
-        this.needsRendering = dataFileItems.length == 0;
+        needsRendering = dataFileItems.length == 0;
         return container;
     }
 
     private renderTasks(container: HTMLDivElement, dataFileItems: FileItem[]) {
-        this.taskWidgetInner = new TaskWidgetInner({
+        const taskWidgetInner = new TaskWidgetInner({
             target: container,
             props: {
                 dataFileItems,
@@ -76,6 +79,7 @@ class TaskWidget extends WidgetType {
                 },
             },
         });
+        taskWidgetInners.push(taskWidgetInner);
     }
 }
 
