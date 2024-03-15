@@ -28,9 +28,9 @@
     export let onSaved: () => void;
     // for completion
     export let pageTitles: string[];
-    export let comefromLinks: Record<string, FileItem>;
     export let search: (keyword: string) => void | undefined;
     export let findEntryByTitle: (title: string) => FileItem;
+    export let autoLinks: string[];
 
     let keymaps = [
         { key: 'Mod-d', run: archive, preventDefault: true },
@@ -214,10 +214,7 @@
         linkPlugin((keyword) => {
             search(keyword);
         }),
-        comeFromLinkHighlightPlugin(
-            () => Object.keys(comefromLinks),
-            findOrCreateEntry,
-        ),
+        comeFromLinkHighlightPlugin(() => autoLinks, findOrCreateEntry),
         EditorView.domEventHandlers({ paste: handlePaste }),
         autocompletion({ override: [myCompletion] }),
     ];

@@ -175,12 +175,44 @@
         return matches;
     }
 
+    function extractAutolinks(content: string): string[] {
+        const pattern = /^AUTOLINK:\s+(.+?)$/gm;
+        const matches = [];
+        let match;
+        while ((match = pattern.exec(content)) !== null) {
+            matches.push(match[1]);
+        }
+        return matches;
+    }
+
     // タイトルの補完用に使う配列
     let pageTitles: string[];
-    $: pageTitles = dataFileItems.map((fileItem) => fileItem.title);
+    $: if (dataFileItems) {
+        const t1 = Date.now();
+        const newPageTitles = [];
+        dataFileItems.forEach((fileItem) => {
+            newPageTitles.push(fileItem.title);
+            newPageTitles.push(...extractAliases(fileItem.content));
+        });
+        console.log(`pageTitles: ${Date.now() - t1}ms`);
+        pageTitles = newPageTitles;
+    }
+
+    // Target of auto links.
+    let autoLinks: string[];
+    $: if (dataFileItems) {
+        const t1 = Date.now();
+        const newAutoLinks = [];
+        dataFileItems.forEach((fileItem) => {
+            newAutoLinks.push(...extractAutolinks(fileItem.content));
+        });
+        console.log(`autoLinks: ${Date.now() - t1}ms`);
+        autoLinks = newAutoLinks;
+    }
 
     let lowerTitle2fileItem: Record<string, FileItem> = {};
     $: if (allFileItems) {
+        const t1 = Date.now();
         const lowerMap: Record<string, FileItem> = {};
         allFileItems.forEach((fileItem) => {
             lowerMap[fileItem.title.toLowerCase()] = fileItem;
@@ -188,19 +220,12 @@
             extractAliases(fileItem.content).forEach((alias) => {
                 lowerMap[alias.toLowerCase()] = fileItem;
             });
-        });
-        lowerTitle2fileItem = lowerMap;
-    }
-
-    let comefromLinks: Record<string, FileItem> = {};
-    $: if (dataFileItems) {
-        const map: Record<string, FileItem> = {};
-        dataFileItems.forEach((fileItem) => {
-            extractAliases(fileItem.content).forEach((link) => {
-                map[link] = fileItem;
+            extractAutolinks(fileItem.content).forEach((alias) => {
+                lowerMap[alias.toLowerCase()] = fileItem;
             });
         });
-        comefromLinks = map;
+        console.log(`lowerTitle2fileItem: ${Date.now() - t1}ms`);
+        lowerTitle2fileItem = lowerMap;
     }
 
     function findEntryByTitle(title: string): FileItem | undefined {
@@ -248,8 +273,8 @@
                 {selectedItem}
                 {onSelectItem}
                 {pageTitles}
-                {comefromLinks}
                 {findEntryByTitle}
+                {autoLinks}
             />
         {:else if tabPane === 'archive'}
             <ArchiveView
@@ -266,8 +291,8 @@
                 {selectedItem}
                 {onSelectItem}
                 {pageTitles}
-                {comefromLinks}
                 {findEntryByTitle}
+                {autoLinks}
             />
         {:else if tabPane === 'calendar'}
             <CalendarView
@@ -276,8 +301,8 @@
                 {onSelectItem}
                 {selectedItem}
                 {pageTitles}
-                {comefromLinks}
                 {findEntryByTitle}
+                {autoLinks}
             />
         {:else if tabPane === 'manual'}
             <ManualView />
@@ -290,8 +315,8 @@
                 {selectedItem}
                 {onSelectItem}
                 {pageTitles}
-                {comefromLinks}
                 {findEntryByTitle}
+                {autoLinks}
             />
         {/if}
     </div>

@@ -15,8 +15,8 @@
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (FileItem) => void;
     export let pageTitles: string[];
-    export let comefromLinks: Record<string, FileItem>;
     export let findEntryByTitle: (title: string) => FileItem | undefined;
+    export let autoLinks: string[];
     let tasks: Task[] = [];
     let filteredTasks: Task[] = [];
 
@@ -73,9 +73,9 @@
                 {onSaved}
                 {onCreateItem}
                 {pageTitles}
-                {comefromLinks}
                 search={() => {}}
                 {findEntryByTitle}
+                {autoLinks}
             />
             <LinkCards
                 file={selectedItem}

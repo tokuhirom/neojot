@@ -16,8 +16,8 @@
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let pageTitles: string[];
-    export let comefromLinks: Record<string, FileItem>;
     export let findEntryByTitle: (title: string) => FileItem | undefined;
+    export let autoLinks: string[];
     let viewerMode = false;
 
     function handleKeydown(event) {
@@ -165,9 +165,9 @@
                     {onSaved}
                     {onCreateItem}
                     {pageTitles}
-                    {comefromLinks}
                     search={(keyword) => (searchWord = keyword)}
                     {findEntryByTitle}
+                    {autoLinks}
                 />
                 <LinkCards
                     file={selectedItem}

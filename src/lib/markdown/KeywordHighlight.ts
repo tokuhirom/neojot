@@ -53,10 +53,19 @@ export function comeFromLinkHighlightPlugin(
                 view: EditorView,
                 getKeywords: () => string[],
             ): RangeSet<Decoration> {
+                console.log('KeywordHighlight.computeDecorations');
+                const t1 = Date.now();
                 const builder = new RangeSetBuilder<Decoration>();
+                const keywords = getKeywords();
+                if (keywords.length == 0) {
+                    return builder.finish();
+                }
+                console.log(
+                    `KeywordHighlight.computeDecorations: ${keywords.length}`,
+                );
+                const keywordRegex = buildKeywordRegex(keywords);
                 for (const { from, to } of view.visibleRanges) {
                     const text = view.state.doc.sliceString(from, to);
-                    const keywordRegex = buildKeywordRegex(getKeywords());
                     let match;
                     while ((match = keywordRegex.exec(text))) {
                         const start = from + match.index;
@@ -64,6 +73,7 @@ export function comeFromLinkHighlightPlugin(
                         builder.add(start, end, keywordDecoration);
                     }
                 }
+                console.log(`computeDecorations: ${Date.now() - t1}ms`);
                 return builder.finish();
             }
         },

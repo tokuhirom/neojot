@@ -10,8 +10,8 @@
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let pageTitles: string[];
-    export let comefromLinks: Record<string, FileItem>;
     export let findEntryByTitle: (title: string) => FileItem | undefined;
+    export let autoLinks: string[];
 
     let year: number;
     let month: number;
@@ -78,9 +78,9 @@
                 {onSaved}
                 {onCreateItem}
                 {pageTitles}
-                {comefromLinks}
                 search={undefined}
                 {findEntryByTitle}
+                {autoLinks}
             />
             <LinkCards
                 file={selectedItem}
