@@ -16,9 +16,11 @@
 
     $: if (dataFileItems) {
         const today = new Date();
+        let t1 = Date.now();
         tasks = sortTasks(extractTasks(dataFileItems)).filter((task) => {
             return calculateFreshness(task, today) >= 0;
         });
+        console.log('re-calculate tasks: ', Date.now() - t1, tasks.length);
     }
 </script>
 
