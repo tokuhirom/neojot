@@ -21,6 +21,7 @@
     import {
         cachedExtractAliases,
         cachedExtractAutoLinks,
+        cachedExtractLinks,
     } from './lib/file_item/AutoLinks';
 
     let tabPane = 'list';
@@ -183,7 +184,7 @@
         dataFileItems.forEach((fileItem) => {
             lowerMap[fileItem.title.toLowerCase()] = fileItem;
 
-            const aliases = cachedExtractAliases(fileItem);
+            const aliases = cachedExtractLinks(fileItem, 'ALIAS');
             newPageTitles.push(fileItem.title);
             if (aliases.length > 0) {
                 newPageTitles.push(...aliases);
@@ -192,7 +193,7 @@
                 });
             }
 
-            const autoLinks = cachedExtractAutoLinks(fileItem);
+            const autoLinks = cachedExtractLinks(fileItem, 'AUTOLINK');
             if (autoLinks.length > 0) {
                 newAutoLinks.push(...autoLinks);
                 autoLinks.forEach((link) => {

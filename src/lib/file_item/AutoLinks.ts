@@ -1,56 +1,35 @@
 import type { FileItem } from './FileItem';
 
-type AliaslinkCacheItem = {
+type CacheItem = {
     mtime: number;
-    autolinks: string[];
-};
-const aliaslinkCache = new Map<string, AliaslinkCacheItem>();
-export function cachedExtractAliases(fileItem: FileItem): string[] {
-    const cache = aliaslinkCache.get(fileItem.filename);
-    if (cache && cache.mtime === fileItem.mtime) {
-        return cache.autolinks;
-    }
-    const autolinks = extractAliases(fileItem);
-    aliaslinkCache.set(fileItem.filename, {
-        mtime: fileItem.mtime,
-        autolinks,
-    });
-    return autolinks;
-}
-
-function extractAliases(fileItem: FileItem): string[] {
-    const content = fileItem.content;
-    const pattern = /^ALIAS:\s+(.+?)$/gm;
-    const matches = [];
-    let match;
-    while ((match = pattern.exec(content)) !== null) {
-        matches.push(match[1]);
-    }
-    return matches;
-}
-
-type AutolinkCacheItem = {
-    mtime: number;
-    autolinks: string[];
+    links: string[];
 };
 
-const autolinkCache = new Map<string, AutolinkCacheItem>();
-export function cachedExtractAutoLinks(fileItem: FileItem): string[] {
-    const cache = autolinkCache.get(fileItem.filename);
-    if (cache && cache.mtime === fileItem.mtime) {
-        return cache.autolinks;
+const cache = new Map<string, CacheItem>();
+
+export function cachedExtractLinks(
+    fileItem: FileItem,
+    type: 'ALIAS' | 'AUTOLINK',
+): string[] {
+    const cacheKey = `${fileItem.filename}-${type}`;
+    const cachedItem = cache.get(cacheKey);
+    if (cachedItem && cachedItem.mtime === fileItem.mtime) {
+        return cachedItem.links;
     }
-    const autolinks = extractAutolinks(fileItem);
-    autolinkCache.set(fileItem.filename, {
+    const links = extractLinks(fileItem, type);
+    cache.set(cacheKey, {
         mtime: fileItem.mtime,
-        autolinks,
+        links,
     });
-    return autolinks;
+    return links;
 }
 
-function extractAutolinks(fileItem: FileItem): string[] {
+function extractLinks(
+    fileItem: FileItem,
+    type: 'ALIAS' | 'AUTOLINK',
+): string[] {
     const content = fileItem.content;
-    const pattern = /^AUTOLINK:\s+(.+?)$/gm;
+    const pattern = new RegExp(`^${type}:\s+(.+?)$`, 'gm');
     const matches = [];
     let match;
     while ((match = pattern.exec(content)) !== null) {
