@@ -64,6 +64,7 @@
         let startState = EditorState.create({
             doc: initialContent,
             extensions: [
+                keymap.of(taskKeymap),
                 todoPlugin,
                 keymap.of(customKeymap),
                 history(),
@@ -88,7 +89,6 @@
                     }
                 }),
                 ...extensions,
-                keymap.of(taskKeymap),
             ],
         });
 

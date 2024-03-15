@@ -171,13 +171,15 @@ export const taskKeymap: KeyBinding[] = [
     },
     {
         key: 'Enter',
-        run: (view) =>
-            replaceLine(view, (type, param, title) => {
+        run: (view) => {
+            console.log('TodoWidget: Enter');
+            return replaceLine(view, (type, param, title) => {
                 if (!param.match(/Finished:/)) {
                     param = `Finished:${currentDate()} ${param}`;
                 }
                 return `DONE[${param}]:${title}`;
-            }),
+            });
+        },
     },
     {
         key: 'n',
