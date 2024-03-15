@@ -51,6 +51,7 @@
         border-radius: 0.5rem;
         cursor: pointer;
         width: 100%;
+        font-size: 80%;
     }
 
     button:hover {
