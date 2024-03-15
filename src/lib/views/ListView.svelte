@@ -3,14 +3,8 @@
     import { type FileItem } from '../file_item/FileItem';
     import LinkCards from '../link/LinkCards.svelte';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
-    import {
-        calculateFreshness,
-        extractTasks,
-        sortTasks,
-        type Task,
-    } from '../task/Task';
+    import { type Task } from '../task/Task';
     import { onDestroy, onMount } from 'svelte';
-    import TaskItem from '../task/TaskItem.svelte';
     import { emit } from '@tauri-apps/api/event';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
     import FileList from '../file_item/FileList.svelte';
@@ -23,7 +17,6 @@
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let title2fileItem: Record<string, FileItem>;
     export let comefromLinks: Record<string, FileItem>;
-    let tasks: Task[] = [];
     let viewerMode = false;
 
     function handleKeydown(event) {
@@ -68,25 +61,10 @@
         window.removeEventListener('keydown', handleKeydown);
     });
 
-    onMount(() => {
-        updateTasks();
-    });
-    $: if (dataFileItems) {
-        updateTasks();
-    }
-
-    function updateTasks() {
-        const today = new Date();
-        tasks = sortTasks(extractTasks(dataFileItems)).filter((task) => {
-            return calculateFreshness(task, today) >= 0;
-        });
-    }
-
     let searchWord = '';
 
     function onSaved() {
         selectedItem = selectedItem;
-        updateTasks();
     }
 
     function onCreateItem(fileItem: FileItem) {
@@ -96,12 +74,6 @@
         dataFileItems = dataFileItems;
         allFileItems = allFileItems;
         onSelectItem(fileItem);
-    }
-
-    function handleOnClick(task: Task) {
-        onSelectItem(task.fileItem);
-        viewerMode = false;
-        emit('go-to-line-number', task.lineNumber);
     }
 
     function enterViewerMode() {
@@ -120,15 +92,11 @@
         });
     });
     function updateFixedAreaHeight() {
-        const fixedAreaElement = document.querySelector(
-            '.fixed-area',
-        ) as HTMLElement | null;
         const clearableSearchBox = document.querySelector(
             '.clearable-search-box',
         ) as HTMLElement | null;
-        if (fixedAreaElement && clearableSearchBox) {
-            fixedAreaHeight =
-                fixedAreaElement.offsetHeight + clearableSearchBox.offsetHeight;
+        if (clearableSearchBox) {
+            fixedAreaHeight = clearableSearchBox.offsetHeight;
         }
     }
 
@@ -177,11 +145,6 @@
             viewerMode = false;
         }}
     >
-        <div class="fixed-area">
-            {#each tasks as task}
-                <TaskItem {task} {handleOnClick} />
-            {/each}
-        </div>
         <div class="clearable-search-box">
             <ClearableSearchBox bind:searchWord />
         </div>
@@ -236,14 +199,6 @@
         height: 100vh;
         padding-left: 8px;
         padding-right: 8px;
-    }
-
-    .fixed-area {
-        flex: 0 0 250px; /* Adjust width as needed */
-        max-height: 30%;
-        overflow-y: scroll; /* Ensures this area does not scroll */
-        padding-right: 9px;
-        padding-left: 4px;
     }
 
     .scrollable-area {
