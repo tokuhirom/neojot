@@ -24,6 +24,7 @@
     import { syntaxHighlighting } from '@codemirror/language';
     import { openSearchPanel, searchKeymap } from '@codemirror/search';
     import { insertDateCommand } from './KeyHandler';
+    import { debounce } from '../utils/Debounce';
 
     let container;
     export let view: EditorView;
@@ -56,16 +57,6 @@
         ...searchKeymap,
         ...defaultKeymap, // 標準のキーマップを含める
     ];
-
-    function debounce(func, delay) {
-        let timeout;
-        return function (...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                func.apply(this, args);
-            }, delay);
-        };
-    }
 
     const debouncedUpdateText = debounce(async () => {
         console.log(`テキストが変更されました`);

@@ -10,6 +10,7 @@ import { type Task } from '../task/Task';
 import type { FileItem } from '../file_item/FileItem';
 import { listen } from '@tauri-apps/api/event';
 import TaskWidgetInner from './TaskWidgetInner.svelte';
+import { debounce } from '../utils/Debounce';
 
 class TaskWidget extends WidgetType {
     private needsRendering: boolean = true;
@@ -21,12 +22,24 @@ class TaskWidget extends WidgetType {
     ) {
         super();
 
-        listen('sort_file_list', (event) => {
+        function debounce(
+            func: (fileItem: FileItem) => void,
+            delay: number,
+        ): (fileItem: FileItem) => void {
+            let timeoutId: ReturnType<typeof setTimeout> | null = null;
+            return function (fileitem: FileItem): void {
+                clearTimeout(timeoutId as ReturnType<typeof setTimeout>);
+                timeoutId = setTimeout(() => {
+                    func(fileitem);
+                }, delay);
+            };
+        }
+
+        const debouncedUpdateTask = debounce((fileItem: FileItem) => {
             console.log('TaskPlugin: sort_file_list event received');
-            const payload = event.payload as { fileItem: FileItem };
             if (this.taskWidgetInner) {
                 if (
-                    payload.fileItem.content.match(/[A-Z]\[.+]/) ||
+                    fileItem.content.match(/[A-Z]\[.+]/) ||
                     this.needsRendering
                 ) {
                     this.taskWidgetInner.$$set({
@@ -35,6 +48,12 @@ class TaskWidget extends WidgetType {
                     this.needsRendering = false;
                 }
             }
+        }, 500);
+
+        listen('sort_file_list', (event) => {
+            const payload = event.payload as { fileItem: FileItem };
+            const fileItem = payload.fileItem;
+            debouncedUpdateTask(fileItem);
         });
     }
 
