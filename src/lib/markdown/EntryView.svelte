@@ -30,7 +30,7 @@
     export let title2fileItem: Record<string, FileItem>;
     export let comefromLinks: Record<string, FileItem>;
     export let search: (keyword: string) => void | undefined;
-    export let existsEntry: (title: string) => boolean;
+    export let findEntryByTitle: (title: string) => FileItem;
 
     let keymaps = [
         { key: 'Mod-d', run: archive, preventDefault: true },
@@ -183,26 +183,13 @@
     };
 
     function findOrCreateEntry(pageName: string) {
-        const lowerPageName = pageName.toLowerCase();
-
-        for (let title of Object.keys(comefromLinks)) {
-            if (title.toLowerCase() === lowerPageName) {
-                onSelectItem(comefromLinks[title]);
-                if (search) {
-                    search(pageName);
-                }
-                return;
+        const fileItem = findEntryByTitle(pageName);
+        if (fileItem) {
+            onSelectItem(fileItem);
+            if (search) {
+                search(pageName);
             }
-        }
-
-        for (let title of Object.keys(title2fileItem)) {
-            if (title.toLowerCase() === lowerPageName) {
-                onSelectItem(title2fileItem[title]);
-                if (search) {
-                    search(pageName);
-                }
-                return;
-            }
+            return;
         }
 
         // create new entry
@@ -221,7 +208,7 @@
 
     let extensions = [
         oneDark,
-        internalLinkPlugin(existsEntry, (pageName) => {
+        internalLinkPlugin(findEntryByTitle, (pageName) => {
             findOrCreateEntry(pageName);
         }),
         linkPlugin((keyword) => {

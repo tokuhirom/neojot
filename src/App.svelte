@@ -206,8 +206,8 @@
         comefromLinks = map;
     }
 
-    function existsEntry(title: string): boolean {
-        return lowerTitle2fileItem[title.toLowerCase()] !== undefined;
+    function findEntryByTitle(title: string): FileItem | undefined {
+        return lowerTitle2fileItem[title.toLowerCase()];
     }
 </script>
 
@@ -252,7 +252,7 @@
                 {onSelectItem}
                 {title2fileItem}
                 {comefromLinks}
-                {existsEntry}
+                {findEntryByTitle}
             />
         {:else if tabPane === 'archive'}
             <ArchiveView
@@ -270,7 +270,7 @@
                 {onSelectItem}
                 {title2fileItem}
                 {comefromLinks}
-                {existsEntry}
+                {findEntryByTitle}
             />
         {:else if tabPane === 'calendar'}
             <CalendarView
@@ -280,7 +280,7 @@
                 {selectedItem}
                 {title2fileItem}
                 {comefromLinks}
-                {existsEntry}
+                {findEntryByTitle}
             />
         {:else if tabPane === 'manual'}
             <ManualView />
@@ -294,7 +294,7 @@
                 {onSelectItem}
                 {title2fileItem}
                 {comefromLinks}
-                {existsEntry}
+                {findEntryByTitle}
             />
         {/if}
     </div>

@@ -11,7 +11,7 @@
     export let selectedItem: FileItem | undefined = undefined;
     export let title2fileItem: Record<string, FileItem>;
     export let comefromLinks: Record<string, FileItem>;
-    export let existsEntry: (title: string) => boolean;
+    export let findEntryByTitle: (title: string) => FileItem | undefined;
 
     let year: number;
     let month: number;
@@ -80,7 +80,7 @@
                 {title2fileItem}
                 {comefromLinks}
                 search={undefined}
-                {existsEntry}
+                {findEntryByTitle}
             />
             <LinkCards
                 file={selectedItem}

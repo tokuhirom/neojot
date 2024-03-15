@@ -19,7 +19,7 @@
     export let findOrCreateEntry: (pageName: string) => void;
     export let dataFileItems: FileItem[];
     export let openTask: (task: Task) => void;
-    export let existsEntry: (title: string) => boolean;
+    export let findEntryByTitle: (title: string) => FileItem | undefined;
 
     let view: EditorView;
 
@@ -61,7 +61,7 @@
     }
 
     let extensions = [
-        internalLinkPlugin(existsEntry, findOrCreateEntry),
+        internalLinkPlugin(findEntryByTitle, findOrCreateEntry),
         nord,
         taskPlugin(() => dataFileItems, openTask),
     ];

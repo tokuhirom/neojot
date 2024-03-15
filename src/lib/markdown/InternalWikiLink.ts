@@ -10,9 +10,10 @@ import {
     RangeSetBuilder,
     type RangeValue,
 } from '@codemirror/state';
+import type { FileItem } from '../file_item/FileItem';
 
 export function internalLinkPlugin(
-    existsEntry: (pageName: string) => boolean,
+    findEntryByTitle: (pageName: string) => FileItem | undefined,
     findOrCreateEntry: (pageName: string) => void,
 ): Extension {
     return ViewPlugin.fromClass(
@@ -37,7 +38,7 @@ export function internalLinkPlugin(
                     let match;
                     while ((match = re.exec(text))) {
                         const pos = from + match.index;
-                        const exists = existsEntry(match[1]);
+                        const exists = !!findEntryByTitle(match[1]);
                         builder.add(
                             pos,
                             pos + match[0].length,

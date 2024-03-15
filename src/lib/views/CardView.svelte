@@ -13,7 +13,7 @@
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let title2fileItem: Record<string, FileItem>;
     export let comefromLinks: Record<string, FileItem>;
-    export let existsEntry: (title: string) => boolean;
+    export let findEntryByTitle: (title: string) => FileItem | undefined;
 
     let filteredFileItems: FileItem[];
     let searchWord = '';
@@ -65,7 +65,7 @@
                 {title2fileItem}
                 {comefromLinks}
                 search={undefined}
-                {existsEntry}
+                {findEntryByTitle}
             />
             <LinkCards
                 file={selectedItem}
