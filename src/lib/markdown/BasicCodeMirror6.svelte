@@ -51,11 +51,13 @@
         },
         { key: 'Mod-f', run: openSearchPanel, preventDefault: true },
         { key: 'Mod-r', run: openSearchPanel, preventDefault: true }, // replace?
+        ...searchKeymap,
+        ...defaultKeymap, // 標準のキーマップを含める
+    ];
+    const taskKeymap: KeyBinding[] = [
         // task related -----------------------------------------
         { key: 'Mod-t', run: (view) => insertDateCommand(view, 'TODO') },
         { key: 'Mod-p', run: (view) => insertDateCommand(view, 'PLAN') },
-        ...searchKeymap,
-        ...defaultKeymap, // 標準のキーマップを含める
     ];
 
     const debouncedUpdateText = debounce(async () => {
@@ -70,6 +72,7 @@
         let startState = EditorState.create({
             doc: initialContent,
             extensions: [
+                keymap.of(taskKeymap),
                 todoPlugin,
                 keymap.of(customKeymap),
                 history(),
