@@ -1,19 +1,5 @@
 import { EditorView } from '@codemirror/view';
 import { invoke } from '@tauri-apps/api/core';
-import { format } from 'date-fns';
-
-export function insertDateCommand(view: EditorView, key: string) {
-    const dateStr =
-        `${key}[Scheduled:` + format(new Date(), 'yyyy-MM-dd(EEE)') + ']: ';
-    const from = view.state.selection.main.from;
-    const to = from + dateStr.length;
-
-    view.dispatch({
-        changes: { from: from, insert: dateStr },
-        selection: { anchor: to },
-    });
-    return true;
-}
 
 export function openInternalLink(
     view: EditorView,

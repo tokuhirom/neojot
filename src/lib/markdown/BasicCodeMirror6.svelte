@@ -15,7 +15,7 @@
         redo,
         undo,
     } from '@codemirror/commands';
-    import { todoPlugin } from './TodoWidget';
+    import { taskKeymap, todoPlugin } from './TodoWidget';
     import { imageDecorator } from './ImageViewWidget';
     import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
     import { languages } from '@codemirror/language-data';
@@ -23,7 +23,6 @@
     import { mermaidPlugin } from './MermaidWidget';
     import { syntaxHighlighting } from '@codemirror/language';
     import { openSearchPanel, searchKeymap } from '@codemirror/search';
-    import { insertDateCommand } from './KeyHandler';
     import { debounce } from '../utils/Debounce';
 
     let container;
@@ -52,11 +51,6 @@
         ...searchKeymap,
         ...defaultKeymap, // 標準のキーマップを含める
     ];
-    const taskKeymap: KeyBinding[] = [
-        // task related -----------------------------------------
-        { key: 'Mod-t', run: (view) => insertDateCommand(view, 'TODO') },
-        { key: 'Mod-p', run: (view) => insertDateCommand(view, 'PLAN') },
-    ];
 
     const debouncedUpdateText = debounce(async () => {
         console.log(`テキストが変更されました`);
@@ -70,7 +64,6 @@
         let startState = EditorState.create({
             doc: initialContent,
             extensions: [
-                keymap.of(taskKeymap),
                 todoPlugin,
                 keymap.of(customKeymap),
                 history(),
@@ -95,6 +88,7 @@
                     }
                 }),
                 ...extensions,
+                keymap.of(taskKeymap),
             ],
         });
 

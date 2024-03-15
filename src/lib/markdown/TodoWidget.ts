@@ -2,6 +2,7 @@ import { type RangeSet, RangeSetBuilder } from '@codemirror/state';
 import {
     Decoration,
     type EditorView,
+    type KeyBinding,
     ViewPlugin,
     ViewUpdate,
 } from '@codemirror/view';
@@ -61,12 +62,10 @@ function replaceDate(event: KeyboardEvent, view: EditorView, key: string) {
         }
     }
 }
-
 function replaceLine(
-    event: KeyboardEvent,
     view: EditorView,
     replacer: (type: string, param: string, title: string) => string,
-) {
+): boolean {
     // replace the current line with 'NOTE'
     const { state } = view;
     const { from, to } = state.selection.main;
@@ -78,7 +77,7 @@ function replaceLine(
     );
     if (!match || from > lineStart + match[0].length) {
         // カーソル位置がパターンにマッチしない場合、または`:`の後ろにある場合は処理をスキップ
-        return;
+        return false;
     }
 
     const modifiedText = lineText.replace(
@@ -89,7 +88,7 @@ function replaceLine(
         },
     );
     if (modifiedText === lineText) {
-        return;
+        return false;
     }
 
     event.preventDefault();
@@ -101,6 +100,7 @@ function replaceLine(
             insert: modifiedText,
         },
     });
+    return true;
 }
 
 export const todoPlugin = ViewPlugin.fromClass(
@@ -154,54 +154,84 @@ export const todoPlugin = ViewPlugin.fromClass(
                     replaceDate(event, view, event.key);
                     return;
                 }
-
-                if (event.shiftKey) {
-                    return;
-                }
-
-                // when user press the 'n' key, update line to 'NOTE'
-                if (event.key === 'n') {
-                    replaceLine(event, view, (type, param, title) => {
-                        const newType = type === 'NOTE' ? 'TODO' : 'NOTE';
-                        return `${newType}[${param}]:${title}`;
-                    });
-                } else if (event.key === 'i') {
-                    replaceLine(event, view, (type, param, title) => {
-                        const newType = type === 'DOING' ? 'TODO' : 'DOING';
-                        return `${newType}[${param}]:${title}`;
-                    });
-                } else if (event.key === 'c') {
-                    replaceLine(event, view, (type, param, title) => {
-                        if (!param.match(/Finished:/)) {
-                            param = `Finished:${currentDate()} ${param}`;
-                        }
-                        return `CANCELED[${param}]:${title}`;
-                    });
-                } else if (event.key === 'Enter') {
-                    replaceLine(event, view, (type, param, title) => {
-                        if (!param.match(/Finished:/)) {
-                            param = `Finished:${currentDate()} ${param}`;
-                        }
-                        return `DONE[${param}]:${title}`;
-                    });
-                } else if (event.key === 's') {
-                    replaceLine(event, view, (type, param, title) => {
-                        // if 'Scheduled:' is not included in param, add it.
-                        if (!param.match(/Scheduled:/)) {
-                            param = `Scheduled:${currentDate()} ${param}`;
-                        }
-                        return `${type}[${param}]:${title}`;
-                    });
-                } else if (event.key === 'd') {
-                    replaceLine(event, view, (type, param, title) => {
-                        // if 'Deadline:' is not included in param, add it.
-                        if (!param.match(/Deadline:/)) {
-                            param = `Deadline:${currentDate()} ${param}`;
-                        }
-                        return `${type}[${param}]:${title}`;
-                    });
-                }
             },
         },
     },
 );
+
+export function insertDateCommand(view: EditorView, key: string) {
+    const dateStr =
+        `${key}[Scheduled:` + format(new Date(), 'yyyy-MM-dd(EEE)') + ']: ';
+    const from = view.state.selection.main.from;
+    const to = from + dateStr.length;
+
+    view.dispatch({
+        changes: { from: from, insert: dateStr },
+        selection: { anchor: to },
+    });
+    return true;
+}
+
+export const taskKeymap: KeyBinding[] = [
+    // task related -----------------------------------------
+    { key: 'Mod-t', run: (view) => insertDateCommand(view, 'TODO') },
+    { key: 'Mod-p', run: (view) => insertDateCommand(view, 'PLAN') },
+    {
+        key: 'Enter',
+        run: (view) =>
+            replaceLine(view, (type, param, title) => {
+                if (!param.match(/Finished:/)) {
+                    param = `Finished:${currentDate()} ${param}`;
+                }
+                return `DONE[${param}]:${title}`;
+            }),
+    },
+    {
+        key: 'n',
+        run: (view) =>
+            replaceLine(view, (type, param, title) => {
+                const newType = type === 'NOTE' ? 'TODO' : 'NOTE';
+                return `${newType}[${param}]:${title}`;
+            }),
+    },
+    {
+        key: 'd',
+        run: (view) =>
+            replaceLine(view, (type, param, title) => {
+                // if 'Deadline:' is not included in param, add it.
+                if (!param.match(/Deadline:/)) {
+                    param = `Deadline:${currentDate()} ${param}`;
+                }
+                return `${type}[${param}]:${title}`;
+            }),
+    },
+    {
+        key: 's',
+        run: (view) =>
+            replaceLine(view, (type, param, title) => {
+                // if 'Scheduled:' is not included in param, add it.
+                if (!param.match(/Scheduled:/)) {
+                    param = `Scheduled:${currentDate()} ${param}`;
+                }
+                return `${type}[${param}]:${title}`;
+            }),
+    },
+    {
+        key: 'c',
+        run: (view) =>
+            replaceLine(view, (type, param, title) => {
+                if (!param.match(/Finished:/)) {
+                    param = `Finished:${currentDate()} ${param}`;
+                }
+                return `CANCELED[${param}]:${title}`;
+            }),
+    },
+    {
+        key: 'i',
+        run: (view) =>
+            replaceLine(view, (type, param, title) => {
+                const newType = type === 'DOING' ? 'TODO' : 'DOING';
+                return `${newType}[${param}]:${title}`;
+            }),
+    },
+];
