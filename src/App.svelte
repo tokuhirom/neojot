@@ -18,11 +18,7 @@
     import type { FileItem } from './lib/file_item/FileItem';
     import ManualView from './lib/views/ManualView.svelte';
     import { initGit } from './lib/git/GitCommands';
-    import {
-        cachedExtractAliases,
-        cachedExtractAutoLinks,
-        cachedExtractLinks,
-    } from './lib/file_item/AutoLinks';
+    import { cachedExtractLinks } from './lib/file_item/AutoLinks';
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;

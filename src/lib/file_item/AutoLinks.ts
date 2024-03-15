@@ -29,7 +29,7 @@ function extractLinks(
     type: 'ALIAS' | 'AUTOLINK',
 ): string[] {
     const content = fileItem.content;
-    const pattern = new RegExp(`^${type}:\s+(.+?)$`, 'gm');
+    const pattern = new RegExp(`^${type}:\\s+(.+?)$`, 'gm');
     const matches = [];
     let match;
     while ((match = pattern.exec(content)) !== null) {
