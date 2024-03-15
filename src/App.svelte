@@ -173,25 +173,20 @@
         return matches;
     }
 
-    // title2fileItem はページ名補完用。
-    // なので、本来はMap じゃなくて Array で十分だったりする。
-    // むしろ、タイトルの配列で十分かも。
-    // TODO: title2fileItem の整理
-    let title2fileItem: Record<string, FileItem> = {};
+    // タイトルの補完用に使う配列
+    let pageTitles: string[];
+    $: pageTitles = dataFileItems.map((fileItem) => fileItem.title);
+
     let lowerTitle2fileItem: Record<string, FileItem> = {};
     $: if (allFileItems) {
-        const map: Record<string, FileItem> = {};
         const lowerMap: Record<string, FileItem> = {};
         allFileItems.forEach((fileItem) => {
-            map[fileItem.title] = fileItem;
             lowerMap[fileItem.title.toLowerCase()] = fileItem;
             // find `<<< FOOBAR` links
             extractComeFromLinks(fileItem.content).forEach((goto) => {
-                map[goto] = fileItem;
                 lowerMap[goto.toLowerCase()] = fileItem;
             });
         });
-        title2fileItem = map;
         lowerTitle2fileItem = lowerMap;
     }
 
@@ -250,7 +245,7 @@
                 {dataFileItems}
                 {selectedItem}
                 {onSelectItem}
-                {title2fileItem}
+                {pageTitles}
                 {comefromLinks}
                 {findEntryByTitle}
             />
@@ -268,7 +263,7 @@
                 {dataFileItems}
                 {selectedItem}
                 {onSelectItem}
-                {title2fileItem}
+                {pageTitles}
                 {comefromLinks}
                 {findEntryByTitle}
             />
@@ -278,7 +273,7 @@
                 {dataFileItems}
                 {onSelectItem}
                 {selectedItem}
-                {title2fileItem}
+                {pageTitles}
                 {comefromLinks}
                 {findEntryByTitle}
             />
@@ -292,7 +287,7 @@
                 {dataFileItems}
                 {selectedItem}
                 {onSelectItem}
-                {title2fileItem}
+                {pageTitles}
                 {comefromLinks}
                 {findEntryByTitle}
             />

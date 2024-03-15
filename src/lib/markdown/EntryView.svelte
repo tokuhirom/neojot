@@ -27,7 +27,7 @@
     export let onCreateItem: (fileItem: FileItem) => void;
     export let onSaved: () => void;
     // for completion
-    export let title2fileItem: Record<string, FileItem>;
+    export let pageTitles: string[];
     export let comefromLinks: Record<string, FileItem>;
     export let search: (keyword: string) => void | undefined;
     export let findEntryByTitle: (title: string) => FileItem;
@@ -91,7 +91,7 @@
             const word = context.matchBefore(/\[\[\w*/);
             if (word) {
                 console.log('Return links');
-                const options = Object.keys(title2fileItem).map((title) => {
+                const options = pageTitles.map((title) => {
                     return {
                         label: `[[${title}]]`,
                         type: 'keyword',

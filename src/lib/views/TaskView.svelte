@@ -14,7 +14,7 @@
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (FileItem) => void;
-    export let title2fileItem: Record<string, FileItem>;
+    export let pageTitles: string[];
     export let comefromLinks: Record<string, FileItem>;
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     let tasks: Task[] = [];
@@ -72,7 +72,7 @@
                 {onSelectItem}
                 {onSaved}
                 {onCreateItem}
-                {title2fileItem}
+                {pageTitles}
                 {comefromLinks}
                 search={() => {}}
                 {findEntryByTitle}

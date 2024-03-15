@@ -15,7 +15,7 @@
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
-    export let title2fileItem: Record<string, FileItem>;
+    export let pageTitles: string[];
     export let comefromLinks: Record<string, FileItem>;
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     let viewerMode = false;
@@ -102,22 +102,11 @@
     }
 
     function findOrCreateEntry(pageName: string) {
-        const lowerPageName = pageName.toLowerCase();
-
-        for (let title of Object.keys(comefromLinks)) {
-            if (title.toLowerCase() === lowerPageName) {
-                onSelectItem(comefromLinks[title]);
-                searchWord = pageName;
-                return;
-            }
-        }
-
-        for (let title of Object.keys(title2fileItem)) {
-            if (title.toLowerCase() === lowerPageName) {
-                onSelectItem(title2fileItem[title]);
-                searchWord = pageName;
-                return;
-            }
+        const fileItem = findEntryByTitle(pageName);
+        if (fileItem) {
+            onSelectItem(fileItem);
+            searchWord = pageName;
+            return;
         }
 
         // create new entry
@@ -175,7 +164,7 @@
                     {onSelectItem}
                     {onSaved}
                     {onCreateItem}
-                    {title2fileItem}
+                    {pageTitles}
                     {comefromLinks}
                     search={(keyword) => (searchWord = keyword)}
                     {findEntryByTitle}
