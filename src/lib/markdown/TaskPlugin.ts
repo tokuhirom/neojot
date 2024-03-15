@@ -22,6 +22,7 @@ class TaskWidget extends WidgetType {
         super();
 
         listen('sort_file_list', (event) => {
+            console.log('TaskPlugin: sort_file_list event received');
             const payload = event.payload as { fileItem: FileItem };
             if (this.taskWidgetInner) {
                 if (
