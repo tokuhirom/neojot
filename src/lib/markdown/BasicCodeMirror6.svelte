@@ -70,9 +70,9 @@
         let startState = EditorState.create({
             doc: initialContent,
             extensions: [
+                todoPlugin,
                 keymap.of(customKeymap),
                 history(),
-                todoPlugin,
                 imageDecorator,
                 markdown({
                     base: markdownLanguage, // enable github flavored markdown
