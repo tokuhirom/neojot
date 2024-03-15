@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { createEventDispatcher, onMount } from 'svelte';
+    import { onMount } from 'svelte';
     import { EditorView, type KeyBinding, keymap } from '@codemirror/view';
     import { invoke } from '@tauri-apps/api/core';
     import {
@@ -32,8 +32,6 @@
     export let extensions: Extension[];
     export let onUpdateText: (string) => Promise<void>;
     export let keymaps: KeyBinding[];
-
-    const dispatch = createEventDispatcher();
 
     const customKeymap: KeyBinding[] = [
         ...keymaps,
@@ -117,8 +115,6 @@
                 }
             }
         });
-
-        dispatch('viewCreated', { view });
     });
 </script>
 
