@@ -8,8 +8,8 @@
     import { emit } from '@tauri-apps/api/event';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
     import FileList from '../file_item/FileList.svelte';
-    import MenuView from './MenuView.svelte';
     import { createNewFileWithContent } from '../repository/NodeRepository';
+    import QuickPadView from './QuickPadView.svelte';
 
     export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
@@ -179,7 +179,7 @@
         {/if}
     </div>
     <div class="menu">
-        <MenuView
+        <QuickPadView
             {findOrCreateEntry}
             {dataFileItems}
             {openTask}

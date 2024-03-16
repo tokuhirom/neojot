@@ -22,22 +22,22 @@
     let view: EditorView;
 
     async function initialContent() {
-        if (await exists('00menu.md', { baseDir: BaseDirectory.AppData })) {
-            console.log('00menu.md exists');
-            return await readTextFile('00menu.md', {
+        if (await exists('00QuickPad.md', { baseDir: BaseDirectory.AppData })) {
+            console.log('00QuickPad.md exists');
+            return await readTextFile('00QuickPad.md', {
                 baseDir: BaseDirectory.AppData,
             });
         } else {
-            console.log('00menu.md does not exist');
+            console.log('00QuickPad.md does not exist');
             // TODO: TODO とかの使い方をメニューに入れる
             return `# NeoJot\n\n- [[Home]]\n- [[About]]\n\n%tasks\n`;
         }
     }
 
-    // save 00menu.md
+    // save 00QuickPad.md
     async function onUpdateText(text: string) {
         console.log('onUpdateText', text);
-        await writeTextFile('00menu.md', text, {
+        await writeTextFile('00QuickPad.md', text, {
             baseDir: BaseDirectory.AppData,
         });
     }
