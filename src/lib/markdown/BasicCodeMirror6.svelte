@@ -27,7 +27,7 @@
 
     let container;
     export let view: EditorView;
-    export let initialContent: string;
+    export let initialContent: () => Promise<string>;
     export let extensions: Extension[];
     export let onUpdateText: (string) => Promise<void>;
     export let keymaps: KeyBinding[];
@@ -60,9 +60,10 @@
         await onUpdateText(text);
     }, 500); // 500ミリ秒のデバウンス遅延
 
-    onMount(() => {
+    onMount(async () => {
+        const doc = await initialContent();
         let startState = EditorState.create({
-            doc: initialContent,
+            doc,
             extensions: [
                 keymap.of(taskKeymap),
                 todoPlugin,

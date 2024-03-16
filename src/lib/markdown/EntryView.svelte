@@ -259,7 +259,7 @@
     <BasicCodeMirror6
         bind:view
         {extensions}
-        initialContent={file.content}
+        initialContent={async () => file.content}
         {onUpdateText}
         {keymaps}
     />

@@ -5,10 +5,8 @@
         readTextFile,
         writeTextFile,
     } from '@tauri-apps/plugin-fs';
-    import { onMount } from 'svelte';
     import BasicCodeMirror6 from '../markdown/BasicCodeMirror6.svelte';
     import type { EditorView } from '@codemirror/view';
-    import { Transaction } from '@codemirror/state';
     import { internalLinkPlugin } from '../markdown/InternalWikiLink';
     import { nord } from 'cm6-theme-nord';
     import { taskPlugin } from '../markdown/TaskPlugin';
@@ -23,22 +21,7 @@
 
     let view: EditorView;
 
-    let menu = '';
-    onMount(async () => {
-        const menu = await readMenu();
-        let state = view.state;
-        let transaction = state.update({
-            changes: {
-                from: 0,
-                to: state.doc.length,
-                insert: menu,
-            },
-            annotations: Transaction.userEvent.of('program'),
-        });
-        view.dispatch(transaction);
-    });
-
-    async function readMenu() {
+    async function initialContent() {
         if (await exists('00menu.md', { baseDir: BaseDirectory.AppData })) {
             console.log('00menu.md exists');
             return await readTextFile('00menu.md', {
@@ -46,7 +29,6 @@
             });
         } else {
             console.log('00menu.md does not exist');
-            // TODO: メニューをクリックできるように
             // TODO: TODO とかの使い方をメニューに入れる
             return `# NeoJot\n\n- [[Home]]\n- [[About]]\n\n%tasks\n`;
         }
@@ -78,7 +60,7 @@
 <div class="wrapper">
     <BasicCodeMirror6
         bind:view
-        initialContent={menu}
+        {initialContent}
         {extensions}
         {onUpdateText}
         {keymaps}
