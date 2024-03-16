@@ -76,7 +76,7 @@
             />
         {/if}
     {:else}
-        {#each filteredFileItems as file}
+        {#each filteredFileItems as file (file.filename)}
             <FileCardItem {onSelectItem} {file} />
         {/each}
     {/if}

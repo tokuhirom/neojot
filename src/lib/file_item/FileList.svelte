@@ -33,7 +33,7 @@
 
 <div>
     {#if searchResult && selectedItem}
-        {#each searchResult as result}
+        {#each searchResult as result (result.fileItem.filename)}
             <FileListItem
                 {onSelectItem}
                 fileItem={result.fileItem}

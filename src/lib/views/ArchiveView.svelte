@@ -38,7 +38,7 @@
         >
         <pre class="archived-source">{selectedItem.content}</pre>
     {:else if archivedFileItems.length > 0}
-        {#each archivedFileItems as file}
+        {#each archivedFileItems as file (file.filename)}
             <FileCardItem {onSelectItem} {file} />
         {/each}
     {:else}
