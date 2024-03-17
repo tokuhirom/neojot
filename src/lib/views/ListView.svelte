@@ -152,7 +152,7 @@
                     {findEntryByTitle}
                     {autoLinks}
                 />
-                <LinkCards file={selectedItem} {onSelectItem} />
+                <LinkCards file={selectedItem} />
             {/if}
         {/if}
     </div>

@@ -25,10 +25,6 @@
         month = currentDate.getMonth() + 1;
     });
 
-    function openFile(fileItem: FileItem) {
-        selectedItem = fileItem;
-    }
-
     function gotoPrevMonth() {
         month--;
         if (month < 1) {
@@ -70,7 +66,7 @@
                 {findEntryByTitle}
                 {autoLinks}
             />
-            <LinkCards file={selectedItem} onSelectItem={openFile} />
+            <LinkCards file={selectedItem} />
         {/if}
     </div>
 </div>
