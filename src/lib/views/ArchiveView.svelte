@@ -1,6 +1,8 @@
 <script lang="ts">
     import type { FileItem } from '../file_item/FileItem';
     import FileCardItem from '../card/FileCardItem.svelte';
+    import { loadFileList } from '../repository/NodeRepository';
+    import { onMount } from 'svelte';
 
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let archiveOrDeleteEntry: (
@@ -8,7 +10,14 @@
     ) => Promise<FileItem | undefined>;
     export let unarchiveEntry: (fileItem: FileItem) => void;
     export let selectedItem: FileItem | undefined = undefined;
-    export let archivedFileItems: FileItem[] = [];
+
+    let archivedFileItems: FileItem[] = [];
+
+    onMount(async () => {
+        const archived = await loadFileList('archived');
+        archived.sort((a, b) => b.mtime - a.mtime); // sort it.
+        archivedFileItems = archived;
+    });
 
     function unselectEntry() {
         onSelectItem(undefined);

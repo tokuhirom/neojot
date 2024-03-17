@@ -23,7 +23,6 @@
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
     let dataFileItems: FileItem[] = [];
-    let archivedFileItems: FileItem[] = [];
 
     onMount(async () => {
         await reloadFiles();
@@ -54,10 +53,6 @@
         const data = await loadFileList('data');
         data.sort((a, b) => b.mtime - a.mtime); // sort it.
         dataFileItems = data;
-
-        const archived = await loadFileList('archived');
-        archived.sort((a, b) => b.mtime - a.mtime); // sort it.
-        archivedFileItems = archived;
     }
 
     async function archiveOrDeleteEntry(
@@ -249,7 +244,6 @@
         {:else if tabPane === 'archive'}
             <ArchiveView
                 {selectedItem}
-                {archivedFileItems}
                 {onSelectItem}
                 {archiveOrDeleteEntry}
                 {unarchiveEntry}
