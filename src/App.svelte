@@ -21,6 +21,7 @@
     import { dataFileItemsStore } from './Stores';
     import { extractTasks } from './lib/task/Task';
     import { tasksStore } from './Stores.js';
+    import { sortTasks } from './lib/task/Task.js';
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
@@ -188,7 +189,7 @@
     }
 
     dataFileItemsStore.subscribe((value) => {
-        const tasks = extractTasks(value);
+        const tasks = sortTasks(extractTasks(value));
         tasksStore.set(tasks);
     });
 </script>

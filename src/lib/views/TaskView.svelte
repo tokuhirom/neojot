@@ -5,22 +5,22 @@
     import { extractTasks, sortTasks, type Task } from '../task/Task';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import TaskItem from '../task/TaskItem.svelte';
-    import { dataFileItemsStore, searchKeywordStore } from '../../Stores';
+    import { searchKeywordStore, tasksStore } from '../../Stores';
+
     export let selectedItem: FileItem | undefined = undefined;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
+
     let tasks: Task[] = [];
     let filteredTasks: Task[] = [];
 
-    onMount(() => {
-        tasks = sortTasks(extractTasks($dataFileItemsStore));
-        if (tasks.length > 0) {
+    tasksStore.subscribe((value) => {
+        tasks = value;
+        if (selectedItem === undefined && tasks.length > 0) {
             selectedItem = tasks[0].fileItem;
         }
     });
-
-    tasks = sortTasks(extractTasks($dataFileItemsStore));
 
     $: if ($searchKeywordStore === '') {
         filteredTasks = tasks;
