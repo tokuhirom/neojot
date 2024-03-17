@@ -111,7 +111,7 @@
 
         // create new entry
         console.log(
-            `Page '${pageName}' is not found. Trying to create new entry...${allFileItems.length}`,
+            `Page '${pageName}' is not found. Trying to create new entry...`,
         );
         createNewFileWithContent(`# ${pageName}\n\n`).then(
             (fileItem: FileItem) => {
@@ -160,7 +160,6 @@
             {:else}
                 <EntryView
                     file={selectedItem}
-                    {allFileItems}
                     {onSelectItem}
                     {onSaved}
                     {onCreateItem}

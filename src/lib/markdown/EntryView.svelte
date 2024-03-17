@@ -22,7 +22,6 @@
     import { openInternalLink } from './KeyHandler';
 
     export let file: FileItem;
-    export let allFileItems: FileItem[];
     export let onSelectItem: (fileItem: FileItem) => void;
     export let onCreateItem: (fileItem: FileItem) => void;
     export let onSaved: () => void;
@@ -194,7 +193,7 @@
 
         // create new entry
         console.log(
-            `Page '${pageName}' is not found. Trying to create new entry...${allFileItems.length}`,
+            `Page '${pageName}' is not found. Trying to create new entry...`,
         );
         createNewFileWithContent(`# ${pageName}\n\n`).then(
             (fileItem: FileItem) => {

@@ -58,12 +58,10 @@
         {:else}
             <EntryView
                 file={selectedItem}
-                {allFileItems}
                 {onSelectItem}
                 {onSaved}
                 {onCreateItem}
                 {pageTitles}
-                f
                 search={undefined}
                 {findEntryByTitle}
                 {autoLinks}
