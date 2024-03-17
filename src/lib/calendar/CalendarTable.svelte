@@ -3,7 +3,7 @@
     import { type CalendarData } from '../repository/NodeRepository';
     import { onMount } from 'svelte';
     import type { FileItem } from '../file_item/FileItem';
-    import { extractTasks, type Task } from '../task/Task';
+    import { extractTasks, getTaskIcon, type Task } from '../task/Task';
     import { emit } from '@tauri-apps/api/event';
     import { invoke } from '@tauri-apps/api/core';
     import { selectedItemStore } from '../../Stores';
@@ -117,7 +117,8 @@
                                 {#each taskMap.get(day.day) || [] as task}
                                     <button
                                         on:click={() => handleTaskOnClick(task)}
-                                        >{#if task.type === 'PLAN'}📅{:else if task.finished && task.finished.getDate() === day.day}✅{:else if task.deadline && task.deadline.getDate() === day.day}🚨{:else if task.scheduled && task.scheduled.getDate() === day.day}💪{/if}
+                                    >
+                                        {getTaskIcon(task)}
                                         {task.title}
                                     </button>
                                 {/each}
