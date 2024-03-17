@@ -2,15 +2,14 @@
     import { onMount } from 'svelte';
     import { type FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
-    import LinkCards from '../link/LinkCards.svelte';
     import { extractTasks, sortTasks, type Task } from '../task/Task';
     import { emit } from '@tauri-apps/api/event';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import TaskItem from '../task/TaskItem.svelte';
+    import { dataFileItemsStore } from '../../Stores';
 
     let searchWord = '';
 
-    export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (FileItem) => void;
     export let pageTitles: string[];
@@ -20,15 +19,13 @@
     let filteredTasks: Task[] = [];
 
     onMount(() => {
-        tasks = sortTasks(extractTasks(dataFileItems));
+        tasks = sortTasks(extractTasks($dataFileItemsStore));
         if (tasks.length > 0) {
             selectedItem = tasks[0].fileItem;
         }
     });
 
-    $: if (dataFileItems) {
-        tasks = sortTasks(extractTasks(dataFileItems));
-    }
+    tasks = sortTasks(extractTasks($dataFileItemsStore));
 
     $: if (searchWord === '') {
         filteredTasks = tasks;
@@ -43,8 +40,7 @@
     }
 
     function onCreateItem(fileItem: FileItem) {
-        dataFileItems.unshift(fileItem);
-        dataFileItems = dataFileItems;
+        $dataFileItemsStore = [...$dataFileItemsStore, fileItem];
         onSelectItem(fileItem);
     }
 
@@ -73,7 +69,6 @@
                 {findEntryByTitle}
                 {autoLinks}
             />
-            <LinkCards file={selectedItem} {onSelectItem} {onCreateItem} />
         {/if}
     </div>
 </div>
