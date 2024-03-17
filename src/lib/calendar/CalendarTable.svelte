@@ -6,8 +6,8 @@
     import { extractTasks, type Task } from '../task/Task';
     import { emit } from '@tauri-apps/api/event';
     import { invoke } from '@tauri-apps/api/core';
+    import { selectedItemStore } from '../../Stores';
 
-    export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let dataFileItems: FileItem[] = [];
 
     export let year: number;
@@ -94,8 +94,12 @@
     }
 
     function handleTaskOnClick(task: Task) {
-        onSelectItem(task.fileItem);
+        selectedItemStore.set(task.fileItem);
         emit('go-to-line-number', task.lineNumber);
+    }
+
+    function onSelectItem(fileItem: FileItem | undefined) {
+        selectedItemStore.set(fileItem);
     }
 </script>
 

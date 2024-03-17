@@ -7,13 +7,17 @@
     import { selectedItemStore } from '../../Stores';
 
     export let dataFileItems: FileItem[] = [];
-    export let selectedItem: FileItem | undefined = undefined;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
 
+    let selectedItem: FileItem | undefined = undefined;
+    selectedItemStore.subscribe((value) => {
+        selectedItem = value;
+    });
+
     async function onSelectItem(fileItem: FileItem | undefined) {
-        $selectedItemStore = fileItem;
+        selectedItemStore.set(fileItem);
     }
 
     let year: number;
@@ -58,7 +62,7 @@
                 <h1>{year}-{month.toString().padStart(2, '0')}</h1>
                 <button on:click={gotoNextMonth} class="month-nav">Next</button>
             </div>
-            <CalendarTable {dataFileItems} {onSelectItem} {year} {month} />
+            <CalendarTable {dataFileItems} {year} {month} />
         {/if}
     </div>
     <div class="log-view">
