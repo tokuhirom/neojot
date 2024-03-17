@@ -14,7 +14,7 @@
         type CompletionContext,
     } from '@codemirror/autocomplete';
     import { aliasPlugin } from './AliasPlugin';
-    import { comeFromLinkHighlightPlugin } from './KeywordHighlight';
+    import { autoLinkHighlightPlugin } from './KeywordHighlight';
     import { languages } from '@codemirror/language-data';
     import BasicCodeMirror6 from './BasicCodeMirror6.svelte';
     import { internalLinkPlugin } from './InternalWikiLink';
@@ -219,7 +219,7 @@
             findOrCreateEntry(pageName);
         }),
         aliasPlugin(),
-        comeFromLinkHighlightPlugin(() => autoLinks, findOrCreateEntry),
+        autoLinkHighlightPlugin(() => autoLinks, findOrCreateEntry),
         EditorView.domEventHandlers({ paste: handlePaste }),
         autocompletion({ override: [myCompletion] }),
     ];
