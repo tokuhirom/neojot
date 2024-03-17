@@ -8,7 +8,7 @@
     import { invoke } from '@tauri-apps/api/core';
 
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
-    export let allFileItems: FileItem[] = [];
+    export let dataFileItems: FileItem[] = [];
 
     export let year: number;
     export let month: number;
@@ -42,7 +42,7 @@
 
     let taskMap: Map<number, Task[]> = new Map();
     $: if (year && month) {
-        const tasks = extractTasks(allFileItems)
+        const tasks = extractTasks(dataFileItems)
             .filter(
                 (task) =>
                     (task.scheduled &&
@@ -79,7 +79,7 @@
 
     async function reloadFiles() {
         let newFileMap: Record<string, FileItem> = {};
-        for (let fileItem of allFileItems) {
+        for (let fileItem of dataFileItems) {
             newFileMap[fileItem.filename.replace(/.+\//, '')] = fileItem;
         }
         fileMap = newFileMap;

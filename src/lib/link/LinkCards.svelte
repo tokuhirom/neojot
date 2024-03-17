@@ -6,14 +6,14 @@
     import { createNewFileWithContent } from '../repository/NodeRepository';
 
     export let file: FileItem;
-    export let allFileItems: FileItem[];
+    export let dataFileItems: FileItem[];
     export let onSelectItem: (fileItem: FileItem) => void;
     export let onCreateItem: (fileItem: FileItem) => void;
 
     let links: Links | undefined = undefined;
 
-    $: if (allFileItems || file) {
-        links = buildLinks(file, allFileItems);
+    $: if (dataFileItems || file) {
+        links = buildLinks(file, dataFileItems);
     }
 
     async function createNewEntry(title: string) {

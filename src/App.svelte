@@ -22,7 +22,6 @@
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
-    let allFileItems: FileItem[] = [];
     let dataFileItems: FileItem[] = [];
     let archivedFileItems: FileItem[] = [];
 
@@ -59,8 +58,6 @@
         const archived = await loadFileList('archived');
         archived.sort((a, b) => b.mtime - a.mtime); // sort it.
         archivedFileItems = archived;
-
-        allFileItems = archived.concat(data);
     }
 
     async function archiveOrDeleteEntry(
@@ -128,7 +125,6 @@
                 }
 
                 dataFileItems.unshift(fileItem);
-                allFileItems.unshift(fileItem);
 
                 dataFileItems = dataFileItems; // reload ListView's file list.
 
@@ -243,7 +239,6 @@
     <div class="main">
         {#if tabPane === 'list'}
             <ListView
-                {allFileItems}
                 {dataFileItems}
                 {selectedItem}
                 {onSelectItem}
@@ -261,7 +256,6 @@
             />
         {:else if tabPane === 'task'}
             <TaskView
-                {allFileItems}
                 {dataFileItems}
                 {selectedItem}
                 {onSelectItem}
@@ -271,7 +265,6 @@
             />
         {:else if tabPane === 'calendar'}
             <CalendarView
-                {allFileItems}
                 {dataFileItems}
                 {onSelectItem}
                 {selectedItem}
@@ -285,7 +278,6 @@
             <ConfigurationView />
         {:else}
             <CardView
-                {allFileItems}
                 {dataFileItems}
                 {selectedItem}
                 {onSelectItem}

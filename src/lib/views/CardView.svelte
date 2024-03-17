@@ -7,7 +7,6 @@
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
     import { makeMigemoRegexes } from '../search/Migemo';
 
-    export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
@@ -37,9 +36,7 @@
 
     function onCreateItem(fileItem: FileItem) {
         dataFileItems.unshift(fileItem);
-        allFileItems.unshift(fileItem);
         dataFileItems = dataFileItems;
-        allFileItems = allFileItems;
         onSelectItem(fileItem);
     }
 </script>
@@ -68,7 +65,7 @@
             />
             <LinkCards
                 file={selectedItem}
-                {allFileItems}
+                {dataFileItems}
                 {onSelectItem}
                 {onCreateItem}
             />

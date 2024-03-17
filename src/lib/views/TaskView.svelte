@@ -10,7 +10,6 @@
 
     let searchWord = '';
 
-    export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (FileItem) => void;
@@ -45,9 +44,7 @@
 
     function onCreateItem(fileItem: FileItem) {
         dataFileItems.unshift(fileItem);
-        allFileItems.unshift(fileItem);
         dataFileItems = dataFileItems;
-        allFileItems = allFileItems;
         onSelectItem(fileItem);
     }
 
@@ -68,7 +65,6 @@
         {#if selectedItem !== undefined}
             <EntryView
                 file={selectedItem}
-                {allFileItems}
                 {onSelectItem}
                 {onSaved}
                 {onCreateItem}
@@ -79,7 +75,7 @@
             />
             <LinkCards
                 file={selectedItem}
-                {allFileItems}
+                {dataFileItems}
                 {onSelectItem}
                 {onCreateItem}
             />

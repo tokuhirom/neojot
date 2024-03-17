@@ -11,7 +11,6 @@
     import { createNewFileWithContent } from '../repository/NodeRepository';
     import QuickPadView from './QuickPadView.svelte';
 
-    export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
@@ -71,9 +70,7 @@
     function onCreateItem(fileItem: FileItem) {
         viewerMode = false;
         dataFileItems.unshift(fileItem);
-        allFileItems.unshift(fileItem);
         dataFileItems = dataFileItems;
-        allFileItems = allFileItems;
         onSelectItem(fileItem);
     }
 
@@ -170,7 +167,7 @@
                 />
                 <LinkCards
                     file={selectedItem}
-                    {allFileItems}
+                    {dataFileItems}
                     {onSelectItem}
                     {onCreateItem}
                 />

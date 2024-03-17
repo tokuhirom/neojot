@@ -6,7 +6,6 @@
     import CalendarTable from '../calendar/CalendarTable.svelte';
 
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
-    export let allFileItems: FileItem[] = [];
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let pageTitles: string[];
@@ -32,9 +31,7 @@
 
     function onCreateItem(fileItem: FileItem) {
         dataFileItems.unshift(fileItem);
-        allFileItems.unshift(fileItem);
         dataFileItems = dataFileItems;
-        allFileItems = allFileItems;
         onSelectItem(fileItem);
     }
 
@@ -63,7 +60,7 @@
                 <h1>{year}-{month.toString().padStart(2, '0')}</h1>
                 <button on:click={gotoNextMonth} class="month-nav">Next</button>
             </div>
-            <CalendarTable {allFileItems} {onSelectItem} {year} {month} />
+            <CalendarTable {dataFileItems} {onSelectItem} {year} {month} />
         {/if}
     </div>
     <div class="log-view">
@@ -84,7 +81,7 @@
             />
             <LinkCards
                 file={selectedItem}
-                {allFileItems}
+                {dataFileItems}
                 onSelectItem={openFile}
                 {onCreateItem}
             />
