@@ -11,38 +11,9 @@ import TaskWidgetInner from './TaskWidgetInner.svelte';
 import { tasksStore } from '../../Stores';
 import type { Unsubscriber } from 'svelte/store';
 
-const taskWidgetInners: TaskWidgetInner[] = [];
-
-function debounce(
-    func: (tasks: Task[]) => void,
-    delay: number,
-): (tasks: Task[]) => void {
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    return function (tasks: Task[]): void {
-        clearTimeout(timeoutId as ReturnType<typeof setTimeout>);
-        timeoutId = setTimeout(() => {
-            func(tasks);
-        }, delay);
-    };
-}
-
-const debouncedUpdateTask = debounce((tasks: Task[]) => {
-    if (taskWidgetInners.length > 0) {
-        console.log(
-            `TaskPlugin: sort_file_list event received: ${taskWidgetInners.length} tasks: ${tasks.length}`,
-        );
-        taskWidgetInners.forEach((taskWidgetInner) => {
-            taskWidgetInner.$$set({ tasks });
-        });
-    }
-}, 1000);
-
-tasksStore.subscribe((tasks: Task[]) => {
-    console.log(`TaskPlugin: tasksStore.subscribe: ${tasks.length}`);
-    debouncedUpdateTask(tasks);
-});
-
 class TaskWidget extends WidgetType {
+    private inner: TaskWidgetInner | undefined = undefined;
+
     constructor() {
         super();
     }
@@ -50,25 +21,20 @@ class TaskWidget extends WidgetType {
     toDOM() {
         const container = document.createElement('div');
         container.className = 'task-widget';
-        let unsubscriber: Unsubscriber | undefined;
-        unsubscriber = tasksStore.subscribe((tasks: Task[]) => {
-            this.renderTasks(container, tasks);
-            if (tasks.length != 0 && unsubscriber) {
-                unsubscriber();
-                unsubscriber = undefined;
+        tasksStore.subscribe((tasks: Task[]) => {
+            console.log('tasks', tasks);
+            if (this.inner) {
+                this.inner.$$set({ tasks });
+            } else {
+                this.inner = new TaskWidgetInner({
+                    target: container,
+                    props: {
+                        tasks,
+                    },
+                });
             }
         });
         return container;
-    }
-
-    private renderTasks(container: HTMLDivElement, tasks: Task[]) {
-        const taskWidgetInner = new TaskWidgetInner({
-            target: container,
-            props: {
-                tasks,
-            },
-        });
-        taskWidgetInners.push(taskWidgetInner);
     }
 }
 

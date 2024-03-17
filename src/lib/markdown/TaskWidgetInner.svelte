@@ -9,7 +9,7 @@
 
     export let tasks: Task[];
     let filteredTasks: Task[];
-    $: if (tasks) {
+    $: {
         filteredTasks = tasks.filter((task) => {
             return calculateFreshness(task, new Date()) >= 0;
         });
