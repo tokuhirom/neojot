@@ -8,47 +8,42 @@ import {
 import { RangeSetBuilder } from '@codemirror/state';
 import { type Task } from '../task/Task';
 import type { FileItem } from '../file_item/FileItem';
-import { listen } from '@tauri-apps/api/event';
 import TaskWidgetInner from './TaskWidgetInner.svelte';
+import { tasksStore } from '../../Stores';
 
-let needsRendering = true;
 const taskWidgetInners: TaskWidgetInner[] = [];
 let globalGetDataFileItems: () => FileItem[];
 
 function debounce(
-    func: (fileItem: FileItem) => void,
+    func: (tasks: Task[]) => void,
     delay: number,
-): (fileItem: FileItem) => void {
+): (tasks: Task[]) => void {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    return function (fileitem: FileItem): void {
+    return function (tasks: Task[]): void {
         clearTimeout(timeoutId as ReturnType<typeof setTimeout>);
         timeoutId = setTimeout(() => {
-            func(fileitem);
+            func(tasks);
         }, delay);
     };
 }
 
-const debouncedUpdateTask = debounce((fileItem: FileItem) => {
+const debouncedUpdateTask = debounce((tasks: Task[]) => {
     if (taskWidgetInners.length > 0) {
-        if (fileItem.content.match(/[A-Z]\[.+]/) || needsRendering) {
-            needsRendering = false;
-            console.log(
-                `TaskPlugin: sort_file_list event received: ${taskWidgetInners.length}`,
-            );
-            const dataFileItems = globalGetDataFileItems();
-            taskWidgetInners.forEach((taskWidgetInner) => {
-                taskWidgetInner.$$set({
-                    dataFileItems,
-                });
+        console.log(
+            `TaskPlugin: sort_file_list event received: ${taskWidgetInners.length} tasks: ${tasks.length}`,
+        );
+        const dataFileItems = globalGetDataFileItems();
+        taskWidgetInners.forEach((taskWidgetInner) => {
+            taskWidgetInner.$$set({
+                dataFileItems,
             });
-        }
+        });
     }
 }, 1000);
 
-listen('sort_file_list', (event) => {
-    const payload = event.payload as { fileItem: FileItem };
-    const fileItem = payload.fileItem;
-    debouncedUpdateTask(fileItem);
+tasksStore.subscribe((tasks: Task[]) => {
+    console.log(`TaskPlugin: tasksStore.subscribe: ${tasks.length}`);
+    debouncedUpdateTask(tasks);
 });
 
 class TaskWidget extends WidgetType {
@@ -70,7 +65,6 @@ class TaskWidget extends WidgetType {
                 this.renderTasks(container, this.getDataFileItems());
             }, 1000);
         }
-        needsRendering = dataFileItems.length == 0;
         return container;
     }
 

@@ -19,6 +19,8 @@
     import { initGit } from './lib/git/GitCommands';
     import { cachedExtractLinks } from './lib/file_item/AutoLinks';
     import { dataFileItemsStore } from './Stores';
+    import { extractTasks } from './lib/task/Task';
+    import { tasksStore } from './Stores.js';
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
@@ -184,6 +186,11 @@
     function findEntryByTitle(title: string): FileItem | undefined {
         return lowerTitle2fileItem[title.toLowerCase()];
     }
+
+    dataFileItemsStore.subscribe((value) => {
+        const tasks = extractTasks(value);
+        tasksStore.set(tasks);
+    });
 </script>
 
 <main class="container">
