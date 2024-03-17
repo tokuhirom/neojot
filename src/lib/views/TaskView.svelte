@@ -6,9 +6,7 @@
     import { emit } from '@tauri-apps/api/event';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import TaskItem from '../task/TaskItem.svelte';
-    import { dataFileItemsStore } from '../../Stores';
-
-    let searchWord = '';
+    import { dataFileItemsStore, searchKeywordStore } from '../../Stores';
 
     export let selectedItem: FileItem | undefined = undefined;
     export let onSelectItem: (FileItem) => void;
@@ -27,11 +25,13 @@
 
     tasks = sortTasks(extractTasks($dataFileItemsStore));
 
-    $: if (searchWord === '') {
+    $: if ($searchKeywordStore === '') {
         filteredTasks = tasks;
     } else {
         filteredTasks = tasks.filter((task) => {
-            return task.title.toLowerCase().includes(searchWord.toLowerCase());
+            return task.title
+                .toLowerCase()
+                .includes($searchKeywordStore.toLowerCase());
         });
     }
 
@@ -52,7 +52,7 @@
 
 <div class="task-view">
     <div class="file-list">
-        <ClearableSearchBox bind:searchWord />
+        <ClearableSearchBox />
         {#each filteredTasks as task}
             <TaskItem {task} {handleOnClick} fullSize="true" />
         {/each}

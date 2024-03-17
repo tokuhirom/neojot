@@ -4,11 +4,12 @@
     import { onDestroy, onMount } from 'svelte';
     import { format } from 'date-fns';
     import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
+    import { searchKeywordStore } from '../../Stores';
+    import { search } from '@codemirror/search';
 
     export let onSelectItem: (fileItem: FileItem) => void;
     export let fileItem: FileItem;
     export let matchLines: MatchedLine[] | undefined;
-    export let searchWord: string | undefined;
     export let selectedItem: FileItem;
     export let enterViewerMode: () => void = () => {};
     export let viewerMode: boolean = false;
@@ -16,10 +17,10 @@
 
     let searchWords: string[] | undefined = undefined;
 
-    $: if (searchWord) {
-        searchWords =
-            searchWord.length > 0 ? searchWord.split(/\s+/) : undefined;
-    }
+    searchWords =
+        $searchKeywordStore.length > 0
+            ? $searchKeywordStore.split(/\s+/)
+            : undefined;
 
     const unlisten = listen('change_title', (e) => {
         const payload = e.payload as { filename: string };

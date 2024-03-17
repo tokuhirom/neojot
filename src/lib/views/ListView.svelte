@@ -10,6 +10,7 @@
     import FileList from '../file_item/FileList.svelte';
     import { createNewFileWithContent } from '../repository/NodeRepository';
     import QuickPadView from './QuickPadView.svelte';
+    import { searchKeywordStore } from '../../Stores';
 
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
@@ -61,8 +62,6 @@
         window.removeEventListener('keydown', handleKeydown);
     });
 
-    let searchWord = '';
-
     function onSaved() {
         selectedItem = selectedItem;
     }
@@ -102,7 +101,7 @@
         const fileItem = findEntryByTitle(pageName);
         if (fileItem) {
             onSelectItem(fileItem);
-            searchWord = pageName;
+            $searchKeywordStore = pageName;
             return;
         }
 
@@ -113,7 +112,7 @@
         createNewFileWithContent(`# ${pageName}\n\n`).then(
             (fileItem: FileItem) => {
                 onCreateItem(fileItem);
-                searchWord = pageName;
+                $searchKeywordStore = pageName;
             },
         );
     }
@@ -133,7 +132,7 @@
         }}
     >
         <div class="clearable-search-box">
-            <ClearableSearchBox bind:searchWord />
+            <ClearableSearchBox />
         </div>
         <div
             class="scrollable-area"
@@ -141,7 +140,6 @@
         >
             <FileList
                 {dataFileItems}
-                {searchWord}
                 {selectedItem}
                 {onSelectItem}
                 {viewerMode}
@@ -161,7 +159,6 @@
                     {onSaved}
                     {onCreateItem}
                     {pageTitles}
-                    search={(keyword) => (searchWord = keyword)}
                     {findEntryByTitle}
                     {autoLinks}
                 />

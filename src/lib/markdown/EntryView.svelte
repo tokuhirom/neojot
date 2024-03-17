@@ -20,6 +20,7 @@
     import { internalLinkPlugin } from './InternalWikiLink';
     import { oneDark } from '@codemirror/theme-one-dark';
     import { openInternalLink } from './KeyHandler';
+    import { searchKeywordStore } from '../../Stores';
 
     export let file: FileItem;
     export let onSelectItem: (fileItem: FileItem) => void;
@@ -27,7 +28,6 @@
     export let onSaved: () => void;
     // for completion
     export let pageTitles: string[];
-    export let search: (keyword: string) => void | undefined;
     export let findEntryByTitle: (title: string) => FileItem;
     export let autoLinks: string[];
 
@@ -185,9 +185,7 @@
         const fileItem = findEntryByTitle(pageName);
         if (fileItem) {
             onSelectItem(fileItem);
-            if (search) {
-                search(pageName);
-            }
+            $searchKeywordStore = pageName;
             return;
         }
 
@@ -198,9 +196,7 @@
         createNewFileWithContent(`# ${pageName}\n\n`).then(
             (fileItem: FileItem) => {
                 onCreateItem(fileItem);
-                if (search) {
-                    search(pageName);
-                }
+                $searchKeywordStore = pageName;
             },
         );
     }
@@ -210,9 +206,7 @@
         internalLinkPlugin(findEntryByTitle, (pageName) => {
             findOrCreateEntry(pageName);
         }),
-        aliasPlugin((keyword) => {
-            search(keyword);
-        }),
+        aliasPlugin(),
         comeFromLinkHighlightPlugin(() => autoLinks, findOrCreateEntry),
         EditorView.domEventHandlers({ paste: handlePaste }),
         autocompletion({ override: [myCompletion] }),

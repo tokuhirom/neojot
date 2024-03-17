@@ -3,26 +3,26 @@
     import { type FileItem } from './FileItem';
     import { makeMigemoRegexes } from '../search/Migemo';
     import { searchFileItems, type SearchResult } from './Search';
+    import { searchKeywordStore } from '../../Stores';
 
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let viewerMode: boolean = false;
     export let enterViewerMode: () => void = () => {};
-    export let searchWord = '';
 
     let searchResult: SearchResult[];
 
     $: if (dataFileItems || migemoRegexes) {
         searchResult = searchFileItems(
             dataFileItems,
-            searchWord,
+            $searchKeywordStore,
             migemoRegexes,
         );
     }
 
     let migemoRegexes: RegExp[] = [];
-    $: makeMigemoRegexes(searchWord)
+    $: makeMigemoRegexes($searchKeywordStore)
         .then((r) => {
             migemoRegexes = r;
         })
@@ -38,7 +38,6 @@
                 {onSelectItem}
                 fileItem={result.fileItem}
                 matchLines={result.lines}
-                {searchWord}
                 {migemoRegexes}
                 {selectedItem}
                 {enterViewerMode}

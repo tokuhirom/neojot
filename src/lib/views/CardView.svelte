@@ -6,6 +6,7 @@
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
     import { makeMigemoRegexes } from '../search/Migemo';
+    import { searchKeywordStore } from '../../Stores';
 
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
@@ -15,18 +16,17 @@
     export let autoLinks: string[];
 
     let filteredFileItems: FileItem[];
-    let searchWord = '';
 
     let migemoRegexes: RegExp[] = [];
-    $: if (searchWord) {
-        makeMigemoRegexes(searchWord).then((r) => {
+    $: {
+        makeMigemoRegexes($searchKeywordStore).then((r) => {
             migemoRegexes = r;
         });
     }
 
     $: if (dataFileItems || migemoRegexes) {
         filteredFileItems = dataFileItems.filter((it) =>
-            shouldShowFileItem(it, searchWord, migemoRegexes),
+            shouldShowFileItem(it, $searchKeywordStore, migemoRegexes),
         );
     }
 
@@ -42,7 +42,7 @@
 </script>
 
 <div class="container">
-    <ClearableSearchBox bind:searchWord />
+    <ClearableSearchBox />
     {#if selectedItem}
         <button class="back-to-list" on:click={() => onSelectItem(undefined)}>
             Back to List

@@ -1,19 +1,13 @@
 <script>
-    import { listen } from '@tauri-apps/api/event';
-
-    export let searchWord = '';
-
-    listen('clear_search_keyword', () => {
-        if (searchWord !== '') {
-            searchWord = '';
-        }
-    });
+    import { searchKeywordStore } from '../../Stores.ts';
 </script>
 
 <div class="clearable-search-box">
-    <input type="text" bind:value={searchWord} class="search-input" />
-    {#if searchWord}
-        <button class="clear-btn" on:click={() => (searchWord = '')}>✗</button>
+    <input type="text" bind:value={$searchKeywordStore} class="search-input" />
+    {#if $searchKeywordStore}
+        <button class="clear-btn" on:click={() => ($searchKeywordStore = '')}
+            >✗</button
+        >
     {/if}
 </div>
 
