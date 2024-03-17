@@ -11,7 +11,6 @@
     import { makeExcalidrawThumbnailFilename } from './ExcalidrawUtils';
     import { exportToBlob } from '@excalidraw/excalidraw';
     import { BaseDirectory, writeFile } from '@tauri-apps/plugin-fs';
-    import { emit } from '@tauri-apps/api/event';
     import { dataFileItemsStore } from '../../Stores';
 
     export let selectedItem: FileItem;

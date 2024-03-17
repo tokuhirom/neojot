@@ -1,8 +1,7 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
     import { type FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
-    import { extractTasks, sortTasks, type Task } from '../task/Task';
+    import { type Task } from '../task/Task';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import TaskItem from '../task/TaskItem.svelte';
     import { searchKeywordStore, tasksStore } from '../../Stores';

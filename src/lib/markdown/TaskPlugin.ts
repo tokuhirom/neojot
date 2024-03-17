@@ -7,7 +7,6 @@ import {
 } from '@codemirror/view';
 import { RangeSetBuilder } from '@codemirror/state';
 import { type Task } from '../task/Task';
-import type { FileItem } from '../file_item/FileItem';
 import TaskWidgetInner from './TaskWidgetInner.svelte';
 import { tasksStore } from '../../Stores';
 import type { Unsubscriber } from 'svelte/store';

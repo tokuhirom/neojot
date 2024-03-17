@@ -16,10 +16,6 @@
         selectedItem = value;
     });
 
-    async function onSelectItem(fileItem: FileItem | undefined) {
-        selectedItemStore.set(fileItem);
-    }
-
     let year: number;
     let month: number;
 
