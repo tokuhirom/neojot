@@ -13,7 +13,7 @@
         autocompletion,
         type CompletionContext,
     } from '@codemirror/autocomplete';
-    import { linkPlugin } from './LinkPlugin';
+    import { aliasPlugin } from './AliasPlugin';
     import { comeFromLinkHighlightPlugin } from './KeywordHighlight';
     import { languages } from '@codemirror/language-data';
     import BasicCodeMirror6 from './BasicCodeMirror6.svelte';
@@ -210,7 +210,7 @@
         internalLinkPlugin(findEntryByTitle, (pageName) => {
             findOrCreateEntry(pageName);
         }),
-        linkPlugin((keyword) => {
+        aliasPlugin((keyword) => {
             search(keyword);
         }),
         comeFromLinkHighlightPlugin(() => autoLinks, findOrCreateEntry),

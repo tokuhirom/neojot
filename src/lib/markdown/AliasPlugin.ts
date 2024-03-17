@@ -7,7 +7,7 @@ import {
 import { type RangeSet, RangeSetBuilder } from '@codemirror/state';
 
 // カスタムプラグインの型定義
-class LinkPlugin {
+class AliasPlugin {
     decorations: RangeSet<Decoration>;
 
     constructor(view: EditorView) {
@@ -42,8 +42,8 @@ class LinkPlugin {
     }
 }
 
-export const linkPlugin = function (searchItem: (keyword: string) => void) {
-    return ViewPlugin.fromClass(LinkPlugin, {
+export const aliasPlugin = function (searchItem: (keyword: string) => void) {
+    return ViewPlugin.fromClass(AliasPlugin, {
         decorations: (v) => v.decorations,
 
         eventHandlers: {
