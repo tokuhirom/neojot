@@ -85,18 +85,6 @@
         }
     }
 
-    async function unarchiveEntry(
-        fileItem: FileItem,
-    ): Promise<FileItem | undefined> {
-        if (fileItem.filename.startsWith('archived/')) {
-            console.log(`Deleting: ${fileItem.filename}`);
-            await unarchiveFile(fileItem);
-            await reloadFiles();
-        } else {
-            throw new Error("It's not archived");
-        }
-    }
-
     let unlistenCallbackPromises: UnlistenFn[] = [];
 
     onMount(async () => {
@@ -132,6 +120,7 @@
             await listen('do_archive', async () => {
                 if (selectedItem) {
                     selectedItem = await archiveOrDeleteEntry(selectedItem);
+                    $selectedItemStore = selectedItem;
                 }
             }),
         );
@@ -236,11 +225,7 @@
                 {autoLinks}
             />
         {:else if tabPane === 'archive'}
-            <ArchiveView
-                {selectedItem}
-                {archiveOrDeleteEntry}
-                {unarchiveEntry}
-            />
+            <ArchiveView />
         {:else if tabPane === 'task'}
             <TaskView
                 {dataFileItems}

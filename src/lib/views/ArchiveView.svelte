@@ -1,15 +1,16 @@
 <script lang="ts">
     import type { FileItem } from '../file_item/FileItem';
     import FileCardItem from '../card/FileCardItem.svelte';
-    import { loadFileList } from '../repository/NodeRepository';
+    import {
+        deleteArchivedFile,
+        loadFileList,
+        unarchiveFile,
+    } from '../repository/NodeRepository';
     import { onMount } from 'svelte';
-    import { selectedItemStore } from '../../Stores';
+    import { dataFileItemsStore } from '../../Stores';
+    import CardItem from '../card/CardItem.svelte';
 
-    export let archiveOrDeleteEntry: (
-        fileItem: FileItem,
-    ) => Promise<FileItem | undefined>;
-    export let unarchiveEntry: (fileItem: FileItem) => void;
-    export let selectedItem: FileItem | undefined = undefined;
+    let selectedItem: FileItem | undefined = undefined;
 
     let archivedFileItems: FileItem[] = [];
 
@@ -20,20 +21,45 @@
     });
 
     function unselectEntry() {
-        $selectedItemStore = undefined;
+        selectedItem = undefined;
     }
 
     async function deleteSelectedEntry() {
-        if ($selectedItemStore) {
-            $selectedItemStore = await archiveOrDeleteEntry($selectedItemStore);
+        if (selectedItem) {
+            const fileItem = selectedItem;
+            if (fileItem.filename.startsWith('archived/')) {
+                console.log(`Deleting: ${fileItem.filename}`);
+                await deleteArchivedFile(fileItem);
+                archivedFileItems = archivedFileItems.filter(
+                    (item) => item.filename !== fileItem.filename,
+                );
+                selectedItem = undefined;
+            } else {
+                throw new Error("It's not archived");
+            }
         }
     }
 
     async function unarchiveSelectedEntry() {
-        if ($selectedItemStore) {
-            await unarchiveEntry($selectedItemStore);
-            $selectedItemStore = undefined;
+        if (selectedItem) {
+            const fileItem = selectedItem;
+            if (fileItem.filename.startsWith('archived/')) {
+                console.log(`Unarchive: ${fileItem.filename}`);
+                await unarchiveFile(fileItem);
+                $dataFileItemsStore = [fileItem, ...$dataFileItemsStore];
+                $dataFileItemsStore = await loadFileList('data');
+                archivedFileItems = archivedFileItems.filter(
+                    (item) => item.filename !== fileItem.filename,
+                );
+            } else {
+                throw new Error("It's not archived");
+            }
+            selectedItem = undefined;
         }
+    }
+
+    function onClick(fileItem: FileItem) {
+        selectedItem = fileItem;
     }
 </script>
 
@@ -48,7 +74,12 @@
         <pre class="archived-source">{selectedItem.content}</pre>
     {:else if archivedFileItems.length > 0}
         {#each archivedFileItems as file (file.filename)}
-            <FileCardItem {file} />
+            <CardItem
+                onClick={() => onClick(file)}
+                title={file.title}
+                content={file.content}
+                imgSrc={undefined}
+            />
         {/each}
     {:else}
         No archived items.
