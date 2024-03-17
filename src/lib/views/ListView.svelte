@@ -10,15 +10,18 @@
     import FileList from '../file_item/FileList.svelte';
     import { createNewFileWithContent } from '../repository/NodeRepository';
     import QuickPadView from './QuickPadView.svelte';
-    import { searchKeywordStore } from '../../Stores';
+    import { searchKeywordStore, selectedItemStore } from '../../Stores';
 
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
-    export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
     let viewerMode = false;
+
+    async function onSelectItem(fileItem: FileItem | undefined) {
+        $selectedItemStore = fileItem;
+    }
 
     function handleKeydown(event) {
         if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
@@ -138,12 +141,7 @@
             class="scrollable-area"
             style="height: calc(100vh - {fixedAreaHeight}px);"
         >
-            <FileList
-                {selectedItem}
-                {onSelectItem}
-                {viewerMode}
-                {enterViewerMode}
-            />
+            <FileList {viewerMode} {enterViewerMode} />
         </div>
     </div>
     <!-- eslint-disable-next-line -->
@@ -154,9 +152,7 @@
             {:else}
                 <EntryView
                     file={selectedItem}
-                    {onSelectItem}
                     {onSaved}
-                    {onCreateItem}
                     {pageTitles}
                     {findEntryByTitle}
                     {autoLinks}

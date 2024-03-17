@@ -4,13 +4,17 @@
     import EntryView from '../markdown/EntryView.svelte';
     import LinkCards from '../link/LinkCards.svelte';
     import CalendarTable from '../calendar/CalendarTable.svelte';
+    import { selectedItemStore } from '../../Stores';
 
-    export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
+
+    async function onSelectItem(fileItem: FileItem | undefined) {
+        $selectedItemStore = fileItem;
+    }
 
     let year: number;
     let month: number;
@@ -71,9 +75,7 @@
             <EntryView
                 file={selectedItem}
                 fileItems={dataFileItems}
-                onSelectItem={openFile}
                 {onSaved}
-                {onCreateItem}
                 {pageTitles}
                 search={undefined}
                 {findEntryByTitle}

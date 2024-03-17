@@ -20,16 +20,24 @@
     import { internalLinkPlugin } from './InternalWikiLink';
     import { oneDark } from '@codemirror/theme-one-dark';
     import { openInternalLink } from './KeyHandler';
-    import { searchKeywordStore } from '../../Stores';
+    import {
+        dataFileItemsStore,
+        searchKeywordStore,
+        selectedItemStore,
+    } from '../../Stores';
 
     export let file: FileItem;
-    export let onSelectItem: (fileItem: FileItem) => void;
-    export let onCreateItem: (fileItem: FileItem) => void;
     export let onSaved: () => void;
     // for completion
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem;
     export let autoLinks: string[];
+
+    selectedItemStore.subscribe((value) => {
+        if (value) {
+            file = value;
+        }
+    });
 
     let keymaps = [
         { key: 'Mod-d', run: archive, preventDefault: true },
@@ -184,7 +192,7 @@
     function findOrCreateEntry(pageName: string) {
         const fileItem = findEntryByTitle(pageName);
         if (fileItem) {
-            onSelectItem(fileItem);
+            $selectedItemStore = fileItem;
             $searchKeywordStore = pageName;
             return;
         }
@@ -195,7 +203,8 @@
         );
         createNewFileWithContent(`# ${pageName}\n\n`).then(
             (fileItem: FileItem) => {
-                onCreateItem(fileItem);
+                $dataFileItemsStore = [...$dataFileItemsStore, fileItem];
+                $selectedItemStore = fileItem;
                 $searchKeywordStore = pageName;
             },
         );

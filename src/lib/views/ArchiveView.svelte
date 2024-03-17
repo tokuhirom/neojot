@@ -3,8 +3,8 @@
     import FileCardItem from '../card/FileCardItem.svelte';
     import { loadFileList } from '../repository/NodeRepository';
     import { onMount } from 'svelte';
+    import { selectedItemStore } from '../../Stores';
 
-    export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let archiveOrDeleteEntry: (
         fileItem: FileItem,
     ) => Promise<FileItem | undefined>;
@@ -20,19 +20,19 @@
     });
 
     function unselectEntry() {
-        onSelectItem(undefined);
+        $selectedItemStore = undefined;
     }
 
     async function deleteSelectedEntry() {
-        if (selectedItem) {
-            onSelectItem(await archiveOrDeleteEntry(selectedItem));
+        if ($selectedItemStore) {
+            $selectedItemStore = await archiveOrDeleteEntry($selectedItemStore);
         }
     }
 
     async function unarchiveSelectedEntry() {
-        if (selectedItem) {
-            await unarchiveEntry(selectedItem);
-            onSelectItem(undefined);
+        if ($selectedItemStore) {
+            await unarchiveEntry($selectedItemStore);
+            $selectedItemStore = undefined;
         }
     }
 </script>
@@ -48,7 +48,7 @@
         <pre class="archived-source">{selectedItem.content}</pre>
     {:else if archivedFileItems.length > 0}
         {#each archivedFileItems as file (file.filename)}
-            <FileCardItem {onSelectItem} {file} />
+            <FileCardItem {file} />
         {/each}
     {:else}
         No archived items.

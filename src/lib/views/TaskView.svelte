@@ -6,10 +6,13 @@
     import { emit } from '@tauri-apps/api/event';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import TaskItem from '../task/TaskItem.svelte';
-    import { dataFileItemsStore, searchKeywordStore } from '../../Stores';
+    import {
+        dataFileItemsStore,
+        searchKeywordStore,
+        selectedItemStore,
+    } from '../../Stores';
 
     export let selectedItem: FileItem | undefined = undefined;
-    export let onSelectItem: (FileItem) => void;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
@@ -39,14 +42,8 @@
         selectedItem = selectedItem;
     }
 
-    function onCreateItem(fileItem: FileItem) {
-        $dataFileItemsStore = [...$dataFileItemsStore, fileItem];
-        onSelectItem(fileItem);
-    }
-
-    function handleOnClick(task: Task) {
-        onSelectItem(task.fileItem);
-        emit('go-to-line-number', task.lineNumber);
+    async function onSelectItem(fileItem: FileItem | undefined) {
+        $selectedItemStore = fileItem;
     }
 </script>
 
@@ -54,16 +51,14 @@
     <div class="file-list">
         <ClearableSearchBox />
         {#each filteredTasks as task}
-            <TaskItem {task} {handleOnClick} fullSize="true" />
+            <TaskItem {task} fullSize="true" />
         {/each}
     </div>
     <div class="log-view">
         {#if selectedItem !== undefined}
             <EntryView
                 file={selectedItem}
-                {onSelectItem}
                 {onSaved}
-                {onCreateItem}
                 {pageTitles}
                 search={() => {}}
                 {findEntryByTitle}

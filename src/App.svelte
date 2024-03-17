@@ -12,7 +12,6 @@
         createNewFileWithContent,
         deleteArchivedFile,
         loadFileList,
-        loadMarkdownFile,
         unarchiveFile,
     } from './lib/repository/NodeRepository';
     import type { FileItem } from './lib/file_item/FileItem';
@@ -24,13 +23,14 @@
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
     let dataFileItems: FileItem[] = [];
-
-    $: $dataFileItemsStore = dataFileItems;
+    dataFileItemsStore.subscribe((value) => {
+        dataFileItems = value;
+    });
 
     onMount(async () => {
-        await reloadFiles();
-        if (dataFileItems.length > 0) {
-            selectedItem = dataFileItems[0];
+        const items = await reloadFiles();
+        if (items.length > 0) {
+            selectedItem = items[0];
         }
 
         await initGit();
@@ -52,10 +52,10 @@
         }
     }
 
-    async function reloadFiles() {
+    async function reloadFiles(): Promise<FileItem[]> {
         const data = await loadFileList('data');
-        data.sort((a, b) => b.mtime - a.mtime); // sort it.
-        dataFileItems = data;
+        $dataFileItemsStore = data;
+        return data;
     }
 
     async function archiveOrDeleteEntry(
@@ -150,16 +150,6 @@
         }
     });
 
-    async function onSelectItem(fileItem: FileItem | undefined) {
-        console.log(
-            `onSelectItem: ${fileItem ? fileItem.filename : 'undefined'}`,
-        );
-        if (fileItem != undefined) {
-            fileItem.content = await loadMarkdownFile(fileItem.filename);
-        }
-        selectedItem = fileItem;
-    }
-
     // タイトルの補完用に使う配列
     let pageTitles: string[];
     // Target of auto links.
@@ -239,7 +229,6 @@
             <ListView
                 {dataFileItems}
                 {selectedItem}
-                {onSelectItem}
                 {pageTitles}
                 {findEntryByTitle}
                 {autoLinks}
@@ -247,7 +236,6 @@
         {:else if tabPane === 'archive'}
             <ArchiveView
                 {selectedItem}
-                {onSelectItem}
                 {archiveOrDeleteEntry}
                 {unarchiveEntry}
             />
@@ -255,7 +243,6 @@
             <TaskView
                 {dataFileItems}
                 {selectedItem}
-                {onSelectItem}
                 {pageTitles}
                 {findEntryByTitle}
                 {autoLinks}
@@ -263,7 +250,6 @@
         {:else if tabPane === 'calendar'}
             <CalendarView
                 {dataFileItems}
-                {onSelectItem}
                 {selectedItem}
                 {pageTitles}
                 {findEntryByTitle}
@@ -277,7 +263,6 @@
             <CardView
                 {dataFileItems}
                 {selectedItem}
-                {onSelectItem}
                 {pageTitles}
                 {findEntryByTitle}
                 {autoLinks}

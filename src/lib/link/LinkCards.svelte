@@ -4,11 +4,10 @@
     import { buildLinks, type Links } from './Links';
     import CardItem from '../card/CardItem.svelte';
     import { createNewFileWithContent } from '../repository/NodeRepository';
-    import { dataFileItemsStore } from '../../Stores';
+    import { dataFileItemsStore, selectedItemStore } from '../../Stores';
 
     export let file: FileItem;
     export let onSelectItem: (fileItem: FileItem) => void;
-    export let onCreateItem: (fileItem: FileItem) => void;
 
     let links: Links | undefined = undefined;
 
@@ -18,7 +17,8 @@
 
     async function createNewEntry(title: string) {
         const fileItem = await createNewFileWithContent(`# ${title}\n\n`);
-        onCreateItem(fileItem);
+        $dataFileItemsStore = [...$dataFileItemsStore, fileItem];
+        $selectedItemStore = fileItem;
     }
 </script>
 

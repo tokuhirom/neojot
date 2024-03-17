@@ -6,11 +6,10 @@
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
     import { makeMigemoRegexes } from '../search/Migemo';
-    import { searchKeywordStore } from '../../Stores';
+    import { searchKeywordStore, selectedItemStore } from '../../Stores';
 
     export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
-    export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
@@ -39,6 +38,10 @@
         dataFileItems = dataFileItems;
         onSelectItem(fileItem);
     }
+
+    async function onSelectItem(fileItem: FileItem | undefined) {
+        $selectedItemStore = fileItem;
+    }
 </script>
 
 <div class="container">
@@ -55,9 +58,7 @@
         {:else}
             <EntryView
                 file={selectedItem}
-                {onSelectItem}
                 {onSaved}
-                {onCreateItem}
                 {pageTitles}
                 search={undefined}
                 {findEntryByTitle}

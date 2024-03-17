@@ -3,14 +3,14 @@
     import CardItem from './CardItem.svelte';
     import { onMount } from 'svelte';
     import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
+    import { selectedItemStore } from '../../Stores';
 
     export let file: FileItem;
-    export let onSelectItem: (fileItem: FileItem) => void;
     export let backgroundColor = '#f6f6f6';
     export let color = '#0f0f0f';
 
     function onClick() {
-        onSelectItem(file);
+        $selectedItemStore = file;
     }
 
     let title: string | undefined;

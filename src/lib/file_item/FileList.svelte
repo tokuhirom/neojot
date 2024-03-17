@@ -1,12 +1,9 @@
 <script lang="ts">
     import FileListItem from './FileListItem.svelte';
-    import { type FileItem } from './FileItem';
     import { makeMigemoRegexes } from '../search/Migemo';
     import { searchFileItems, type SearchResult } from './Search';
     import { dataFileItemsStore, searchKeywordStore } from '../../Stores';
 
-    export let onSelectItem: (fileItem: FileItem | undefined) => void;
-    export let selectedItem: FileItem | undefined = undefined;
     export let viewerMode: boolean = false;
     export let enterViewerMode: () => void = () => {};
 
@@ -31,14 +28,12 @@
 </script>
 
 <div>
-    {#if searchResult && selectedItem}
+    {#if searchResult}
         {#each searchResult as result (result.fileItem.filename)}
             <FileListItem
-                {onSelectItem}
                 fileItem={result.fileItem}
                 matchLines={result.lines}
                 {migemoRegexes}
-                {selectedItem}
                 {enterViewerMode}
                 {viewerMode}
             />
