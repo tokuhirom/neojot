@@ -26,18 +26,17 @@
     {#if links}
         <div class="row">
             {#each links.links as file}
-                <FileCardItem {onSelectItem} {file} />
+                <FileCardItem {file} />
             {/each}
         </div>
         {#each links.twoHopLinks as twoHopLink}
             <div class="row">
                 <FileCardItem
-                    {onSelectItem}
                     file={twoHopLink.src}
                     backgroundColor="yellowgreen"
                 />
                 {#each twoHopLink.dst as dst}
-                    <FileCardItem {onSelectItem} file={dst} />
+                    <FileCardItem file={dst} />
                 {/each}
             </div>
         {/each}

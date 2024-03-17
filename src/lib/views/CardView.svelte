@@ -64,11 +64,11 @@
                 {findEntryByTitle}
                 {autoLinks}
             />
-            <LinkCards file={selectedItem} {onSelectItem} {onCreateItem} />
+            <LinkCards file={selectedItem} {onSelectItem} />
         {/if}
     {:else}
         {#each filteredFileItems as file (file.filename)}
-            <FileCardItem {onSelectItem} {file} />
+            <FileCardItem {file} />
         {/each}
     {/if}
 </div>
