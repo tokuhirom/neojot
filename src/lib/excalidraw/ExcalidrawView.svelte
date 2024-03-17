@@ -12,6 +12,7 @@
     import { exportToBlob } from '@excalidraw/excalidraw';
     import { BaseDirectory, writeFile } from '@tauri-apps/plugin-fs';
     import { emit } from '@tauri-apps/api/event';
+    import { dataFileItemsStore } from '../../Stores';
 
     export let selectedItem: FileItem;
     let excalidrawApi: ExcalidrawImperativeAPI;
@@ -64,7 +65,14 @@
             // ファイルに保存する
             await saveMarkdownFile(selectedItem.filename, selectedItem.content);
             selectedItem.mtime = Math.floor(Date.now() / 1000);
-            await emit('sort_file_list');
+
+            // move to top of the list.
+            $dataFileItemsStore = [
+                selectedItem,
+                ...$dataFileItemsStore.filter(
+                    (it) => it.filename !== selectedItem.filename,
+                ),
+            ];
 
             // save diagram as a png file.
             const blob = await exportToBlob({

@@ -107,12 +107,6 @@
             );
         }
         unlistenCallbackPromises.push(
-            await listen('sort_file_list', async () => {
-                dataFileItems.sort((a, b) => b.mtime - a.mtime);
-                dataFileItems = dataFileItems;
-            }),
-        );
-        unlistenCallbackPromises.push(
             await listen('do_new_file', async () => {
                 console.log('do_new_file');
 
