@@ -32,10 +32,6 @@
             shouldShowFileItem(it, $searchKeywordStore, migemoRegexes),
         );
     }
-
-    function onSaved() {
-        selectedItem = selectedItem;
-    }
 </script>
 
 <div class="container">
@@ -55,7 +51,6 @@
         {:else}
             <EntryView
                 file={selectedItem}
-                {onSaved}
                 {pageTitles}
                 search={undefined}
                 {findEntryByTitle}

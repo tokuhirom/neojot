@@ -31,9 +31,6 @@
                 .includes($searchKeywordStore.toLowerCase());
         });
     }
-    function onSaved() {
-        selectedItem = selectedItem;
-    }
 </script>
 
 <div class="task-view">
@@ -47,7 +44,6 @@
         {#if selectedItem !== undefined}
             <EntryView
                 file={selectedItem}
-                {onSaved}
                 {pageTitles}
                 search={() => {}}
                 {findEntryByTitle}

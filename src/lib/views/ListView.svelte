@@ -65,10 +65,6 @@
         window.removeEventListener('keydown', handleKeydown);
     });
 
-    function onSaved() {
-        selectedItem = selectedItem;
-    }
-
     function onCreateItem(fileItem: FileItem) {
         viewerMode = false;
         dataFileItems.unshift(fileItem);
@@ -152,7 +148,6 @@
             {:else}
                 <EntryView
                     file={selectedItem}
-                    {onSaved}
                     {pageTitles}
                     {findEntryByTitle}
                     {autoLinks}

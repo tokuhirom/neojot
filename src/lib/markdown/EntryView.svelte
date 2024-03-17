@@ -27,7 +27,6 @@
     } from '../../Stores';
 
     export let file: FileItem;
-    export let onSaved: () => void;
     // for completion
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem;
@@ -62,8 +61,6 @@
             file.mtime = Math.floor(Date.now() / 1000);
             console.log(`emit sort_file_list: ${file.filename}`);
             await emit('sort_file_list', { fileItem: file });
-            console.log(`onSaved: ${file.filename}`);
-            onSaved();
         }
     }
 

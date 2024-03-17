@@ -33,10 +33,6 @@
         selectedItem = fileItem;
     }
 
-    function onSaved() {
-        selectedItem = selectedItem;
-    }
-
     function gotoPrevMonth() {
         month--;
         if (month < 1) {
@@ -73,7 +69,6 @@
             <EntryView
                 file={selectedItem}
                 fileItems={dataFileItems}
-                {onSaved}
                 {pageTitles}
                 search={undefined}
                 {findEntryByTitle}
