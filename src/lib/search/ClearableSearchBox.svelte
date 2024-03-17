@@ -6,10 +6,7 @@
         searchRegexesStore,
     } from '../../Stores.ts';
     import { makeMigemoRegexes } from './Migemo';
-    import {
-        type FileItem,
-        shouldShowFileItem,
-    } from '../file_item/FileItem.ts';
+    import { type FileItem } from '../file_item/FileItem.ts';
     import { searchFileItems } from '../file_item/Search';
 
     let migemoRegexes: RegExp[] | undefined = undefined;
@@ -29,7 +26,7 @@
         dataFileItems = value;
     });
     $: if (dataFileItems) {
-        // TODO debounce?
+        // TODO debounce
         searchFilteredFileItems.set(
             searchFileItems(dataFileItems, $searchKeywordStore, migemoRegexes),
         );
