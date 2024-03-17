@@ -81,7 +81,6 @@
             />
             <LinkCards
                 file={selectedItem}
-                {dataFileItems}
                 onSelectItem={openFile}
                 {onCreateItem}
             />

@@ -4,16 +4,16 @@
     import { buildLinks, type Links } from './Links';
     import CardItem from '../card/CardItem.svelte';
     import { createNewFileWithContent } from '../repository/NodeRepository';
+    import { dataFileItemsStore } from '../../Stores';
 
     export let file: FileItem;
-    export let dataFileItems: FileItem[];
     export let onSelectItem: (fileItem: FileItem) => void;
     export let onCreateItem: (fileItem: FileItem) => void;
 
     let links: Links | undefined = undefined;
 
-    $: if (dataFileItems || file) {
-        links = buildLinks(file, dataFileItems);
+    $: if (file) {
+        links = buildLinks(file, $dataFileItemsStore);
     }
 
     async function createNewEntry(title: string) {

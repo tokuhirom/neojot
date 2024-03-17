@@ -63,12 +63,7 @@
                 {findEntryByTitle}
                 {autoLinks}
             />
-            <LinkCards
-                file={selectedItem}
-                {dataFileItems}
-                {onSelectItem}
-                {onCreateItem}
-            />
+            <LinkCards file={selectedItem} {onSelectItem} {onCreateItem} />
         {/if}
     {:else}
         {#each filteredFileItems as file (file.filename)}

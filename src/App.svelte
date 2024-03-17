@@ -19,10 +19,13 @@
     import ManualView from './lib/views/ManualView.svelte';
     import { initGit } from './lib/git/GitCommands';
     import { cachedExtractLinks } from './lib/file_item/AutoLinks';
+    import { dataFileItemsStore } from './Stores';
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
     let dataFileItems: FileItem[] = [];
+
+    $: $dataFileItemsStore = dataFileItems;
 
     onMount(async () => {
         await reloadFiles();
