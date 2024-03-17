@@ -1,32 +1,24 @@
 <script lang="ts">
     import {
         calculateFreshness,
-        extractTasks,
         getTaskIcon,
-        sortTasks,
+        openTask,
         type Task,
     } from '../task/Task';
-    import type { FileItem } from '../file_item/FileItem';
     import { format } from 'date-fns';
 
-    export let onClick: (task: Task) => void;
-    export let dataFileItems: FileItem[];
-
-    let tasks: Task[];
-
-    $: if (dataFileItems) {
-        const today = new Date();
-        let t1 = Date.now();
-        tasks = sortTasks(extractTasks(dataFileItems)).filter((task) => {
-            return calculateFreshness(task, today) >= 0;
+    export let tasks: Task[];
+    let filteredTasks: Task[];
+    $: if (tasks) {
+        filteredTasks = tasks.filter((task) => {
+            return calculateFreshness(task, new Date()) >= 0;
         });
-        console.log('re-calculate tasks: ', Date.now() - t1, 'ms');
     }
 </script>
 
 <div>
-    {#each tasks as task}
-        <button on:click={() => onClick(task)}>
+    {#each filteredTasks as task}
+        <button on:click={async () => await openTask(task)}>
             {getTaskIcon(task)}
             {#if task.type === 'PLAN' && task.scheduled}
                 {format(task.scheduled, 'yyyy-MM-dd')}

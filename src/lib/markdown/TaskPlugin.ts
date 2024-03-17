@@ -10,9 +10,9 @@ import { type Task } from '../task/Task';
 import type { FileItem } from '../file_item/FileItem';
 import TaskWidgetInner from './TaskWidgetInner.svelte';
 import { tasksStore } from '../../Stores';
+import type { Unsubscriber } from 'svelte/store';
 
 const taskWidgetInners: TaskWidgetInner[] = [];
-let globalGetDataFileItems: () => FileItem[];
 
 function debounce(
     func: (tasks: Task[]) => void,
@@ -32,11 +32,8 @@ const debouncedUpdateTask = debounce((tasks: Task[]) => {
         console.log(
             `TaskPlugin: sort_file_list event received: ${taskWidgetInners.length} tasks: ${tasks.length}`,
         );
-        const dataFileItems = globalGetDataFileItems();
         taskWidgetInners.forEach((taskWidgetInner) => {
-            taskWidgetInner.$$set({
-                dataFileItems,
-            });
+            taskWidgetInner.$$set({ tasks });
         });
     }
 }, 1000);
@@ -47,45 +44,36 @@ tasksStore.subscribe((tasks: Task[]) => {
 });
 
 class TaskWidget extends WidgetType {
-    constructor(
-        private getDataFileItems: () => FileItem[],
-        private openTask: (task: Task) => void,
-    ) {
+    constructor() {
         super();
-        globalGetDataFileItems = getDataFileItems;
     }
 
     toDOM() {
         const container = document.createElement('div');
         container.className = 'task-widget';
-        const dataFileItems = this.getDataFileItems();
-        this.renderTasks(container, dataFileItems);
-        if (dataFileItems.length == 0) {
-            setTimeout(() => {
-                this.renderTasks(container, this.getDataFileItems());
-            }, 1000);
-        }
+        let unsubscriber: Unsubscriber | undefined;
+        unsubscriber = tasksStore.subscribe((tasks: Task[]) => {
+            this.renderTasks(container, tasks);
+            if (tasks.length != 0 && unsubscriber) {
+                unsubscriber();
+                unsubscriber = undefined;
+            }
+        });
         return container;
     }
 
-    private renderTasks(container: HTMLDivElement, dataFileItems: FileItem[]) {
+    private renderTasks(container: HTMLDivElement, tasks: Task[]) {
         const taskWidgetInner = new TaskWidgetInner({
             target: container,
             props: {
-                dataFileItems,
-                onClick: (task: Task) => {
-                    this.openTask(task);
-                },
+                tasks,
             },
         });
         taskWidgetInners.push(taskWidgetInner);
     }
 }
 
-export function taskPlugin(
-    getDataFileItems: () => FileItem[],
-    openTask: (task: Task) => void,
-) {
+export function taskPlugin() {
     return ViewPlugin.fromClass(
         class {
             decorations;
@@ -122,10 +110,7 @@ export function taskPlugin(
                             pos,
                             pos,
                             Decoration.widget({
-                                widget: new TaskWidget(
-                                    getDataFileItems,
-                                    openTask,
-                                ),
+                                widget: new TaskWidget(),
                                 side: 1,
                                 attributes: {
                                     style: 'color: yellow',

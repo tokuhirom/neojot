@@ -1,6 +1,8 @@
 import type { FileItem } from '../file_item/FileItem';
 import { differenceInDays, startOfDay } from 'date-fns';
 import { parse as parseDate2 } from 'date-fns';
+import { emit } from '@tauri-apps/api/event';
+import { selectedItemStore } from '../../Stores';
 
 export type Task = {
     type: string;
@@ -183,4 +185,9 @@ export function getTaskIcon(task: Task): string {
     } else {
         return '📝';
     }
+}
+
+export async function openTask(task: Task) {
+    selectedItemStore.set(task.fileItem);
+    await emit('go-to-line-number', task.lineNumber);
 }

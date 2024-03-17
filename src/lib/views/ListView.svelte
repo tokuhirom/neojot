@@ -157,12 +157,7 @@
         {/if}
     </div>
     <div class="menu">
-        <QuickPadView
-            {findOrCreateEntry}
-            {dataFileItems}
-            {openTask}
-            {findEntryByTitle}
-        />
+        <QuickPadView {findOrCreateEntry} {openTask} {findEntryByTitle} />
     </div>
 </div>
 

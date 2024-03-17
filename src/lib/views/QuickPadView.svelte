@@ -11,12 +11,9 @@
     import { nord } from 'cm6-theme-nord';
     import { taskPlugin } from '../markdown/TaskPlugin';
     import type { FileItem } from '../file_item/FileItem';
-    import type { Task } from '../task/Task';
     import { openInternalLink } from '../markdown/KeyHandler';
 
     export let findOrCreateEntry: (pageName: string) => void;
-    export let dataFileItems: FileItem[];
-    export let openTask: (task: Task) => void;
     export let findEntryByTitle: (title: string) => FileItem | undefined;
 
     let view: EditorView;
@@ -45,7 +42,7 @@
     let extensions = [
         internalLinkPlugin(findEntryByTitle, findOrCreateEntry),
         nord,
-        taskPlugin(() => dataFileItems, openTask),
+        taskPlugin(),
     ];
 
     let keymaps = [
