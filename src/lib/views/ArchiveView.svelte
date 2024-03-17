@@ -1,6 +1,5 @@
 <script lang="ts">
     import type { FileItem } from '../file_item/FileItem';
-    import FileCardItem from '../card/FileCardItem.svelte';
     import {
         deleteArchivedFile,
         loadFileList,

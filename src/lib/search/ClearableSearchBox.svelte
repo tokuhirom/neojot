@@ -1,7 +1,18 @@
-<script>
-    import { searchKeywordStore, searchRegexesStore } from '../../Stores.ts';
+<script lang="ts">
+    import {
+        dataFileItemsStore,
+        searchFilteredFileItems,
+        searchKeywordStore,
+        searchRegexesStore,
+    } from '../../Stores.ts';
     import { makeMigemoRegexes } from './Migemo';
+    import {
+        type FileItem,
+        shouldShowFileItem,
+    } from '../file_item/FileItem.ts';
+    import { searchFileItems } from '../file_item/Search';
 
+    let migemoRegexes: RegExp[] | undefined = undefined;
     searchKeywordStore.subscribe(async (value) => {
         console.log('searchKeywordStore.subscribe', value);
         if (value === '') {
@@ -10,6 +21,19 @@
             searchRegexesStore.set(await makeMigemoRegexes(value));
         }
     });
+    searchRegexesStore.subscribe((value) => {
+        migemoRegexes = value;
+    });
+    let dataFileItems: FileItem[] = [];
+    dataFileItemsStore.subscribe((value) => {
+        dataFileItems = value;
+    });
+    $: if (dataFileItems) {
+        // TODO debounce?
+        searchFilteredFileItems.set(
+            searchFileItems(dataFileItems, $searchKeywordStore, migemoRegexes),
+        );
+    }
 </script>
 
 <div class="clearable-search-box">

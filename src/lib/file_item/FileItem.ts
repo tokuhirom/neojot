@@ -36,9 +36,9 @@ export function extractTitle(content: string) {
 export function shouldShowFileItem(
     fileItem: FileItem,
     searchWord: string,
-    regExps: RegExp[],
+    regExps: RegExp[] | undefined,
 ): boolean {
-    if (searchWord.length == 0) {
+    if (searchWord.length == 0 || !regExps) {
         return true;
     }
 

@@ -12,7 +12,6 @@
         createNewFileWithContent,
         deleteArchivedFile,
         loadFileList,
-        unarchiveFile,
     } from './lib/repository/NodeRepository';
     import type { FileItem } from './lib/file_item/FileItem';
     import ManualView from './lib/views/ManualView.svelte';
@@ -249,7 +248,6 @@
         {:else}
             <CardView
                 {dataFileItems}
-                {selectedItem}
                 {pageTitles}
                 {findEntryByTitle}
                 {autoLinks}

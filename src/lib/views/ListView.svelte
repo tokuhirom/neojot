@@ -59,10 +59,9 @@
 
     onMount(() => {
         window.addEventListener('keydown', handleKeydown);
-    });
-
-    onDestroy(() => {
-        window.removeEventListener('keydown', handleKeydown);
+        return function () {
+            window.removeEventListener('keydown', handleKeydown);
+        };
     });
 
     function onCreateItem(fileItem: FileItem) {

@@ -1,40 +1,15 @@
 <script lang="ts">
     import FileListItem from './FileListItem.svelte';
-    import { searchFileItems, type SearchResult } from './Search';
-    import {
-        dataFileItemsStore,
-        searchKeywordStore,
-        searchRegexesStore,
-    } from '../../Stores';
-    import type { FileItem } from './FileItem';
+    import { type SearchResult } from './Search';
+    import { searchFilteredFileItems } from '../../Stores';
 
     export let viewerMode: boolean = false;
     export let enterViewerMode: () => void = () => {};
 
     let searchResult: SearchResult[];
-
-    let dataFileItems: FileItem[] = [];
-    dataFileItemsStore.subscribe((value) => {
-        dataFileItems = value;
+    searchFilteredFileItems.subscribe((value) => {
+        searchResult = value;
     });
-
-    let searchKeyword: string = '';
-    searchKeywordStore.subscribe((value) => {
-        searchKeyword = value;
-    });
-
-    let searchRegexes: RegExp[] | undefined = undefined;
-    searchRegexesStore.subscribe((value) => {
-        searchRegexes = value;
-    });
-
-    $: {
-        searchResult = searchFileItems(
-            dataFileItems,
-            searchKeyword,
-            searchRegexes,
-        );
-    }
 </script>
 
 <div>

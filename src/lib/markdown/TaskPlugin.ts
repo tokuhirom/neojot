@@ -9,7 +9,6 @@ import { RangeSetBuilder } from '@codemirror/state';
 import { type Task } from '../task/Task';
 import TaskWidgetInner from './TaskWidgetInner.svelte';
 import { tasksStore } from '../../Stores';
-import type { Unsubscriber } from 'svelte/store';
 
 class TaskWidget extends WidgetType {
     private inner: TaskWidgetInner | undefined = undefined;
