@@ -4,7 +4,7 @@
     import ArchiveView from './lib/views/ArchiveView.svelte';
     import TaskView from './lib/views/TaskView.svelte';
     import CalendarView from './lib/views/CalendarView.svelte';
-    import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event';
+    import { listen, type UnlistenFn } from '@tauri-apps/api/event';
     import { onDestroy, onMount } from 'svelte';
     import ConfigurationView from './lib/views/ConfigurationView.svelte';
     import {
@@ -18,7 +18,11 @@
     import ManualView from './lib/views/ManualView.svelte';
     import { initGit } from './lib/git/GitCommands';
     import { cachedExtractLinks } from './lib/file_item/AutoLinks';
-    import { dataFileItemsStore } from './Stores';
+    import {
+        dataFileItemsStore,
+        searchKeywordStore,
+        selectedItemStore,
+    } from './Stores';
     import { extractTasks } from './lib/task/Task';
     import { tasksStore } from './Stores.js';
     import { sortTasks } from './lib/task/Task.js';
@@ -119,13 +123,9 @@
                     tabPane = 'list';
                 }
 
-                dataFileItems.unshift(fileItem);
-
-                dataFileItems = dataFileItems; // reload ListView's file list.
-
-                selectedItem = fileItem;
-
-                await emit('clear_search_keyword');
+                $dataFileItemsStore = [fileItem, ...$dataFileItemsStore];
+                $selectedItemStore = fileItem;
+                $searchKeywordStore = '';
             }),
         );
         unlistenCallbackPromises.push(
