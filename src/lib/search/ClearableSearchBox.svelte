@@ -7,7 +7,7 @@
     } from '../../Stores.ts';
     import { makeMigemoRegexes } from './Migemo';
     import { type FileItem } from '../file_item/FileItem.ts';
-    import { searchFileItems } from '../file_item/Search';
+    import { searchFileItems, type SearchResult } from '../file_item/Search';
 
     let migemoRegexes: RegExp[] | undefined = undefined;
     searchKeywordStore.subscribe(async (value) => {
@@ -26,10 +26,22 @@
         dataFileItems = value;
     });
     $: if (dataFileItems) {
-        // TODO debounce
-        searchFilteredFileItems.set(
-            searchFileItems(dataFileItems, $searchKeywordStore, migemoRegexes),
-        );
+        // TODO debounce?
+        if (migemoRegexes) {
+            searchFilteredFileItems.set(
+                searchFileItems(
+                    dataFileItems,
+                    $searchKeywordStore, // TODO maybe never used
+                    migemoRegexes,
+                ),
+            );
+        } else {
+            searchFilteredFileItems.set(
+                dataFileItems.map((fileItem) => {
+                    return { lines: [], fileItem } as SearchResult;
+                }),
+            );
+        }
     }
 </script>
 
