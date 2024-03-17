@@ -125,7 +125,8 @@
     <button
         bind:this={buttonElement}
         on:click={handleOnClick}
-        class:active={$selectedItemStore.filename === fileItem.filename}
+        class:active={$selectedItemStore &&
+            $selectedItemStore.filename === fileItem.filename}
         class:viewer-mode={viewerMode}
         ><span class="title">{fileItem.title}</span>
         {#if matchLines && searchWords}

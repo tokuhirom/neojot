@@ -9,6 +9,17 @@
 
     let searchResult: SearchResult[];
 
+    let migemoRegexes: RegExp[] = [];
+    searchKeywordStore.subscribe(async (value) => {
+        makeMigemoRegexes(value)
+            .then((r) => {
+                migemoRegexes = r;
+            })
+            .catch((e) => {
+                console.error('Cannot update migemo regexes', e);
+            });
+    });
+
     $: if (migemoRegexes) {
         searchResult = searchFileItems(
             $dataFileItemsStore,
@@ -16,15 +27,6 @@
             migemoRegexes,
         );
     }
-
-    let migemoRegexes: RegExp[] = [];
-    $: makeMigemoRegexes($searchKeywordStore)
-        .then((r) => {
-            migemoRegexes = r;
-        })
-        .catch((e) => {
-            console.error('Cannot update migemo regexes', e);
-        });
 </script>
 
 <div>
