@@ -1,5 +1,15 @@
 <script>
-    import { searchKeywordStore } from '../../Stores.ts';
+    import { searchKeywordStore, searchRegexesStore } from '../../Stores.ts';
+    import { makeMigemoRegexes } from './Migemo';
+
+    searchKeywordStore.subscribe(async (value) => {
+        console.log('searchKeywordStore.subscribe', value);
+        if (value === '') {
+            searchRegexesStore.set(undefined);
+        } else {
+            searchRegexesStore.set(await makeMigemoRegexes(value));
+        }
+    });
 </script>
 
 <div class="clearable-search-box">

@@ -4,13 +4,20 @@
     import { onDestroy, onMount } from 'svelte';
     import { format } from 'date-fns';
     import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
-    import { searchKeywordStore, selectedItemStore } from '../../Stores';
+    import {
+        searchKeywordStore,
+        searchRegexesStore,
+        selectedItemStore,
+    } from '../../Stores';
 
     export let fileItem: FileItem;
     export let matchLines: MatchedLine[] | undefined;
     export let enterViewerMode: () => void = () => {};
     export let viewerMode: boolean = false;
-    export let migemoRegexes: RegExp[] | undefined = undefined;
+    let migemoRegexes: RegExp[] | undefined = undefined;
+    searchRegexesStore.subscribe((value) => {
+        migemoRegexes = value;
+    });
 
     let searchWords: string[] | undefined = undefined;
 

@@ -1,30 +1,38 @@
 <script lang="ts">
     import FileListItem from './FileListItem.svelte';
-    import { makeMigemoRegexes } from '../search/Migemo';
     import { searchFileItems, type SearchResult } from './Search';
-    import { dataFileItemsStore, searchKeywordStore } from '../../Stores';
+    import {
+        dataFileItemsStore,
+        searchKeywordStore,
+        searchRegexesStore,
+    } from '../../Stores';
+    import type { FileItem } from './FileItem';
 
     export let viewerMode: boolean = false;
     export let enterViewerMode: () => void = () => {};
 
     let searchResult: SearchResult[];
 
-    let migemoRegexes: RegExp[] = [];
-    searchKeywordStore.subscribe(async (value) => {
-        makeMigemoRegexes(value)
-            .then((r) => {
-                migemoRegexes = r;
-            })
-            .catch((e) => {
-                console.error('Cannot update migemo regexes', e);
-            });
+    let dataFileItems: FileItem[] = [];
+    dataFileItemsStore.subscribe((value) => {
+        dataFileItems = value;
     });
 
-    $: if (migemoRegexes) {
+    let searchKeyword: string = '';
+    searchKeywordStore.subscribe((value) => {
+        searchKeyword = value;
+    });
+
+    let searchRegexes: RegExp[] | undefined = undefined;
+    searchRegexesStore.subscribe((value) => {
+        searchRegexes = value;
+    });
+
+    $: {
         searchResult = searchFileItems(
-            $dataFileItemsStore,
-            $searchKeywordStore,
-            migemoRegexes,
+            dataFileItems,
+            searchKeyword,
+            searchRegexes,
         );
     }
 </script>
@@ -35,7 +43,6 @@
             <FileListItem
                 fileItem={result.fileItem}
                 matchLines={result.lines}
-                {migemoRegexes}
                 {enterViewerMode}
                 {viewerMode}
             />

@@ -10,9 +10,9 @@ export type SearchResult = {
 export function searchFileItems(
     fileItems: FileItem[],
     searchWord: string,
-    regExps: RegExp[],
+    regExps: RegExp[] | undefined,
 ): SearchResult[] {
-    if (searchWord.length === 0) {
+    if (searchWord.length === 0 || !regExps) {
         return fileItems.map((fileItem) => {
             return { lines: [], fileItem };
         });
@@ -33,13 +33,13 @@ export function searchFileItems(
 function searchLinesByWord(
     fileItem: FileItem,
     searchWord: string,
-    migemoRegexes: RegExp[],
+    regExps: RegExp[],
 ): MatchedLine[] | undefined {
     if (searchWord.length > 0) {
         if (fileItem.filename.endsWith('.excalidraw')) {
-            return searchExcalidrawFile(fileItem, migemoRegexes);
+            return searchExcalidrawFile(fileItem, regExps);
         } else {
-            return searchMarkdownFile(fileItem, searchWord, migemoRegexes);
+            return searchMarkdownFile(fileItem, searchWord, regExps);
         }
     } else {
         // without search word, there's no matched lines.
@@ -49,7 +49,7 @@ function searchLinesByWord(
 
 function searchExcalidrawFile(
     fileItem: FileItem,
-    regExps: RegExp[],
+    regExps: RegExp[] | undefined,
 ): MatchedLine[] | undefined {
     const lines: MatchedLine[] = [];
     const json = fileItem.content;
