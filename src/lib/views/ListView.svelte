@@ -139,7 +139,6 @@
             style="height: calc(100vh - {fixedAreaHeight}px);"
         >
             <FileList
-                {dataFileItems}
                 {selectedItem}
                 {onSelectItem}
                 {viewerMode}

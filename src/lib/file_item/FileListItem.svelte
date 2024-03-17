@@ -5,7 +5,6 @@
     import { format } from 'date-fns';
     import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
     import { searchKeywordStore } from '../../Stores';
-    import { search } from '@codemirror/search';
 
     export let onSelectItem: (fileItem: FileItem) => void;
     export let fileItem: FileItem;

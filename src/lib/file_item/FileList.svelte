@@ -3,19 +3,18 @@
     import { type FileItem } from './FileItem';
     import { makeMigemoRegexes } from '../search/Migemo';
     import { searchFileItems, type SearchResult } from './Search';
-    import { searchKeywordStore } from '../../Stores';
+    import { dataFileItemsStore, searchKeywordStore } from '../../Stores';
 
     export let onSelectItem: (fileItem: FileItem | undefined) => void;
-    export let dataFileItems: FileItem[] = [];
     export let selectedItem: FileItem | undefined = undefined;
     export let viewerMode: boolean = false;
     export let enterViewerMode: () => void = () => {};
 
     let searchResult: SearchResult[];
 
-    $: if (dataFileItems || migemoRegexes) {
+    $: if (migemoRegexes) {
         searchResult = searchFileItems(
-            dataFileItems,
+            $dataFileItemsStore,
             $searchKeywordStore,
             migemoRegexes,
         );
