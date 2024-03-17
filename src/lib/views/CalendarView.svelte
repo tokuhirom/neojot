@@ -33,12 +33,6 @@
         selectedItem = selectedItem;
     }
 
-    function onCreateItem(fileItem: FileItem) {
-        dataFileItems.unshift(fileItem);
-        dataFileItems = dataFileItems;
-        onSelectItem(fileItem);
-    }
-
     function gotoPrevMonth() {
         month--;
         if (month < 1) {

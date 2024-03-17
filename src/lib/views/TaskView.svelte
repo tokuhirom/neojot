@@ -3,15 +3,9 @@
     import { type FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
     import { extractTasks, sortTasks, type Task } from '../task/Task';
-    import { emit } from '@tauri-apps/api/event';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import TaskItem from '../task/TaskItem.svelte';
-    import {
-        dataFileItemsStore,
-        searchKeywordStore,
-        selectedItemStore,
-    } from '../../Stores';
-
+    import { dataFileItemsStore, searchKeywordStore } from '../../Stores';
     export let selectedItem: FileItem | undefined = undefined;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
@@ -37,13 +31,8 @@
                 .includes($searchKeywordStore.toLowerCase());
         });
     }
-
     function onSaved() {
         selectedItem = selectedItem;
-    }
-
-    async function onSelectItem(fileItem: FileItem | undefined) {
-        $selectedItemStore = fileItem;
     }
 </script>
 

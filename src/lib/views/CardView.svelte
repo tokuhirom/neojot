@@ -9,10 +9,14 @@
     import { searchKeywordStore, selectedItemStore } from '../../Stores';
 
     export let dataFileItems: FileItem[] = [];
-    export let selectedItem: FileItem | undefined = undefined;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
+
+    let selectedItem: FileItem | undefined = undefined;
+    selectedItemStore.subscribe((value) => {
+        selectedItem = value;
+    });
 
     let filteredFileItems: FileItem[];
 
@@ -32,22 +36,15 @@
     function onSaved() {
         selectedItem = selectedItem;
     }
-
-    function onCreateItem(fileItem: FileItem) {
-        dataFileItems.unshift(fileItem);
-        dataFileItems = dataFileItems;
-        onSelectItem(fileItem);
-    }
-
-    async function onSelectItem(fileItem: FileItem | undefined) {
-        $selectedItemStore = fileItem;
-    }
 </script>
 
 <div class="container">
     <ClearableSearchBox />
     {#if selectedItem}
-        <button class="back-to-list" on:click={() => onSelectItem(undefined)}>
+        <button
+            class="back-to-list"
+            on:click={() => selectedItemStore.set(undefined)}
+        >
             Back to List
         </button>
 
@@ -64,7 +61,7 @@
                 {findEntryByTitle}
                 {autoLinks}
             />
-            <LinkCards file={selectedItem} {onSelectItem} />
+            <LinkCards file={selectedItem} />
         {/if}
     {:else}
         {#each filteredFileItems as file (file.filename)}

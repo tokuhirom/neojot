@@ -7,7 +7,6 @@
     import { dataFileItemsStore, selectedItemStore } from '../../Stores';
 
     export let file: FileItem;
-    export let onSelectItem: (fileItem: FileItem) => void;
 
     let links: Links | undefined = undefined;
 
