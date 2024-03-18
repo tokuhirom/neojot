@@ -1,11 +1,9 @@
 <script lang="ts">
     import { type CalendarDay, generateCalendar } from './calendar-utils.ts';
-    import { type CalendarData } from '../repository/NodeRepository';
     import { onMount } from 'svelte';
     import type { FileItem } from '../file_item/FileItem';
-    import { extractTasks, getTaskIcon, type Task } from '../task/Task';
+    import { getTaskIcon, type Task } from '../task/Task';
     import { emit } from '@tauri-apps/api/event';
-    import { invoke } from '@tauri-apps/api/core';
     import { selectedItemStore, tasksStore } from '../../Stores';
 
     export let dataFileItems: FileItem[] = [];
@@ -14,16 +12,13 @@
     export let month: number;
 
     let calendars: CalendarDay[][] = [];
-    let fileMap: Record<string, FileItem> = {};
 
     onMount(async () => {
         calendars = generateCalendar(year, month);
-        await reloadFiles();
     });
 
     $: if (year && month) {
         calendars = generateCalendar(year, month);
-        reloadFiles();
     }
 
     let tasks: Task[] = [];
@@ -66,14 +61,6 @@
             }
         });
         taskMap = newTaskMap;
-    }
-
-    async function reloadFiles() {
-        let newFileMap: Record<string, FileItem> = {};
-        for (let fileItem of dataFileItems) {
-            newFileMap[fileItem.filename.replace(/.+\//, '')] = fileItem;
-        }
-        fileMap = newFileMap;
     }
 
     function getDayClass(day) {
