@@ -6,7 +6,7 @@
     import { extractTasks, getTaskIcon, type Task } from '../task/Task';
     import { emit } from '@tauri-apps/api/event';
     import { invoke } from '@tauri-apps/api/core';
-    import { selectedItemStore } from '../../Stores';
+    import { selectedItemStore, tasksStore } from '../../Stores';
 
     export let dataFileItems: FileItem[] = [];
 
@@ -40,9 +40,14 @@
         });
     }
 
+    let tasks: Task[] = [];
+    tasksStore.subscribe((value) => {
+        tasks = value;
+    });
+
     let taskMap: Map<number, Task[]> = new Map();
     $: if (year && month) {
-        const tasks = extractTasks(dataFileItems)
+        const filteredTasks = tasks
             .filter(
                 (task) =>
                     (task.scheduled &&
@@ -60,7 +65,7 @@
         // insert tasks into taskMap.
         // the key is the day of month.
         const newTaskMap = new Map<number, Task[]>();
-        tasks.forEach((task) => {
+        filteredTasks.forEach((task) => {
             // at first, if task.scheduled, use it.
             // after that, if task.deadline, use it.
             for (const date of [task.finished, task.scheduled, task.deadline]) {

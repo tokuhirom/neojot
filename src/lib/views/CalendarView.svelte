@@ -60,9 +60,7 @@
             {/if}
             <EntryView
                 file={selectedItem}
-                fileItems={dataFileItems}
                 {pageTitles}
-                search={undefined}
                 {findEntryByTitle}
                 {autoLinks}
             />
