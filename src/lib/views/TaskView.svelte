@@ -4,12 +4,20 @@
     import { type Task } from '../task/Task';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import TaskItem from '../task/TaskItem.svelte';
-    import { searchKeywordStore, tasksStore } from '../../Stores';
+    import {
+        searchKeywordStore,
+        selectedItemStore,
+        tasksStore,
+    } from '../../Stores';
 
-    export let selectedItem: FileItem | undefined = undefined;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
+
+    let selectedItem: FileItem | undefined = undefined;
+    selectedItemStore.subscribe((value) => {
+        selectedItem = value;
+    });
 
     let tasks: Task[] = [];
     let filteredTasks: Task[] = [];
@@ -17,7 +25,7 @@
     tasksStore.subscribe((value) => {
         tasks = value;
         if (selectedItem === undefined && tasks.length > 0) {
-            selectedItem = tasks[0].fileItem;
+            $selectedItemStore = tasks[0].fileItem;
         }
     });
 

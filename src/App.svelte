@@ -231,7 +231,6 @@
         {:else if tabPane === 'task'}
             <TaskView
                 {dataFileItems}
-                {selectedItem}
                 {pageTitles}
                 {findEntryByTitle}
                 {autoLinks}
@@ -239,7 +238,6 @@
         {:else if tabPane === 'calendar'}
             <CalendarView
                 {dataFileItems}
-                {selectedItem}
                 {pageTitles}
                 {findEntryByTitle}
                 {autoLinks}
