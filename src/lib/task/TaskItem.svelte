@@ -81,6 +81,10 @@
         color: #757575 !important;
         text-decoration: line-through;
     }
+    .canceled {
+        color: #757575 !important;
+        text-decoration: line-through;
+    }
 
     .schedule {
         color: orange !important;
@@ -112,5 +116,8 @@
     .negative {
         background-color: #a9a9a9 !important;
         color: black;
+    }
+    .negative.plan {
+        text-decoration: line-through;
     }
 </style>
