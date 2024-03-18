@@ -4,7 +4,7 @@
     import LinkCards from '../link/LinkCards.svelte';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import { type Task } from '../task/Task';
-    import { onDestroy, onMount } from 'svelte';
+    import { onMount } from 'svelte';
     import { emit } from '@tauri-apps/api/event';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
     import FileList from '../file_item/FileList.svelte';
@@ -13,11 +13,15 @@
     import { searchKeywordStore, selectedItemStore } from '../../Stores';
 
     export let dataFileItems: FileItem[] = [];
-    export let selectedItem: FileItem | undefined = undefined;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
     let viewerMode = false;
+
+    let selectedItem: FileItem | undefined = undefined;
+    selectedItemStore.subscribe((value) => {
+        selectedItem = value;
+    });
 
     async function onSelectItem(fileItem: FileItem | undefined) {
         $selectedItemStore = fileItem;
@@ -156,6 +160,9 @@
         {/if}
     </div>
     <div class="menu">
+        {#if selectedItem}
+            {selectedItem.title}
+        {/if}
         <QuickPadView {findOrCreateEntry} {openTask} {findEntryByTitle} />
     </div>
 </div>

@@ -28,6 +28,10 @@
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
+    selectedItemStore.subscribe((value) => {
+        selectedItem = value;
+    });
+
     let dataFileItems: FileItem[] = [];
     dataFileItemsStore.subscribe((value) => {
         dataFileItems = value;
@@ -218,7 +222,6 @@
         {#if tabPane === 'list'}
             <ListView
                 {dataFileItems}
-                {selectedItem}
                 {pageTitles}
                 {findEntryByTitle}
                 {autoLinks}

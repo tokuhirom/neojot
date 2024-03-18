@@ -42,7 +42,7 @@
             $selectedItemStore &&
             fileItem.filename === $selectedItemStore.filename
         ) {
-            // すでにセレクトされているアイテムをクリックした場合、viewer mode に入る。
+            console.log('Clicked already selected item. Entering viewer mode.');
             enterViewerMode();
             return;
         }
