@@ -1,7 +1,6 @@
 <script lang="ts">
     import { type CalendarDay, generateCalendar } from './calendar-utils.ts';
     import { onMount } from 'svelte';
-    import type { FileItem } from '../file_item/FileItem';
     import { getTaskIcon, type Task } from '../task/Task';
     import { emit } from '@tauri-apps/api/event';
     import { selectedItemStore, tasksStore } from '../../Stores';

@@ -3,9 +3,7 @@
     import { type FileItem } from '../file_item/FileItem';
     import LinkCards from '../link/LinkCards.svelte';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
-    import { type Task } from '../task/Task';
     import { onMount } from 'svelte';
-    import { emit } from '@tauri-apps/api/event';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
     import FileList from '../file_item/FileList.svelte';
     import { createNewFileWithContent } from '../repository/NodeRepository';
