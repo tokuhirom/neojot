@@ -1,50 +1,37 @@
 <script lang="ts">
-    import { type FileItem, shouldShowFileItem } from '../file_item/FileItem';
+    import { type FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
     import LinkCards from '../link/LinkCards.svelte';
     import FileCardItem from '../card/FileCardItem.svelte';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
-    import { makeMigemoRegexes } from '../search/Migemo';
+    import {
+        searchFilteredFileItemsStore,
+        selectedItemStore,
+    } from '../../Stores';
 
-    export let dataFileItems: FileItem[] = [];
-    export let selectedItem: FileItem | undefined = undefined;
-    export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
 
+    let selectedItem: FileItem | undefined = undefined;
+    selectedItemStore.subscribe((value) => {
+        selectedItem = value;
+    });
+
     let filteredFileItems: FileItem[];
-    let searchWord = '';
-
-    let migemoRegexes: RegExp[] = [];
-    $: if (searchWord) {
-        makeMigemoRegexes(searchWord).then((r) => {
-            migemoRegexes = r;
-        });
-    }
-
-    $: if (dataFileItems || migemoRegexes) {
-        filteredFileItems = dataFileItems.filter((it) =>
-            shouldShowFileItem(it, searchWord, migemoRegexes),
-        );
-    }
-
-    function onSaved() {
-        selectedItem = selectedItem;
-    }
-
-    function onCreateItem(fileItem: FileItem) {
-        dataFileItems.unshift(fileItem);
-        dataFileItems = dataFileItems;
-        onSelectItem(fileItem);
-    }
+    searchFilteredFileItemsStore.subscribe((value) => {
+        filteredFileItems = value.map((it) => it.fileItem);
+    });
 </script>
 
 <div class="container">
-    <ClearableSearchBox bind:searchWord />
+    <ClearableSearchBox />
     {#if selectedItem}
-        <button class="back-to-list" on:click={() => onSelectItem(undefined)}>
+        <button
+            class="back-to-list"
+            on:click={() => selectedItemStore.set(undefined)}
+        >
             Back to List
         </button>
 
@@ -55,24 +42,16 @@
         {:else}
             <EntryView
                 file={selectedItem}
-                {onSelectItem}
-                {onSaved}
-                {onCreateItem}
                 {pageTitles}
                 search={undefined}
                 {findEntryByTitle}
                 {autoLinks}
             />
-            <LinkCards
-                file={selectedItem}
-                {dataFileItems}
-                {onSelectItem}
-                {onCreateItem}
-            />
+            <LinkCards file={selectedItem} />
         {/if}
     {:else}
         {#each filteredFileItems as file (file.filename)}
-            <FileCardItem {onSelectItem} {file} />
+            <FileCardItem {file} />
         {/each}
     {/if}
 </div>

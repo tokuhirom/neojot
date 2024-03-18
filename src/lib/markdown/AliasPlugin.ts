@@ -5,9 +5,10 @@ import {
     ViewUpdate,
 } from '@codemirror/view';
 import { type RangeSet, RangeSetBuilder } from '@codemirror/state';
+import { searchKeywordStore } from '../../Stores';
 
 // カスタムプラグインの型定義
-class LinkPlugin {
+class AliasPlugin {
     decorations: RangeSet<Decoration>;
 
     constructor(view: EditorView) {
@@ -42,8 +43,8 @@ class LinkPlugin {
     }
 }
 
-export const linkPlugin = function (searchItem: (keyword: string) => void) {
-    return ViewPlugin.fromClass(LinkPlugin, {
+export const aliasPlugin = function () {
+    return ViewPlugin.fromClass(AliasPlugin, {
         decorations: (v) => v.decorations,
 
         eventHandlers: {
@@ -56,7 +57,7 @@ export const linkPlugin = function (searchItem: (keyword: string) => void) {
 
                     const keyword = target.getAttribute('data-keyword');
                     if (keyword) {
-                        searchItem(keyword);
+                        searchKeywordStore.set(keyword);
                     }
                 }
             },

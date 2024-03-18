@@ -28,7 +28,7 @@ export function buildKeywordRegex(keywords: string[]): RegExp {
 }
 
 // キーワードハイライトプラグインのファクトリ関数
-export function comeFromLinkHighlightPlugin(
+export function autoLinkHighlightPlugin(
     getKeywords: () => string[],
     findOrCreateEntry: (pageName: string) => void,
 ): Extension {
@@ -42,6 +42,7 @@ export function comeFromLinkHighlightPlugin(
 
             update(update: ViewUpdate) {
                 if (update.docChanged || update.selectionSet) {
+                    // TODO: needs debounce?
                     this.decorations = this.computeDecorations(
                         update.view,
                         getKeywords,

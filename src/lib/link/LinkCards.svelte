@@ -4,21 +4,20 @@
     import { buildLinks, type Links } from './Links';
     import CardItem from '../card/CardItem.svelte';
     import { createNewFileWithContent } from '../repository/NodeRepository';
+    import { dataFileItemsStore, selectedItemStore } from '../../Stores';
 
     export let file: FileItem;
-    export let dataFileItems: FileItem[];
-    export let onSelectItem: (fileItem: FileItem) => void;
-    export let onCreateItem: (fileItem: FileItem) => void;
 
     let links: Links | undefined = undefined;
 
-    $: if (dataFileItems || file) {
-        links = buildLinks(file, dataFileItems);
+    $: if (file) {
+        links = buildLinks(file, $dataFileItemsStore);
     }
 
     async function createNewEntry(title: string) {
         const fileItem = await createNewFileWithContent(`# ${title}\n\n`);
-        onCreateItem(fileItem);
+        $dataFileItemsStore = [...$dataFileItemsStore, fileItem];
+        $selectedItemStore = fileItem;
     }
 </script>
 
@@ -26,18 +25,17 @@
     {#if links}
         <div class="row">
             {#each links.links as file}
-                <FileCardItem {onSelectItem} {file} />
+                <FileCardItem {file} />
             {/each}
         </div>
         {#each links.twoHopLinks as twoHopLink}
             <div class="row">
                 <FileCardItem
-                    {onSelectItem}
                     file={twoHopLink.src}
                     backgroundColor="yellowgreen"
                 />
                 {#each twoHopLink.dst as dst}
-                    <FileCardItem {onSelectItem} file={dst} />
+                    <FileCardItem file={dst} />
                 {/each}
             </div>
         {/each}

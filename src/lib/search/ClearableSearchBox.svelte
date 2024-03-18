@@ -1,19 +1,56 @@
-<script>
-    import { listen } from '@tauri-apps/api/event';
+<script lang="ts">
+    import {
+        dataFileItemsStore,
+        searchFilteredFileItemsStore,
+        searchKeywordStore,
+        searchRegexesStore,
+    } from '../../Stores.ts';
+    import { makeMigemoRegexes } from './Migemo';
+    import { type FileItem } from '../file_item/FileItem.ts';
+    import { searchFileItems, type SearchResult } from '../file_item/Search';
 
-    export let searchWord = '';
-
-    listen('clear_search_keyword', () => {
-        if (searchWord !== '') {
-            searchWord = '';
+    let migemoRegexes: RegExp[] | undefined = undefined;
+    searchKeywordStore.subscribe(async (value) => {
+        console.log('searchKeywordStore.subscribe', value);
+        if (value === '') {
+            searchRegexesStore.set(undefined);
+        } else {
+            searchRegexesStore.set(await makeMigemoRegexes(value));
         }
     });
+    searchRegexesStore.subscribe((value) => {
+        migemoRegexes = value;
+    });
+    let dataFileItems: FileItem[] = [];
+    dataFileItemsStore.subscribe((value) => {
+        dataFileItems = value;
+    });
+    $: if (dataFileItems) {
+        // TODO debounce?
+        if (migemoRegexes) {
+            searchFilteredFileItemsStore.set(
+                searchFileItems(
+                    dataFileItems,
+                    $searchKeywordStore, // TODO maybe never used
+                    migemoRegexes,
+                ),
+            );
+        } else {
+            searchFilteredFileItemsStore.set(
+                dataFileItems.map((fileItem) => {
+                    return { lines: [], fileItem } as SearchResult;
+                }),
+            );
+        }
+    }
 </script>
 
 <div class="clearable-search-box">
-    <input type="text" bind:value={searchWord} class="search-input" />
-    {#if searchWord}
-        <button class="clear-btn" on:click={() => (searchWord = '')}>✗</button>
+    <input type="text" bind:value={$searchKeywordStore} class="search-input" />
+    {#if $searchKeywordStore}
+        <button class="clear-btn" on:click={() => ($searchKeywordStore = '')}
+            >✗</button
+        >
     {/if}
 </div>
 

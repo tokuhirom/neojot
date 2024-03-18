@@ -7,91 +7,105 @@ import {
 } from '@codemirror/view';
 import { RangeSetBuilder } from '@codemirror/state';
 import { type Task } from '../task/Task';
-import type { FileItem } from '../file_item/FileItem';
-import { listen } from '@tauri-apps/api/event';
 import TaskWidgetInner from './TaskWidgetInner.svelte';
+import { tasksStore } from '../../Stores';
+import { addDays, format, isEqual } from 'date-fns';
 
-let needsRendering = true;
-const taskWidgetInners: TaskWidgetInner[] = [];
-let globalGetDataFileItems: () => FileItem[];
-
-function debounce(
-    func: (fileItem: FileItem) => void,
-    delay: number,
-): (fileItem: FileItem) => void {
-    let timeoutId: ReturnType<typeof setTimeout> | null = null;
-    return function (fileitem: FileItem): void {
-        clearTimeout(timeoutId as ReturnType<typeof setTimeout>);
-        timeoutId = setTimeout(() => {
-            func(fileitem);
-        }, delay);
-    };
-}
-
-const debouncedUpdateTask = debounce((fileItem: FileItem) => {
-    if (taskWidgetInners.length > 0) {
-        if (fileItem.content.match(/[A-Z]\[.+]/) || needsRendering) {
-            needsRendering = false;
-            console.log(
-                `TaskPlugin: sort_file_list event received: ${taskWidgetInners.length}`,
-            );
-            const dataFileItems = globalGetDataFileItems();
-            taskWidgetInners.forEach((taskWidgetInner) => {
-                taskWidgetInner.$$set({
-                    dataFileItems,
-                });
-            });
-        }
-    }
-}, 1000);
-
-listen('sort_file_list', (event) => {
-    const payload = event.payload as { fileItem: FileItem };
-    const fileItem = payload.fileItem;
-    debouncedUpdateTask(fileItem);
-});
+export type DateTasks = {
+    date: string;
+    tasks: Task[];
+};
 
 class TaskWidget extends WidgetType {
-    constructor(
-        private getDataFileItems: () => FileItem[],
-        private openTask: (task: Task) => void,
-    ) {
+    private inner: TaskWidgetInner | undefined = undefined;
+
+    constructor() {
         super();
-        globalGetDataFileItems = getDataFileItems;
     }
 
     toDOM() {
         const container = document.createElement('div');
         container.className = 'task-widget';
-        const dataFileItems = this.getDataFileItems();
-        this.renderTasks(container, dataFileItems);
-        if (dataFileItems.length == 0) {
-            setTimeout(() => {
-                this.renderTasks(container, this.getDataFileItems());
-            }, 1000);
-        }
-        needsRendering = dataFileItems.length == 0;
+        tasksStore.subscribe((tasks: Task[]) => {
+            const filteredTasks: Record<string, Task[]> = this.filter(tasks);
+            console.log(filteredTasks);
+
+            const doing = filteredTasks['DOING'] || [];
+            const dateTasks: DateTasks[] = [];
+            for (const dt of Object.keys(filteredTasks)) {
+                if (dt !== 'DOING') {
+                    const tasks = filteredTasks[dt];
+                    if (tasks && tasks.length > 0) {
+                        dateTasks.push({ date: dt, tasks });
+                    }
+                }
+            }
+
+            if (this.inner) {
+                this.inner.$$set({ tasks, doing, dateTasks });
+            } else {
+                this.inner = new TaskWidgetInner({
+                    target: container,
+                    props: {
+                        tasks,
+                        doing,
+                        dateTasks,
+                    },
+                });
+            }
+        });
         return container;
     }
 
-    private renderTasks(container: HTMLDivElement, dataFileItems: FileItem[]) {
-        const taskWidgetInner = new TaskWidgetInner({
-            target: container,
-            props: {
-                dataFileItems,
-                onClick: (task: Task) => {
-                    this.openTask(task);
-                },
-            },
+    private filter(tasks: Task[]): Record<string, Task[]> {
+        const result: Record<string, Task[]> = {};
+        const start = new Date();
+        const end = addDays(new Date(), 7);
+
+        function insert(d: Date | null, task: Task) {
+            if (d && start <= d && d <= end) {
+                const date = format(d, 'yyyy-MM-dd(EEE)');
+                result[date] = [...(result[date] || []), task];
+            }
+        }
+
+        tasks.forEach((task) => {
+            switch (task.type) {
+                case 'DOING':
+                    result['DOING'] = [...(result['DOING'] || []), task];
+                    break;
+
+                case 'PLAN':
+                    insert(task.scheduled, task);
+                    break;
+
+                case 'NOTE':
+                case 'TODO':
+                    insert(task.scheduled, task);
+                    if (
+                        task.scheduled == null ||
+                        task.deadline == null ||
+                        !isEqual(task.scheduled, task.deadline)
+                    ) {
+                        console.log(task.scheduled, task.deadline);
+                        insert(task.deadline, task);
+                    }
+                    break;
+
+                case 'WAITING':
+                    insert(task.deadline, task);
+                    break;
+
+                case 'DONE': // ignore completed tasks
+                case 'CANCELED':
+                    break;
+            }
         });
-        taskWidgetInners.push(taskWidgetInner);
+        return result;
     }
 }
 
-export function taskPlugin(
-    getDataFileItems: () => FileItem[],
-    openTask: (task: Task) => void,
-) {
+export function taskPlugin() {
     return ViewPlugin.fromClass(
         class {
             decorations;
@@ -128,10 +142,7 @@ export function taskPlugin(
                             pos,
                             pos,
                             Decoration.widget({
-                                widget: new TaskWidget(
-                                    getDataFileItems,
-                                    openTask,
-                                ),
+                                widget: new TaskWidget(),
                                 side: 1,
                                 attributes: {
                                     style: 'color: yellow',

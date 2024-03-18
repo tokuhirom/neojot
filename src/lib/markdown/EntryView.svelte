@@ -13,23 +13,30 @@
         autocompletion,
         type CompletionContext,
     } from '@codemirror/autocomplete';
-    import { linkPlugin } from './LinkPlugin';
-    import { comeFromLinkHighlightPlugin } from './KeywordHighlight';
+    import { aliasPlugin } from './AliasPlugin';
+    import { autoLinkHighlightPlugin } from './KeywordHighlight';
     import { languages } from '@codemirror/language-data';
     import BasicCodeMirror6 from './BasicCodeMirror6.svelte';
     import { internalLinkPlugin } from './InternalWikiLink';
     import { oneDark } from '@codemirror/theme-one-dark';
     import { openInternalLink } from './KeyHandler';
+    import {
+        dataFileItemsStore,
+        searchKeywordStore,
+        selectedItemStore,
+    } from '../../Stores';
 
     export let file: FileItem;
-    export let onSelectItem: (fileItem: FileItem) => void;
-    export let onCreateItem: (fileItem: FileItem) => void;
-    export let onSaved: () => void;
     // for completion
     export let pageTitles: string[];
-    export let search: (keyword: string) => void | undefined;
     export let findEntryByTitle: (title: string) => FileItem;
     export let autoLinks: string[];
+
+    selectedItemStore.subscribe((value) => {
+        if (value) {
+            file = value;
+        }
+    });
 
     let keymaps = [
         { key: 'Mod-d', run: archive, preventDefault: true },
@@ -52,10 +59,14 @@
             }
             await saveMarkdownFile(file.filename, text);
             file.mtime = Math.floor(Date.now() / 1000);
-            console.log(`emit sort_file_list: ${file.filename}`);
-            await emit('sort_file_list', { fileItem: file });
-            console.log(`onSaved: ${file.filename}`);
-            onSaved();
+
+            // move to top of the list.
+            $dataFileItemsStore = [
+                file,
+                ...$dataFileItemsStore.filter(
+                    (it) => it.filename !== file.filename,
+                ),
+            ];
         }
     }
 
@@ -184,10 +195,8 @@
     function findOrCreateEntry(pageName: string) {
         const fileItem = findEntryByTitle(pageName);
         if (fileItem) {
-            onSelectItem(fileItem);
-            if (search) {
-                search(pageName);
-            }
+            $selectedItemStore = fileItem;
+            $searchKeywordStore = pageName;
             return;
         }
 
@@ -197,10 +206,9 @@
         );
         createNewFileWithContent(`# ${pageName}\n\n`).then(
             (fileItem: FileItem) => {
-                onCreateItem(fileItem);
-                if (search) {
-                    search(pageName);
-                }
+                $dataFileItemsStore = [...$dataFileItemsStore, fileItem];
+                $selectedItemStore = fileItem;
+                $searchKeywordStore = pageName;
             },
         );
     }
@@ -210,10 +218,8 @@
         internalLinkPlugin(findEntryByTitle, (pageName) => {
             findOrCreateEntry(pageName);
         }),
-        linkPlugin((keyword) => {
-            search(keyword);
-        }),
-        comeFromLinkHighlightPlugin(() => autoLinks, findOrCreateEntry),
+        aliasPlugin(),
+        autoLinkHighlightPlugin(() => autoLinks, findOrCreateEntry),
         EditorView.domEventHandlers({ paste: handlePaste }),
         autocompletion({ override: [myCompletion] }),
     ];

@@ -3,21 +3,27 @@
     import { type FileItem } from '../file_item/FileItem';
     import LinkCards from '../link/LinkCards.svelte';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
-    import { type Task } from '../task/Task';
-    import { onDestroy, onMount } from 'svelte';
-    import { emit } from '@tauri-apps/api/event';
+    import { onMount } from 'svelte';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
     import FileList from '../file_item/FileList.svelte';
     import { createNewFileWithContent } from '../repository/NodeRepository';
     import QuickPadView from './QuickPadView.svelte';
+    import { searchKeywordStore, selectedItemStore } from '../../Stores';
 
     export let dataFileItems: FileItem[] = [];
-    export let selectedItem: FileItem | undefined = undefined;
-    export let onSelectItem: (fileItem: FileItem | undefined) => void;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
     let viewerMode = false;
+
+    let selectedItem: FileItem | undefined = undefined;
+    selectedItemStore.subscribe((value) => {
+        selectedItem = value;
+    });
+
+    async function onSelectItem(fileItem: FileItem | undefined) {
+        $selectedItemStore = fileItem;
+    }
 
     function handleKeydown(event) {
         if (event.ctrlKey || event.metaKey || event.altKey || event.shiftKey) {
@@ -55,17 +61,10 @@
 
     onMount(() => {
         window.addEventListener('keydown', handleKeydown);
+        return function () {
+            window.removeEventListener('keydown', handleKeydown);
+        };
     });
-
-    onDestroy(() => {
-        window.removeEventListener('keydown', handleKeydown);
-    });
-
-    let searchWord = '';
-
-    function onSaved() {
-        selectedItem = selectedItem;
-    }
 
     function onCreateItem(fileItem: FileItem) {
         viewerMode = false;
@@ -102,7 +101,7 @@
         const fileItem = findEntryByTitle(pageName);
         if (fileItem) {
             onSelectItem(fileItem);
-            searchWord = pageName;
+            $searchKeywordStore = pageName;
             return;
         }
 
@@ -113,15 +112,9 @@
         createNewFileWithContent(`# ${pageName}\n\n`).then(
             (fileItem: FileItem) => {
                 onCreateItem(fileItem);
-                searchWord = pageName;
+                $searchKeywordStore = pageName;
             },
         );
-    }
-
-    function openTask(task: Task) {
-        onSelectItem(task.fileItem);
-        viewerMode = false;
-        emit('go-to-line-number', task.lineNumber);
     }
 </script>
 
@@ -133,20 +126,13 @@
         }}
     >
         <div class="clearable-search-box">
-            <ClearableSearchBox bind:searchWord />
+            <ClearableSearchBox />
         </div>
         <div
             class="scrollable-area"
             style="height: calc(100vh - {fixedAreaHeight}px);"
         >
-            <FileList
-                {dataFileItems}
-                {searchWord}
-                {selectedItem}
-                {onSelectItem}
-                {viewerMode}
-                {enterViewerMode}
-            />
+            <FileList {viewerMode} {enterViewerMode} />
         </div>
     </div>
     <!-- eslint-disable-next-line -->
@@ -157,30 +143,19 @@
             {:else}
                 <EntryView
                     file={selectedItem}
-                    {onSelectItem}
-                    {onSaved}
-                    {onCreateItem}
                     {pageTitles}
-                    search={(keyword) => (searchWord = keyword)}
                     {findEntryByTitle}
                     {autoLinks}
                 />
-                <LinkCards
-                    file={selectedItem}
-                    {dataFileItems}
-                    {onSelectItem}
-                    {onCreateItem}
-                />
+                <LinkCards file={selectedItem} />
             {/if}
         {/if}
     </div>
     <div class="menu">
-        <QuickPadView
-            {findOrCreateEntry}
-            {dataFileItems}
-            {openTask}
-            {findEntryByTitle}
-        />
+        {#if selectedItem}
+            {selectedItem.title}
+        {/if}
+        <QuickPadView {findOrCreateEntry} {findEntryByTitle} />
     </div>
 </div>
 

@@ -1,32 +1,15 @@
 <script lang="ts">
-    import {
-        calculateFreshness,
-        extractTasks,
-        getTaskIcon,
-        sortTasks,
-        type Task,
-    } from '../task/Task';
-    import type { FileItem } from '../file_item/FileItem';
+    import { getTaskIcon, openTask, type Task } from '../task/Task';
     import { format } from 'date-fns';
+    import type { DateTasks } from './TaskPlugin';
 
-    export let onClick: (task: Task) => void;
-    export let dataFileItems: FileItem[];
-
-    let tasks: Task[];
-
-    $: if (dataFileItems) {
-        const today = new Date();
-        let t1 = Date.now();
-        tasks = sortTasks(extractTasks(dataFileItems)).filter((task) => {
-            return calculateFreshness(task, today) >= 0;
-        });
-        console.log('re-calculate tasks: ', Date.now() - t1, 'ms');
-    }
+    export let doing: Task[];
+    export let dateTasks: DateTasks[];
 </script>
 
 <div>
-    {#each tasks as task}
-        <button on:click={() => onClick(task)}>
+    {#each doing as task}
+        <button on:click={async () => await openTask(task)}>
             {getTaskIcon(task)}
             {#if task.type === 'PLAN' && task.scheduled}
                 {format(task.scheduled, 'yyyy-MM-dd')}
@@ -38,6 +21,23 @@
             {/if}
             {task.title}
         </button>
+    {/each}
+    {#each dateTasks as dateTask}
+        <div class="date">{dateTask.date}</div>
+        {#each dateTask.tasks as task}
+            <button on:click={async () => await openTask(task)}>
+                {getTaskIcon(task)}
+                {#if task.type === 'PLAN' && task.scheduled}
+                    {format(task.scheduled, 'yyyy-MM-dd')}
+                {/if}
+                {#if task.deadline}
+                    <span class="deadline"
+                        >{format(task.deadline, 'yyyy-MM-dd')}</span
+                    >
+                {/if}
+                {task.title}
+            </button>
+        {/each}
     {/each}
 </div>
 
@@ -59,5 +59,9 @@
     }
     .deadline {
         color: orangered;
+    }
+
+    .date {
+        font-size: 89%;
     }
 </style>

@@ -1,48 +1,31 @@
 <script lang="ts">
     import { type CalendarDay, generateCalendar } from './calendar-utils.ts';
-    import { type CalendarData } from '../repository/NodeRepository';
     import { onMount } from 'svelte';
-    import type { FileItem } from '../file_item/FileItem';
-    import { extractTasks, type Task } from '../task/Task';
+    import { getTaskIcon, type Task } from '../task/Task';
     import { emit } from '@tauri-apps/api/event';
-    import { invoke } from '@tauri-apps/api/core';
-
-    export let onSelectItem: (fileItem: FileItem | undefined) => void;
-    export let dataFileItems: FileItem[] = [];
+    import { selectedItemStore, tasksStore } from '../../Stores';
 
     export let year: number;
     export let month: number;
 
     let calendars: CalendarDay[][] = [];
-    let calendarData: CalendarData | undefined = undefined;
-    let fileMap: Record<string, FileItem> = {};
 
     onMount(async () => {
         calendars = generateCalendar(year, month);
-        loadCalendarMap();
-        await reloadFiles();
     });
 
     $: if (year && month) {
         calendars = generateCalendar(year, month);
-        loadCalendarMap();
-        reloadFiles();
     }
 
-    function loadCalendarMap() {
-        invoke('tauri_get_commits_by_day', {
-            year,
-            month,
-        }).then((res) => {
-            const calendarMap = res as Record<number, string[]>;
-            calendarData = calendarMap;
-            console.log(calendarMap);
-        });
-    }
+    let tasks: Task[] = [];
+    tasksStore.subscribe((value) => {
+        tasks = value;
+    });
 
     let taskMap: Map<number, Task[]> = new Map();
     $: if (year && month) {
-        const tasks = extractTasks(dataFileItems)
+        const filteredTasks = tasks
             .filter(
                 (task) =>
                     (task.scheduled &&
@@ -60,7 +43,7 @@
         // insert tasks into taskMap.
         // the key is the day of month.
         const newTaskMap = new Map<number, Task[]>();
-        tasks.forEach((task) => {
+        filteredTasks.forEach((task) => {
             // at first, if task.scheduled, use it.
             // after that, if task.deadline, use it.
             for (const date of [task.finished, task.scheduled, task.deadline]) {
@@ -74,15 +57,22 @@
                 }
             }
         });
+        // sort tasks in each day.
+        // the key is the day of month.
+        // sort key is the type of task.
+        // task type is 'PLAN', 'DOING', 'WAITING', 'DONE', 'CANCELED'.
+        // Sort tasks by this order.
+        const taskTypeOrder = {
+            PLAN: 0,
+            DOING: 1,
+            WAITING: 2,
+            DONE: 3,
+            CANCELED: 4,
+        };
+        newTaskMap.forEach((tasks) => {
+            tasks.sort((a, b) => taskTypeOrder[a.type] - taskTypeOrder[b.type]);
+        });
         taskMap = newTaskMap;
-    }
-
-    async function reloadFiles() {
-        let newFileMap: Record<string, FileItem> = {};
-        for (let fileItem of dataFileItems) {
-            newFileMap[fileItem.filename.replace(/.+\//, '')] = fileItem;
-        }
-        fileMap = newFileMap;
     }
 
     function getDayClass(day) {
@@ -94,7 +84,7 @@
     }
 
     function handleTaskOnClick(task: Task) {
-        onSelectItem(task.fileItem);
+        selectedItemStore.set(task.fileItem);
         emit('go-to-line-number', task.lineNumber);
     }
 </script>
@@ -113,21 +103,13 @@
                                 {#each taskMap.get(day.day) || [] as task}
                                     <button
                                         on:click={() => handleTaskOnClick(task)}
-                                        >{#if task.type === 'PLAN'}📅{:else if task.finished && task.finished.getDate() === day.day}✅{:else if task.deadline && task.deadline.getDate() === day.day}🚨{:else if task.scheduled && task.scheduled.getDate() === day.day}💪{/if}
+                                        class={task.type.toLowerCase()}
+                                    >
+                                        <span class="icon"
+                                            >{getTaskIcon(task)}</span
+                                        >
                                         {task.title}
                                     </button>
-                                {/each}
-                            {/if}
-                            {#if calendarData}
-                                {#each calendarData[day.day] || [] as filename}
-                                    {#if fileMap[filename]}
-                                        <button
-                                            on:click={() =>
-                                                onSelectItem(fileMap[filename])}
-                                        >
-                                            {fileMap[filename].title}
-                                        </button>
-                                    {/if}
                                 {/each}
                             {/if}
                         {/if}
@@ -179,5 +161,10 @@
         margin: 0;
         cursor: pointer;
         border: darkslategrey 1px solid;
+    }
+
+    .canceled {
+        filter: grayscale(100%);
+        opacity: 0.4;
     }
 </style>

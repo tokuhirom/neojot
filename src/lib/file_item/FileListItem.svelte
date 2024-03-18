@@ -4,22 +4,27 @@
     import { onDestroy, onMount } from 'svelte';
     import { format } from 'date-fns';
     import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
+    import {
+        searchKeywordStore,
+        searchRegexesStore,
+        selectedItemStore,
+    } from '../../Stores';
 
-    export let onSelectItem: (fileItem: FileItem) => void;
     export let fileItem: FileItem;
     export let matchLines: MatchedLine[] | undefined;
-    export let searchWord: string | undefined;
-    export let selectedItem: FileItem;
     export let enterViewerMode: () => void = () => {};
     export let viewerMode: boolean = false;
-    export let migemoRegexes: RegExp[] | undefined = undefined;
+    let migemoRegexes: RegExp[] | undefined = undefined;
+    searchRegexesStore.subscribe((value) => {
+        migemoRegexes = value;
+    });
 
     let searchWords: string[] | undefined = undefined;
 
-    $: if (searchWord) {
-        searchWords =
-            searchWord.length > 0 ? searchWord.split(/\s+/) : undefined;
-    }
+    searchWords =
+        $searchKeywordStore.length > 0
+            ? $searchKeywordStore.split(/\s+/)
+            : undefined;
 
     const unlisten = listen('change_title', (e) => {
         const payload = e.payload as { filename: string };
@@ -32,14 +37,19 @@
     });
 
     function handleOnClick(e: Event) {
-        if (fileItem.filename === selectedItem.filename) {
+        console.log('handleOnClick', fileItem.filename);
+        if (
+            $selectedItemStore &&
+            fileItem.filename === $selectedItemStore.filename
+        ) {
+            console.log('Clicked already selected item. Entering viewer mode.');
             enterViewerMode();
             return;
         }
 
-        const elem = e.target as HTMLElement;
-        onSelectItem(fileItem);
+        $selectedItemStore = fileItem;
 
+        const elem = e.target as HTMLElement;
         const lineNumber = elem.getAttribute('data-lineNumber');
         if (lineNumber && lineNumber.length) {
             emit('go-to-line-number', parseInt(lineNumber, 10));
@@ -91,9 +101,11 @@
 
     let buttonElement;
 
-    $: if (selectedItem && selectedItem.filename === fileItem.filename) {
-        scrollToView();
-    }
+    selectedItemStore.subscribe((value) => {
+        if (value && value.filename === fileItem.filename) {
+            scrollToView();
+        }
+    });
 
     function scrollToView() {
         if (buttonElement) {
@@ -120,7 +132,8 @@
     <button
         bind:this={buttonElement}
         on:click={handleOnClick}
-        class:active={selectedItem.filename === fileItem.filename}
+        class:active={$selectedItemStore &&
+            $selectedItemStore.filename === fileItem.filename}
         class:viewer-mode={viewerMode}
         ><span class="title">{fileItem.title}</span>
         {#if matchLines && searchWords}

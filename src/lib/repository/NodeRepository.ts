@@ -34,6 +34,7 @@ export async function loadFileList(prefix: string): Promise<FileItem[]> {
     console.log('loaded file items');
     console.log(fileItems);
 
+    fileItems.sort((a, b) => b.mtime - a.mtime); // sort it.
     return fileItems;
 }
 

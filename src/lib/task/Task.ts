@@ -1,9 +1,11 @@
 import type { FileItem } from '../file_item/FileItem';
 import { differenceInDays, startOfDay } from 'date-fns';
 import { parse as parseDate2 } from 'date-fns';
+import { emit } from '@tauri-apps/api/event';
+import { selectedItemStore } from '../../Stores';
 
 export type Task = {
-    type: string;
+    type: 'TODO' | 'WAITING' | 'CANCELED' | 'DONE' | 'PLAN' | 'DOING' | 'NOTE';
     scheduled: Date | null;
     deadline: Date | null;
     finished: Date | null;
@@ -26,11 +28,7 @@ export function calculateFreshness(
     },
     today: Date,
 ): number {
-    if (
-        task.type === 'COMPLETED' ||
-        task.type === 'CANCELED' ||
-        task.type === 'DONE'
-    ) {
+    if (task.type === 'CANCELED' || task.type === 'DONE') {
         return -Infinity;
     }
 
@@ -176,6 +174,8 @@ export function getTaskIcon(task: Task): string {
         return '✍️';
     } else if (task.type === 'WAITING') {
         return '⏳';
+    } else if (task.type === 'CANCELED') {
+        return '❌';
     } else if (task.deadline && task.deadline.getDate() <= today.getDate()) {
         return '🚨';
     } else if (task.scheduled && task.scheduled.getDate() === today.getDate()) {
@@ -183,4 +183,9 @@ export function getTaskIcon(task: Task): string {
     } else {
         return '📝';
     }
+}
+
+export async function openTask(task: Task) {
+    selectedItemStore.set(task.fileItem);
+    await emit('go-to-line-number', task.lineNumber);
 }

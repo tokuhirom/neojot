@@ -4,7 +4,7 @@
     import ArchiveView from './lib/views/ArchiveView.svelte';
     import TaskView from './lib/views/TaskView.svelte';
     import CalendarView from './lib/views/CalendarView.svelte';
-    import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event';
+    import { listen, type UnlistenFn } from '@tauri-apps/api/event';
     import { onDestroy, onMount } from 'svelte';
     import ConfigurationView from './lib/views/ConfigurationView.svelte';
     import {
@@ -12,23 +12,35 @@
         createNewFileWithContent,
         deleteArchivedFile,
         loadFileList,
-        loadMarkdownFile,
-        unarchiveFile,
     } from './lib/repository/NodeRepository';
     import type { FileItem } from './lib/file_item/FileItem';
     import ManualView from './lib/views/ManualView.svelte';
     import { initGit } from './lib/git/GitCommands';
     import { cachedExtractLinks } from './lib/file_item/AutoLinks';
+    import {
+        dataFileItemsStore,
+        searchKeywordStore,
+        selectedItemStore,
+    } from './Stores';
+    import { extractTasks } from './lib/task/Task';
+    import { tasksStore } from './Stores.js';
+    import { sortTasks } from './lib/task/Task.js';
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
+    selectedItemStore.subscribe((value) => {
+        selectedItem = value;
+    });
+
     let dataFileItems: FileItem[] = [];
-    let archivedFileItems: FileItem[] = [];
+    dataFileItemsStore.subscribe((value) => {
+        dataFileItems = value;
+    });
 
     onMount(async () => {
-        await reloadFiles();
-        if (dataFileItems.length > 0) {
-            selectedItem = dataFileItems[0];
+        const items = await reloadFiles();
+        if (items.length > 0) {
+            selectedItem = items[0];
         }
 
         await initGit();
@@ -50,14 +62,10 @@
         }
     }
 
-    async function reloadFiles() {
+    async function reloadFiles(): Promise<FileItem[]> {
         const data = await loadFileList('data');
-        data.sort((a, b) => b.mtime - a.mtime); // sort it.
-        dataFileItems = data;
-
-        const archived = await loadFileList('archived');
-        archived.sort((a, b) => b.mtime - a.mtime); // sort it.
-        archivedFileItems = archived;
+        $dataFileItemsStore = data;
+        return data;
     }
 
     async function archiveOrDeleteEntry(
@@ -80,18 +88,6 @@
         }
     }
 
-    async function unarchiveEntry(
-        fileItem: FileItem,
-    ): Promise<FileItem | undefined> {
-        if (fileItem.filename.startsWith('archived/')) {
-            console.log(`Deleting: ${fileItem.filename}`);
-            await unarchiveFile(fileItem);
-            await reloadFiles();
-        } else {
-            throw new Error("It's not archived");
-        }
-    }
-
     let unlistenCallbackPromises: UnlistenFn[] = [];
 
     onMount(async () => {
@@ -109,12 +105,6 @@
             );
         }
         unlistenCallbackPromises.push(
-            await listen('sort_file_list', async () => {
-                dataFileItems.sort((a, b) => b.mtime - a.mtime);
-                dataFileItems = dataFileItems;
-            }),
-        );
-        unlistenCallbackPromises.push(
             await listen('do_new_file', async () => {
                 console.log('do_new_file');
 
@@ -124,19 +114,16 @@
                     tabPane = 'list';
                 }
 
-                dataFileItems.unshift(fileItem);
-
-                dataFileItems = dataFileItems; // reload ListView's file list.
-
-                selectedItem = fileItem;
-
-                await emit('clear_search_keyword');
+                $dataFileItemsStore = [fileItem, ...$dataFileItemsStore];
+                $selectedItemStore = fileItem;
+                $searchKeywordStore = '';
             }),
         );
         unlistenCallbackPromises.push(
             await listen('do_archive', async () => {
                 if (selectedItem) {
                     selectedItem = await archiveOrDeleteEntry(selectedItem);
+                    $selectedItemStore = selectedItem;
                 }
             }),
         );
@@ -151,16 +138,6 @@
             unlistenCallbackPromise();
         }
     });
-
-    async function onSelectItem(fileItem: FileItem | undefined) {
-        console.log(
-            `onSelectItem: ${fileItem ? fileItem.filename : 'undefined'}`,
-        );
-        if (fileItem != undefined) {
-            fileItem.content = await loadMarkdownFile(fileItem.filename);
-        }
-        selectedItem = fileItem;
-    }
 
     // タイトルの補完用に使う配列
     let pageTitles: string[];
@@ -202,6 +179,11 @@
     function findEntryByTitle(title: string): FileItem | undefined {
         return lowerTitle2fileItem[title.toLowerCase()];
     }
+
+    dataFileItemsStore.subscribe((value) => {
+        const tasks = sortTasks(extractTasks(value));
+        tasksStore.set(tasks);
+    });
 </script>
 
 <main class="container">
@@ -240,38 +222,21 @@
         {#if tabPane === 'list'}
             <ListView
                 {dataFileItems}
-                {selectedItem}
-                {onSelectItem}
                 {pageTitles}
                 {findEntryByTitle}
                 {autoLinks}
             />
         {:else if tabPane === 'archive'}
-            <ArchiveView
-                {selectedItem}
-                {archivedFileItems}
-                {onSelectItem}
-                {archiveOrDeleteEntry}
-                {unarchiveEntry}
-            />
+            <ArchiveView />
         {:else if tabPane === 'task'}
             <TaskView
                 {dataFileItems}
-                {selectedItem}
-                {onSelectItem}
                 {pageTitles}
                 {findEntryByTitle}
                 {autoLinks}
             />
         {:else if tabPane === 'calendar'}
-            <CalendarView
-                {dataFileItems}
-                {onSelectItem}
-                {selectedItem}
-                {pageTitles}
-                {findEntryByTitle}
-                {autoLinks}
-            />
+            <CalendarView {pageTitles} {findEntryByTitle} {autoLinks} />
         {:else if tabPane === 'manual'}
             <ManualView />
         {:else if tabPane === 'configuration'}
@@ -279,8 +244,6 @@
         {:else}
             <CardView
                 {dataFileItems}
-                {selectedItem}
-                {onSelectItem}
                 {pageTitles}
                 {findEntryByTitle}
                 {autoLinks}

@@ -4,13 +4,16 @@
     import EntryView from '../markdown/EntryView.svelte';
     import LinkCards from '../link/LinkCards.svelte';
     import CalendarTable from '../calendar/CalendarTable.svelte';
+    import { selectedItemStore } from '../../Stores';
 
-    export let onSelectItem: (fileItem: FileItem | undefined) => void;
-    export let dataFileItems: FileItem[] = [];
-    export let selectedItem: FileItem | undefined = undefined;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
+
+    let selectedItem: FileItem | undefined = undefined;
+    selectedItemStore.subscribe((value) => {
+        selectedItem = value;
+    });
 
     let year: number;
     let month: number;
@@ -20,20 +23,6 @@
         year = currentDate.getFullYear();
         month = currentDate.getMonth() + 1;
     });
-
-    function openFile(fileItem: FileItem) {
-        selectedItem = fileItem;
-    }
-
-    function onSaved() {
-        selectedItem = selectedItem;
-    }
-
-    function onCreateItem(fileItem: FileItem) {
-        dataFileItems.unshift(fileItem);
-        dataFileItems = dataFileItems;
-        onSelectItem(fileItem);
-    }
 
     function gotoPrevMonth() {
         month--;
@@ -60,7 +49,7 @@
                 <h1>{year}-{month.toString().padStart(2, '0')}</h1>
                 <button on:click={gotoNextMonth} class="month-nav">Next</button>
             </div>
-            <CalendarTable {dataFileItems} {onSelectItem} {year} {month} />
+            <CalendarTable {year} {month} />
         {/if}
     </div>
     <div class="log-view">
@@ -70,21 +59,11 @@
             {/if}
             <EntryView
                 file={selectedItem}
-                fileItems={dataFileItems}
-                onSelectItem={openFile}
-                {onSaved}
-                {onCreateItem}
                 {pageTitles}
-                search={undefined}
                 {findEntryByTitle}
                 {autoLinks}
             />
-            <LinkCards
-                file={selectedItem}
-                {dataFileItems}
-                onSelectItem={openFile}
-                {onCreateItem}
-            />
+            <LinkCards file={selectedItem} />
         {/if}
     </div>
 </div>

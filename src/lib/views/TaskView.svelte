@@ -1,83 +1,60 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
     import { type FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
-    import LinkCards from '../link/LinkCards.svelte';
-    import { extractTasks, sortTasks, type Task } from '../task/Task';
-    import { emit } from '@tauri-apps/api/event';
+    import { type Task } from '../task/Task';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import TaskItem from '../task/TaskItem.svelte';
+    import {
+        searchKeywordStore,
+        selectedItemStore,
+        tasksStore,
+    } from '../../Stores';
 
-    let searchWord = '';
-
-    export let dataFileItems: FileItem[] = [];
-    export let selectedItem: FileItem | undefined = undefined;
-    export let onSelectItem: (FileItem) => void;
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
+
+    let selectedItem: FileItem | undefined = undefined;
+    selectedItemStore.subscribe((value) => {
+        selectedItem = value;
+    });
+
     let tasks: Task[] = [];
     let filteredTasks: Task[] = [];
 
-    onMount(() => {
-        tasks = sortTasks(extractTasks(dataFileItems));
-        if (tasks.length > 0) {
-            selectedItem = tasks[0].fileItem;
+    tasksStore.subscribe((value) => {
+        tasks = value;
+        if (selectedItem === undefined && tasks.length > 0) {
+            $selectedItemStore = tasks[0].fileItem;
         }
     });
 
-    $: if (dataFileItems) {
-        tasks = sortTasks(extractTasks(dataFileItems));
-    }
-
-    $: if (searchWord === '') {
+    $: if ($searchKeywordStore === '') {
         filteredTasks = tasks;
     } else {
         filteredTasks = tasks.filter((task) => {
-            return task.title.toLowerCase().includes(searchWord.toLowerCase());
+            return task.title
+                .toLowerCase()
+                .includes($searchKeywordStore.toLowerCase());
         });
-    }
-
-    function onSaved() {
-        selectedItem = selectedItem;
-    }
-
-    function onCreateItem(fileItem: FileItem) {
-        dataFileItems.unshift(fileItem);
-        dataFileItems = dataFileItems;
-        onSelectItem(fileItem);
-    }
-
-    function handleOnClick(task: Task) {
-        onSelectItem(task.fileItem);
-        emit('go-to-line-number', task.lineNumber);
     }
 </script>
 
 <div class="task-view">
     <div class="file-list">
-        <ClearableSearchBox bind:searchWord />
+        <ClearableSearchBox />
         {#each filteredTasks as task}
-            <TaskItem {task} {handleOnClick} fullSize="true" />
+            <TaskItem {task} fullSize="true" />
         {/each}
     </div>
     <div class="log-view">
         {#if selectedItem !== undefined}
             <EntryView
                 file={selectedItem}
-                {onSelectItem}
-                {onSaved}
-                {onCreateItem}
                 {pageTitles}
                 search={() => {}}
                 {findEntryByTitle}
                 {autoLinks}
-            />
-            <LinkCards
-                file={selectedItem}
-                {dataFileItems}
-                {onSelectItem}
-                {onCreateItem}
             />
         {/if}
     </div>

@@ -2,10 +2,16 @@
     import { format } from 'date-fns';
     import { calculateFreshness, type Task } from './Task';
     import TaskIcon from './TaskIcon.svelte';
+    import { selectedItemStore } from '../../Stores';
+    import { emit } from '@tauri-apps/api/event';
 
     export let task: Task;
-    export let handleOnClick: (task: Task) => void;
     export let fullSize: boolean = false;
+
+    function handleOnClick(task: Task) {
+        $selectedItemStore = task.fileItem;
+        emit('go-to-line-number', task.lineNumber);
+    }
 
     function determineClass(task: Task) {
         const now = new Date();
