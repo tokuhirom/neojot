@@ -13,3 +13,6 @@ export const tasksStore: Writable<Task[]> = writable([]);
 export const searchFilteredFileItemsStore: Writable<SearchResult[]> = writable(
     [],
 );
+
+export const lowerTitle2fileItemStore: Writable<Record<string, FileItem>> =
+    writable({});

@@ -19,6 +19,7 @@
     import { cachedExtractLinks } from './lib/file_item/AutoLinks';
     import {
         dataFileItemsStore,
+        lowerTitle2fileItemStore,
         searchKeywordStore,
         selectedItemStore,
     } from './Stores';
@@ -172,6 +173,7 @@
         });
         console.log(`lowerTitle2fileItem: ${Date.now() - t1}ms`);
         lowerTitle2fileItem = lowerMap;
+        lowerTitle2fileItemStore.set(lowerMap);
         autoLinks = newAutoLinks;
         pageTitles = newPageTitles;
     }
