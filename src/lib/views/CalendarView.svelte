@@ -6,7 +6,6 @@
     import CalendarTable from '../calendar/CalendarTable.svelte';
     import { selectedItemStore } from '../../Stores';
 
-    export let dataFileItems: FileItem[] = [];
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
@@ -50,7 +49,7 @@
                 <h1>{year}-{month.toString().padStart(2, '0')}</h1>
                 <button on:click={gotoNextMonth} class="month-nav">Next</button>
             </div>
-            <CalendarTable {dataFileItems} {year} {month} />
+            <CalendarTable {year} {month} />
         {/if}
     </div>
     <div class="log-view">

@@ -6,8 +6,6 @@
     import { emit } from '@tauri-apps/api/event';
     import { selectedItemStore, tasksStore } from '../../Stores';
 
-    export let dataFileItems: FileItem[] = [];
-
     export let year: number;
     export let month: number;
 

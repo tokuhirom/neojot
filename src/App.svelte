@@ -236,12 +236,7 @@
                 {autoLinks}
             />
         {:else if tabPane === 'calendar'}
-            <CalendarView
-                {dataFileItems}
-                {pageTitles}
-                {findEntryByTitle}
-                {autoLinks}
-            />
+            <CalendarView {pageTitles} {findEntryByTitle} {autoLinks} />
         {:else if tabPane === 'manual'}
             <ManualView />
         {:else if tabPane === 'configuration'}
