@@ -10,4 +10,6 @@ export const selectedItemStore: Writable<FileItem | undefined> =
 export const searchRegexesStore: Writable<RegExp[] | undefined> =
     writable(undefined);
 export const tasksStore: Writable<Task[]> = writable([]);
-export const searchFilteredFileItems: Writable<SearchResult[]> = writable([]);
+export const searchFilteredFileItemsStore: Writable<SearchResult[]> = writable(
+    [],
+);

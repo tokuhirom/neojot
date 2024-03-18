@@ -1,7 +1,7 @@
 <script lang="ts">
     import {
         dataFileItemsStore,
-        searchFilteredFileItems,
+        searchFilteredFileItemsStore,
         searchKeywordStore,
         searchRegexesStore,
     } from '../../Stores.ts';
@@ -28,7 +28,7 @@
     $: if (dataFileItems) {
         // TODO debounce?
         if (migemoRegexes) {
-            searchFilteredFileItems.set(
+            searchFilteredFileItemsStore.set(
                 searchFileItems(
                     dataFileItems,
                     $searchKeywordStore, // TODO maybe never used
@@ -36,7 +36,7 @@
                 ),
             );
         } else {
-            searchFilteredFileItems.set(
+            searchFilteredFileItemsStore.set(
                 dataFileItems.map((fileItem) => {
                     return { lines: [], fileItem } as SearchResult;
                 }),

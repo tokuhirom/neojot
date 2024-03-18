@@ -1,13 +1,13 @@
 <script lang="ts">
     import FileListItem from './FileListItem.svelte';
     import { type SearchResult } from './Search';
-    import { searchFilteredFileItems } from '../../Stores';
+    import { searchFilteredFileItemsStore } from '../../Stores';
 
     export let viewerMode: boolean = false;
     export let enterViewerMode: () => void = () => {};
 
     let searchResult: SearchResult[];
-    searchFilteredFileItems.subscribe((value) => {
+    searchFilteredFileItemsStore.subscribe((value) => {
         searchResult = value;
     });
 </script>

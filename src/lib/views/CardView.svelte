@@ -1,14 +1,15 @@
 <script lang="ts">
-    import { type FileItem, shouldShowFileItem } from '../file_item/FileItem';
+    import { type FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
     import LinkCards from '../link/LinkCards.svelte';
     import FileCardItem from '../card/FileCardItem.svelte';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
-    import { makeMigemoRegexes } from '../search/Migemo';
-    import { searchKeywordStore, selectedItemStore } from '../../Stores';
+    import {
+        searchFilteredFileItemsStore,
+        selectedItemStore,
+    } from '../../Stores';
 
-    export let dataFileItems: FileItem[] = [];
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
     export let autoLinks: string[];
@@ -19,19 +20,9 @@
     });
 
     let filteredFileItems: FileItem[];
-
-    let migemoRegexes: RegExp[] = [];
-    $: {
-        makeMigemoRegexes($searchKeywordStore).then((r) => {
-            migemoRegexes = r;
-        });
-    }
-
-    $: if (dataFileItems || migemoRegexes) {
-        filteredFileItems = dataFileItems.filter((it) =>
-            shouldShowFileItem(it, $searchKeywordStore, migemoRegexes),
-        );
-    }
+    searchFilteredFileItemsStore.subscribe((value) => {
+        filteredFileItems = value.map((it) => it.fileItem);
+    });
 </script>
 
 <div class="container">
