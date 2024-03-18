@@ -14,30 +14,16 @@
     export let month: number;
 
     let calendars: CalendarDay[][] = [];
-    let calendarData: CalendarData | undefined = undefined;
     let fileMap: Record<string, FileItem> = {};
 
     onMount(async () => {
         calendars = generateCalendar(year, month);
-        loadCalendarMap();
         await reloadFiles();
     });
 
     $: if (year && month) {
         calendars = generateCalendar(year, month);
-        loadCalendarMap();
         reloadFiles();
-    }
-
-    function loadCalendarMap() {
-        invoke('tauri_get_commits_by_day', {
-            year,
-            month,
-        }).then((res) => {
-            const calendarMap = res as Record<number, string[]>;
-            calendarData = calendarMap;
-            console.log(calendarMap);
-        });
     }
 
     let tasks: Task[] = [];
@@ -102,10 +88,6 @@
         selectedItemStore.set(task.fileItem);
         emit('go-to-line-number', task.lineNumber);
     }
-
-    function onSelectItem(fileItem: FileItem | undefined) {
-        selectedItemStore.set(fileItem);
-    }
 </script>
 
 <div>
@@ -122,22 +104,13 @@
                                 {#each taskMap.get(day.day) || [] as task}
                                     <button
                                         on:click={() => handleTaskOnClick(task)}
+                                        class={task.type.toLowerCase()}
                                     >
-                                        {getTaskIcon(task)}
+                                        <span class="icon"
+                                            >{getTaskIcon(task)}</span
+                                        >
                                         {task.title}
                                     </button>
-                                {/each}
-                            {/if}
-                            {#if calendarData}
-                                {#each calendarData[day.day] || [] as filename}
-                                    {#if fileMap[filename]}
-                                        <button
-                                            on:click={() =>
-                                                onSelectItem(fileMap[filename])}
-                                        >
-                                            {fileMap[filename].title}
-                                        </button>
-                                    {/if}
                                 {/each}
                             {/if}
                         {/if}
@@ -189,5 +162,10 @@
         margin: 0;
         cursor: pointer;
         border: darkslategrey 1px solid;
+    }
+
+    .canceled {
+        filter: grayscale(100%);
+        opacity: 0.4;
     }
 </style>
