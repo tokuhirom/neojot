@@ -87,7 +87,6 @@ class TaskWidget extends WidgetType {
                         task.deadline == null ||
                         !isEqual(task.scheduled, task.deadline)
                     ) {
-                        console.log(task.scheduled, task.deadline);
                         insert(task.deadline, task);
                     }
                     break;
