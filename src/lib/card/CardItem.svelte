@@ -45,6 +45,7 @@
         border-radius: 2px;
         text-align: left;
         vertical-align: top;
+        overflow-x: hidden;
     }
 
     .title {
