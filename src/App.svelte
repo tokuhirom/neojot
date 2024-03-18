@@ -40,7 +40,9 @@
 
     onMount(async () => {
         const items = await reloadFiles();
+        console.log(`Loaded ${items.length} items!`);
         if (items.length > 0) {
+            selectedItemStore.set(items[0]);
             selectedItem = items[0];
         }
 
