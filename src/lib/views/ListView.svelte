@@ -118,12 +118,6 @@
             },
         );
     }
-
-    function openTask(task: Task) {
-        onSelectItem(task.fileItem);
-        viewerMode = false;
-        emit('go-to-line-number', task.lineNumber);
-    }
 </script>
 
 <div class="list-view">
