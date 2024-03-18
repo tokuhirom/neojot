@@ -163,7 +163,7 @@
         {#if selectedItem}
             {selectedItem.title}
         {/if}
-        <QuickPadView {findOrCreateEntry} {openTask} {findEntryByTitle} />
+        <QuickPadView {findOrCreateEntry} {findEntryByTitle} />
     </div>
 </div>
 

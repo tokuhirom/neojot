@@ -21,7 +21,6 @@ class TaskWidget extends WidgetType {
         const container = document.createElement('div');
         container.className = 'task-widget';
         tasksStore.subscribe((tasks: Task[]) => {
-            console.log('tasks', tasks);
             if (this.inner) {
                 this.inner.$$set({ tasks });
             } else {
