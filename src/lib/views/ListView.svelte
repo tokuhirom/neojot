@@ -152,9 +152,6 @@
         {/if}
     </div>
     <div class="menu">
-        {#if selectedItem}
-            {selectedItem.title}
-        {/if}
         <QuickPadView {findOrCreateEntry} {findEntryByTitle} />
     </div>
 </div>
