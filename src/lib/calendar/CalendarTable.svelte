@@ -58,6 +58,21 @@
                 }
             }
         });
+        // sort tasks in each day.
+        // the key is the day of month.
+        // sort key is the type of task.
+        // task type is 'PLAN', 'DOING', 'WAITING', 'DONE', 'CANCELED'.
+        // Sort tasks by this order.
+        const taskTypeOrder = {
+            PLAN: 0,
+            DOING: 1,
+            WAITING: 2,
+            DONE: 3,
+            CANCELED: 4,
+        };
+        newTaskMap.forEach((tasks) => {
+            tasks.sort((a, b) => taskTypeOrder[a.type] - taskTypeOrder[b.type]);
+        });
         taskMap = newTaskMap;
     }
 
