@@ -1,7 +1,7 @@
 <script lang="ts">
     import { type FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
-    import { type Task } from '../task/Task';
+    import { calculateFreshness, type Task } from '../task/Task';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import TaskItem from '../task/TaskItem.svelte';
     import {
@@ -23,11 +23,20 @@
     let filteredTasks: Task[] = [];
 
     tasksStore.subscribe((value) => {
-        tasks = value;
+        tasks = sortTasks(value);
         if (selectedItem === undefined && tasks.length > 0) {
             $selectedItemStore = tasks[0].fileItem;
         }
     });
+
+    export function sortTasks(tasks: Task[]): Task[] {
+        const today = new Date();
+        tasks.sort(
+            (a, b) =>
+                calculateFreshness(b, today) - calculateFreshness(a, today),
+        );
+        return tasks;
+    }
 
     $: if ($searchKeywordStore === '') {
         filteredTasks = tasks;
@@ -69,7 +78,7 @@
         padding-right: 8px;
     }
     .file-list {
-        flex: 0 0 250px;
+        flex: 0 0 30%;
         height: 100vh;
         overflow-y: auto;
         padding-right: 9px;

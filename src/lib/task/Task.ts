@@ -156,14 +156,6 @@ function extractTaskFromFileItem(fileItem: FileItem): Task[] {
         .filter((it) => it) as Task[];
 }
 
-export function sortTasks(tasks: Task[]): Task[] {
-    const today = new Date();
-    tasks.sort(
-        (a, b) => calculateFreshness(b, today) - calculateFreshness(a, today),
-    );
-    return tasks;
-}
-
 export function getTaskIcon(task: Task): string {
     const today = startOfDay(new Date());
     if (task.type === 'DONE') {
