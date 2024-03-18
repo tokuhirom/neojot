@@ -36,7 +36,7 @@
         } else {
             title = file.title;
             content = file.content
-                .replace(/^<<< .*?$/gms, '')
+                .replace(/^(ALIAS|AUTOLINK):\s*.*?$/gms, '')
                 .replace(/\[\[(.*?)]]/g, '$1')
                 .split('\n')
                 .slice(1)
