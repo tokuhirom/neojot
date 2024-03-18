@@ -43,8 +43,10 @@
                 .join('\n');
 
             // content に markdown の画像記法が含まれていた場合は、それを読み取ります。
-            // 次に data scheme で imgSrc に格納します
-            imgSrc = await cachedLoadImage(file);
+            // lazy loading...
+            setTimeout(async () => {
+                imgSrc = await cachedLoadImage(file);
+            }, 0);
         }
     }
 </script>
