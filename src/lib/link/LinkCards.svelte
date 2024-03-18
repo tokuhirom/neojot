@@ -4,14 +4,23 @@
     import { buildLinks, type Links } from './Links';
     import CardItem from '../card/CardItem.svelte';
     import { createNewFileWithContent } from '../repository/NodeRepository';
-    import { dataFileItemsStore, selectedItemStore } from '../../Stores';
+    import {
+        dataFileItemsStore,
+        lowerTitle2fileItemStore,
+        selectedItemStore,
+    } from '../../Stores';
 
     export let file: FileItem;
+
+    let lowerTitle2fileItem = {};
+    lowerTitle2fileItemStore.subscribe((value) => {
+        lowerTitle2fileItem = value;
+    });
 
     let links: Links | undefined = undefined;
 
     $: if (file) {
-        links = buildLinks(file, $dataFileItemsStore);
+        links = buildLinks(file, lowerTitle2fileItem, $dataFileItemsStore);
     }
 
     async function createNewEntry(title: string) {

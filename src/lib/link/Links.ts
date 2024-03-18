@@ -54,15 +54,11 @@ export function extractLinks(fileItems: FileItem[]): {
 
 export function buildLinks(
     selectedFileItem: FileItem,
+    lowerTitle2fileItem: Record<string, FileItem>,
     fileItems: FileItem[],
 ): Links {
     console.log('Starting buildLinks');
     const t0 = Date.now();
-
-    const lowerTitle2fileItem: Record<string, FileItem> = {};
-    for (const fileItem of fileItems) {
-        lowerTitle2fileItem[fileItem.title.toLowerCase()] = fileItem;
-    }
 
     const { forward, backward } = extractLinks(fileItems);
 
