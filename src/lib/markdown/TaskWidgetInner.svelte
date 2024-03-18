@@ -1,23 +1,14 @@
 <script lang="ts">
-    import {
-        calculateFreshness,
-        getTaskIcon,
-        openTask,
-        type Task,
-    } from '../task/Task';
+    import { getTaskIcon, openTask, type Task } from '../task/Task';
     import { format } from 'date-fns';
+    import type { DateTasks } from './TaskPlugin';
 
-    export let tasks: Task[];
-    let filteredTasks: Task[];
-    $: {
-        filteredTasks = tasks.filter((task) => {
-            return calculateFreshness(task, new Date()) >= 0;
-        });
-    }
+    export let doing: Task[];
+    export let dateTasks: DateTasks[];
 </script>
 
 <div>
-    {#each filteredTasks as task}
+    {#each doing as task}
         <button on:click={async () => await openTask(task)}>
             {getTaskIcon(task)}
             {#if task.type === 'PLAN' && task.scheduled}
@@ -30,6 +21,23 @@
             {/if}
             {task.title}
         </button>
+    {/each}
+    {#each dateTasks as dateTask}
+        <div class="date">{dateTask.date}</div>
+        {#each dateTask.tasks as task}
+            <button on:click={async () => await openTask(task)}>
+                {getTaskIcon(task)}
+                {#if task.type === 'PLAN' && task.scheduled}
+                    {format(task.scheduled, 'yyyy-MM-dd')}
+                {/if}
+                {#if task.deadline}
+                    <span class="deadline"
+                        >{format(task.deadline, 'yyyy-MM-dd')}</span
+                    >
+                {/if}
+                {task.title}
+            </button>
+        {/each}
     {/each}
 </div>
 
@@ -51,5 +59,9 @@
     }
     .deadline {
         color: orangered;
+    }
+
+    .date {
+        font-size: 89%;
     }
 </style>

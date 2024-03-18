@@ -5,7 +5,7 @@ import { emit } from '@tauri-apps/api/event';
 import { selectedItemStore } from '../../Stores';
 
 export type Task = {
-    type: string;
+    type: 'TODO' | 'WAITING' | 'CANCELED' | 'DONE' | 'PLAN' | 'DOING' | 'NOTE';
     scheduled: Date | null;
     deadline: Date | null;
     finished: Date | null;
@@ -28,11 +28,7 @@ export function calculateFreshness(
     },
     today: Date,
 ): number {
-    if (
-        task.type === 'COMPLETED' ||
-        task.type === 'CANCELED' ||
-        task.type === 'DONE'
-    ) {
+    if (task.type === 'CANCELED' || task.type === 'DONE') {
         return -Infinity;
     }
 

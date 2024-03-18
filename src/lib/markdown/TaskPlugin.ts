@@ -9,6 +9,12 @@ import { RangeSetBuilder } from '@codemirror/state';
 import { type Task } from '../task/Task';
 import TaskWidgetInner from './TaskWidgetInner.svelte';
 import { tasksStore } from '../../Stores';
+import { addDays, format, isEqual } from 'date-fns';
+
+export type DateTasks = {
+    date: string;
+    tasks: Task[];
+};
 
 class TaskWidget extends WidgetType {
     private inner: TaskWidgetInner | undefined = undefined;
@@ -21,18 +27,81 @@ class TaskWidget extends WidgetType {
         const container = document.createElement('div');
         container.className = 'task-widget';
         tasksStore.subscribe((tasks: Task[]) => {
+            const filteredTasks: Record<string, Task[]> = this.filter(tasks);
+            console.log(filteredTasks);
+
+            const doing = filteredTasks['DOING'] || [];
+            const dateTasks: DateTasks[] = [];
+            for (const dt of Object.keys(filteredTasks)) {
+                if (dt !== 'DOING') {
+                    const tasks = filteredTasks[dt];
+                    if (tasks && tasks.length > 0) {
+                        dateTasks.push({ date: dt, tasks });
+                    }
+                }
+            }
+
             if (this.inner) {
-                this.inner.$$set({ tasks });
+                this.inner.$$set({ tasks, doing, dateTasks });
             } else {
                 this.inner = new TaskWidgetInner({
                     target: container,
                     props: {
                         tasks,
+                        doing,
+                        dateTasks,
                     },
                 });
             }
         });
         return container;
+    }
+
+    private filter(tasks: Task[]): Record<string, Task[]> {
+        const result: Record<string, Task[]> = {};
+        const start = new Date();
+        const end = addDays(new Date(), 7);
+
+        function insert(d: Date | null, task: Task) {
+            if (d && start <= d && d <= end) {
+                const date = format(d, 'yyyy-MM-dd(EEE)');
+                result[date] = [...(result[date] || []), task];
+            }
+        }
+
+        tasks.forEach((task) => {
+            switch (task.type) {
+                case 'DOING':
+                    result['DOING'] = [...(result['DOING'] || []), task];
+                    break;
+
+                case 'PLAN':
+                    insert(task.scheduled, task);
+                    break;
+
+                case 'NOTE':
+                case 'TODO':
+                    insert(task.scheduled, task);
+                    if (
+                        task.scheduled == null ||
+                        task.deadline == null ||
+                        !isEqual(task.scheduled, task.deadline)
+                    ) {
+                        console.log(task.scheduled, task.deadline);
+                        insert(task.deadline, task);
+                    }
+                    break;
+
+                case 'WAITING':
+                    insert(task.deadline, task);
+                    break;
+
+                case 'DONE': // ignore completed tasks
+                case 'CANCELED':
+                    break;
+            }
+        });
+        return result;
     }
 }
 
