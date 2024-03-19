@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest';
 import { buildLinks, extractLinks, type Links } from './Links';
 import type { FileItem } from '../file_item/FileItem';
+import { lowerTitle2fileItemStore } from '../../Stores';
 
 // for debugging
 function dumpLinks(links: Links) {
@@ -104,7 +105,11 @@ test('extractLinks', () => {
 });
 
 test('buildLinks', () => {
-    const links = buildLinks(orig, fileItems);
+    const lowerTitle2fileItem: Record<string, FileItem> = {};
+    fileItems.forEach(
+        (it) => (lowerTitle2fileItem[it.title.toLowerCase()] = it),
+    );
+    const links = buildLinks(orig, lowerTitle2fileItem, fileItems);
 
     dumpLinks(links);
 

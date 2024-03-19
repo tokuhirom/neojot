@@ -44,7 +44,7 @@ describe('searchFileItems', () => {
             },
         ];
         const regExps = [new RegExp('hello', 'i')];
-        const results = searchFileItems(fileItems, 'hello', regExps);
+        const results = searchFileItems(fileItems, regExps);
         expect(results.map((it) => it.fileItem.filename)).toStrictEqual([
             'doc.md',
             'doc2.md',

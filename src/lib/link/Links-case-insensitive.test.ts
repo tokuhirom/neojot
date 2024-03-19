@@ -45,11 +45,15 @@ test('extractLinks', () => {
 });
 
 test('buildLinks', () => {
-    const links = buildLinks(lang, fileItems);
+    const lowerTitle2fileItem: Record<string, FileItem> = {};
+    fileItems.forEach(
+        (it) => (lowerTitle2fileItem[it.title.toLowerCase()] = it),
+    );
+    const links = buildLinks(lang, lowerTitle2fileItem, fileItems);
 
     dumpLinks(links);
 
-    expect(links.newLinks).toStrictEqual(['bad']);
+    expect(links.newLinks).toStrictEqual(['BAD']);
     expect(new Set(links.links.map((it) => it.title))).toStrictEqual(
         new Set([]),
     );
