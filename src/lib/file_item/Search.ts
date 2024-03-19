@@ -9,17 +9,16 @@ export type SearchResult = {
 
 export function searchFileItems(
     fileItems: FileItem[],
-    searchWord: string,
     regExps: RegExp[] | undefined,
 ): SearchResult[] {
-    if (searchWord.length === 0 || !regExps) {
+    if (!regExps) {
         return fileItems.map((fileItem) => {
             return { lines: [], fileItem };
         });
     } else {
         return fileItems
             .map((fileItem) => {
-                const lines = searchLinesByWord(fileItem, searchWord, regExps);
+                const lines = searchLinesByWord(fileItem, regExps);
                 if (lines) {
                     return { lines, fileItem } as SearchResult;
                 } else {
@@ -32,14 +31,13 @@ export function searchFileItems(
 
 function searchLinesByWord(
     fileItem: FileItem,
-    searchWord: string,
     regExps: RegExp[],
 ): MatchedLine[] | undefined {
-    if (searchWord.length > 0) {
+    if (regExps && regExps.length > 0) {
         if (fileItem.filename.endsWith('.excalidraw')) {
             return searchExcalidrawFile(fileItem, regExps);
         } else {
-            return searchMarkdownFile(fileItem, searchWord, regExps);
+            return searchMarkdownFile(fileItem, regExps);
         }
     } else {
         // without search word, there's no matched lines.
@@ -71,14 +69,20 @@ function searchExcalidrawFile(
     }
 }
 
+// if there's no matched lines, return undefined.
 function searchMarkdownFile(
     fileItem: FileItem,
-    searchWord: string,
     regExps: RegExp[],
 ): MatchedLine[] | undefined {
     const contentLines = fileItem.content.split(/\n/);
+    // matches all keywords?
+    if (!regExps.every((regex) => regex.test(fileItem.content.toLowerCase()))) {
+        return undefined;
+    }
+
     const lines = contentLines
         .map((line, index) => {
+            // find the line, that is matched to one of the keyword.
             if (regExps.some((regex) => regex.test(line.toLowerCase()))) {
                 return {
                     content: line,
@@ -91,11 +95,14 @@ function searchMarkdownFile(
         .filter((it) => it !== undefined) as MatchedLine[];
 
     if (lines.length > 0) {
+        // タイトル行は、タイトル行としてすでに表示されるので除外する
+        // ALIAS, AUTOLINK も表示されても意味ないので除外
         return lines.filter(
             (line) =>
                 !(
                     line.content.startsWith('# ') ||
-                    line.content.startsWith('<<< ')
+                    line.content.startsWith('ALIAS:') ||
+                    line.content.startsWith('AUTOLINK:')
                 ),
         );
     } else {

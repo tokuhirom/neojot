@@ -29,11 +29,7 @@
         // TODO debounce?
         if (migemoRegexes) {
             searchFilteredFileItemsStore.set(
-                searchFileItems(
-                    dataFileItems,
-                    $searchKeywordStore, // TODO maybe never used
-                    migemoRegexes,
-                ),
+                searchFileItems(dataFileItems, migemoRegexes),
             );
         } else {
             searchFilteredFileItemsStore.set(
