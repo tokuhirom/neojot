@@ -23,7 +23,7 @@ class AliasPlugin {
 
     computeDecorations(view: EditorView): RangeSet<Decoration> {
         const builder = new RangeSetBuilder<Decoration>();
-        const regex = /^ALIAS:\s+(.+)$/gm;
+        const regex = /^(ALIAS|AUTOLINK):\s+(.+)$/gm;
         for (const { from, to } of view.visibleRanges) {
             const text = view.state.doc.sliceString(from, to);
             let match;
@@ -31,9 +31,9 @@ class AliasPlugin {
                 const start = from + match.index;
                 const end = start + match[0].length;
                 const linkDecoration = Decoration.mark({
-                    class: 'link-plugin-link',
+                    class: 'keyword-plugin-' + match[1].toLowerCase(),
                     attributes: {
-                        'data-keyword': match[1],
+                        'data-keyword': match[2],
                     },
                 });
                 builder.add(start, end, linkDecoration);
@@ -51,7 +51,10 @@ export const aliasPlugin = function () {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             mousedown: (event: MouseEvent, _view: EditorView) => {
                 const target = event.target as HTMLElement;
-                if (target.matches('.link-plugin-link')) {
+                if (
+                    target.matches('.keyword-plugin-alias') ||
+                    target.matches('.keyword-plugin-autolink')
+                ) {
                     // ここでリンクのクリックイベントを処理
                     console.log(`link clicked! ${target.innerText}`);
 

@@ -113,3 +113,14 @@ button {
     border: #24c8db 1px solid;
     padding: 4px;
 }
+
+.keyword-plugin-autolink {
+    color: chocolate;
+    cursor: pointer;
+    text-decoration: none;
+}
+.keyword-plugin-alias {
+    color: darkolivegreen;
+    cursor: pointer;
+    text-decoration: none;
+}
