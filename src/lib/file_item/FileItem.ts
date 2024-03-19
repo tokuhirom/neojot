@@ -32,27 +32,6 @@ export function extractTitle(content: string) {
         return '';
     }
 }
-
-export function shouldShowFileItem(
-    fileItem: FileItem,
-    searchWord: string,
-    regExps: RegExp[] | undefined,
-): boolean {
-    if (searchWord.length == 0 || !regExps) {
-        return true;
-    }
-
-    const lowerCaseTitle = fileItem.title.toLowerCase();
-    const lowerCaseContent = fileItem.content.toLowerCase();
-
-    for (const re of regExps) {
-        if (!re.test(lowerCaseTitle) && !re.test(lowerCaseContent)) {
-            return false;
-        }
-    }
-    return true;
-}
-
 export function extractBrackets(content: string): string[] {
     const pattern = /\[\[([^|]+?)]]/g;
     const matches = [];
