@@ -87,6 +87,8 @@ export async function cachedLoadImage(
     }
 }
 
+// TODO: load image by <img> tag.
+// see https://github.com/tauri-apps/tauri/discussions/1438
 async function loadImage(fileItem: FileItem): Promise<string | undefined> {
     const match = fileItem.content.match(/!\[.*]\((.*)\)/);
     if (match) {
