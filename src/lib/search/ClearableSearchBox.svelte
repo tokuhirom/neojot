@@ -7,7 +7,7 @@
     } from '../../Stores.ts';
     import { makeMigemoRegexes } from './Migemo';
     import { type FileItem } from '../file_item/FileItem.ts';
-    import { searchFileItems, type SearchResult } from '../file_item/Search';
+    import { searchFileItems } from '../file_item/Search';
     import BasicClearableSearchBox from './BasicClearableSearchBox.svelte';
 
     let migemoRegexes: RegExp[] | undefined = undefined;

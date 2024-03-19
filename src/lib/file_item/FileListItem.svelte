@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { FileItem, MatchedLine } from './FileItem';
     import { emit, listen } from '@tauri-apps/api/event';
-    import { onDestroy, onMount } from 'svelte';
+    import { onMount } from 'svelte';
     import { format } from 'date-fns';
     import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
     import {

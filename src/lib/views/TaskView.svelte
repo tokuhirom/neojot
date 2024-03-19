@@ -2,13 +2,8 @@
     import { type FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
     import { type Task } from '../task/Task';
-    import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import TaskItem from '../task/TaskItem.svelte';
-    import {
-        searchKeywordStore,
-        selectedItemStore,
-        tasksStore,
-    } from '../../Stores';
+    import { selectedItemStore, tasksStore } from '../../Stores';
     import BasicClearableSearchBox from '../search/BasicClearableSearchBox.svelte';
 
     export let pageTitles: string[];
