@@ -9,6 +9,7 @@
         selectedItemStore,
         tasksStore,
     } from '../../Stores';
+    import BasicClearableSearchBox from '../search/BasicClearableSearchBox.svelte';
 
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
@@ -61,20 +62,19 @@
         return score;
     }
 
-    $: if ($searchKeywordStore === '') {
+    let keyword: string = '';
+    $: if (keyword === '') {
         filteredTasks = tasks;
     } else {
         filteredTasks = tasks.filter((task) => {
-            return task.title
-                .toLowerCase()
-                .includes($searchKeywordStore.toLowerCase());
+            return task.title.toLowerCase().includes(keyword.toLowerCase());
         });
     }
 </script>
 
 <div class="task-view">
     <div class="file-list">
-        <ClearableSearchBox />
+        <BasicClearableSearchBox bind:keyword />
         {#each filteredTasks as task}
             <TaskItem {task} fullSize="true" />
         {/each}
