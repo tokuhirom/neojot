@@ -26,14 +26,16 @@
             ? $searchKeywordStore.split(/\s+/)
             : undefined;
 
-    const unlisten = listen('change_title', (e) => {
-        const payload = e.payload as { filename: string };
-        if (payload.filename === fileItem.filename) {
-            fileItem = fileItem;
-        }
-    });
-    onDestroy(async () => {
-        (await unlisten)();
+    onMount(async () => {
+        const unlisten = await listen('change_title', (e) => {
+            const payload = e.payload as { filename: string };
+            if (payload.filename === fileItem.filename) {
+                fileItem = fileItem;
+            }
+        });
+        return () => {
+            unlisten();
+        };
     });
 
     function handleOnClick(e: Event) {
