@@ -41,7 +41,7 @@ export function autoLinkHighlightPlugin(
             }
 
             update(update: ViewUpdate) {
-                if (update.docChanged || update.selectionSet) {
+                if (update.docChanged) {
                     // TODO: needs debounce?
                     this.decorations = this.computeDecorations(
                         update.view,
