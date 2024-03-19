@@ -55,12 +55,12 @@
         console.log(`Switched tabPane to ${tabPane}`);
         if (tabPane === 'list') {
             if (dataFileItems.length > 0) {
-                selectedItem = dataFileItems[0];
+                selectedItemStore.set(dataFileItems[0]);
             } else {
-                selectedItem = undefined;
+                selectedItemStore.set(undefined);
             }
         } else {
-            selectedItem = undefined;
+            selectedItemStore.set(undefined);
         }
     }
 
