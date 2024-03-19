@@ -1,9 +1,20 @@
 <script lang="ts">
     export let keyword: string;
+
+    function handleKeydown(event: KeyboardEvent) {
+        if (event.key === 'Escape') {
+            keyword = '';
+        }
+    }
 </script>
 
 <div class="clearable-search-box">
-    <input type="text" bind:value={keyword} class="search-input" />
+    <input
+        type="text"
+        bind:value={keyword}
+        class="search-input"
+        on:keydown={handleKeydown}
+    />
     {#if keyword}
         <button class="clear-btn" on:click={() => (keyword = '')}>✗</button>
     {/if}
