@@ -109,7 +109,7 @@ export const todoPlugin = ViewPlugin.fromClass(
         }
 
         update(update: ViewUpdate) {
-            if (update.docChanged || update.selectionSet) {
+            if (update.docChanged) {
                 this.decorations = this.computeDecorations(update.view);
             }
         }

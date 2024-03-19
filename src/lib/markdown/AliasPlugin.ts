@@ -16,7 +16,7 @@ class AliasPlugin {
     }
 
     update(update: ViewUpdate) {
-        if (update.docChanged || update.selectionSet) {
+        if (update.docChanged) {
             this.decorations = this.computeDecorations(update.view);
         }
     }
