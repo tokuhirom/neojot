@@ -28,17 +28,9 @@
     });
     $: if (dataFileItems) {
         // TODO debounce?
-        if (migemoRegexes) {
-            searchFilteredFileItemsStore.set(
-                searchFileItems(dataFileItems, migemoRegexes),
-            );
-        } else {
-            searchFilteredFileItemsStore.set(
-                dataFileItems.map((fileItem) => {
-                    return { lines: [], fileItem } as SearchResult;
-                }),
-            );
-        }
+        searchFilteredFileItemsStore.set(
+            searchFileItems(dataFileItems, migemoRegexes),
+        );
     }
 </script>
 
