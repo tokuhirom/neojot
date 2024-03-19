@@ -1,7 +1,7 @@
 <script lang="ts">
     import { type FileItem } from '../file_item/FileItem';
     import EntryView from '../markdown/EntryView.svelte';
-    import { calculateFreshness, type Task } from '../task/Task';
+    import { type Task } from '../task/Task';
     import ClearableSearchBox from '../search/ClearableSearchBox.svelte';
     import TaskItem from '../task/TaskItem.svelte';
     import {
@@ -22,20 +22,43 @@
     let tasks: Task[] = [];
     let filteredTasks: Task[] = [];
 
-    tasksStore.subscribe((value) => {
-        tasks = sortTasks(value);
+    tasksStore.subscribe((value: Task[]) => {
+        tasks = value
+            .filter((task) => shouldShowTask(task))
+            .sort((a, b) => taskScore(a) - taskScore(b));
         if (selectedItem === undefined && tasks.length > 0) {
             $selectedItemStore = tasks[0].fileItem;
         }
     });
 
-    export function sortTasks(tasks: Task[]): Task[] {
-        const today = new Date();
-        tasks.sort(
-            (a, b) =>
-                calculateFreshness(b, today) - calculateFreshness(a, today),
-        );
-        return tasks;
+    function shouldShowTask(task: Task) {
+        if (task.type == 'DONE' || task.type == 'CANCELED') {
+            return false;
+        }
+
+        if (task.type == 'PLAN' && task.scheduled != null) {
+            if (task.scheduled < new Date()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    // lower score should be shown first
+    function taskScore(task: Task): number {
+        let score: number = Infinity;
+        if (task.scheduled != null) {
+            score = task.scheduled.getTime();
+        }
+        if (task.deadline != null) {
+            if (task.scheduled != null) {
+                score = Math.min(score, task.deadline.getTime());
+            } else {
+                score = task.deadline.getTime();
+            }
+        }
+        return score;
     }
 
     $: if ($searchKeywordStore === '') {
