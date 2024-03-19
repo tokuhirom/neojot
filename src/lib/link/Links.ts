@@ -129,9 +129,22 @@ export function buildLinks(
 
     console.log(`Finished buildLinks. ${Date.now() - t0}ms`);
 
+    const brackets: string[] = extractBracketsWithCache(selectedFileItem);
+    console.log('LINKS', extractBracketsWithCache(selectedFileItem));
+    const bracketsMap = new Map();
+    brackets.forEach((link) => {
+        bracketsMap.set(link.toLowerCase(), link);
+    });
+    const caseRespectedNewLinks: string[] = newLinks.map((link) => {
+        const originalCaseLink = bracketsMap.get(link.toLowerCase());
+        // 存在する場合は元の大文字小文字を保持したリンクを使用
+        // 存在しない場合は元のリンクをそのまま使用
+        return originalCaseLink ? originalCaseLink : link;
+    });
+
     return {
         links: uniqueLinks,
         twoHopLinks,
-        newLinks,
+        newLinks: caseRespectedNewLinks,
     };
 }
