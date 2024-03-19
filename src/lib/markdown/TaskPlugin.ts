@@ -9,7 +9,7 @@ import { RangeSetBuilder } from '@codemirror/state';
 import { type Task } from '../task/Task';
 import TaskWidgetInner from './TaskWidgetInner.svelte';
 import { tasksStore } from '../../Stores';
-import { addDays, format, isEqual } from 'date-fns';
+import { addDays, format, isEqual, startOfDay } from 'date-fns';
 
 export type DateTasks = {
     date: string;
@@ -40,6 +40,7 @@ class TaskWidget extends WidgetType {
                     }
                 }
             }
+            dateTasks.sort((a, b) => a.date.localeCompare(b.date));
 
             if (this.inner) {
                 this.inner.$$set({ tasks, doing, dateTasks });
@@ -59,11 +60,11 @@ class TaskWidget extends WidgetType {
 
     private filter(tasks: Task[]): Record<string, Task[]> {
         const result: Record<string, Task[]> = {};
-        const start = new Date();
+        const today = startOfDay(new Date());
         const end = addDays(new Date(), 7);
 
         function insert(d: Date | null, task: Task) {
-            if (d && start <= d && d <= end) {
+            if (d && d <= end) {
                 const date = format(d, 'yyyy-MM-dd(EEE)');
                 result[date] = [...(result[date] || []), task];
             }
@@ -76,7 +77,12 @@ class TaskWidget extends WidgetType {
                     break;
 
                 case 'PLAN':
-                    insert(task.scheduled, task);
+                    if (
+                        task.scheduled &&
+                        today.getTime() <= task.scheduled.getTime()
+                    ) {
+                        insert(task.scheduled, task);
+                    }
                     break;
 
                 case 'NOTE':
