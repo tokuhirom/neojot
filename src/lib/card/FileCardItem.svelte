@@ -4,6 +4,7 @@
     import { onMount } from 'svelte';
     import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
     import { selectedItemStore } from '../../Stores';
+    import { extractCardContent } from './CardUtils';
 
     export let file: FileItem;
     export let backgroundColor = '#f6f6f6';
@@ -35,12 +36,10 @@
             }
         } else {
             title = file.title;
-            content = file.content
-                .replace(/^(ALIAS|AUTOLINK):\s*.*?$/gms, '')
-                .replace(/\[\[(.*?)]]/g, '$1')
-                .split('\n')
-                .slice(1)
-                .join('\n');
+            // ALIAS と AUTOLINK のようなメタデータを削除
+            // [[...]] のようなリンク記法を削除
+            // 画像記法を削除
+            content = extractCardContent(file.content);
 
             // content に markdown の画像記法が含まれていた場合は、それを読み取ります。
             // lazy loading...
