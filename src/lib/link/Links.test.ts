@@ -1,7 +1,6 @@
 import { expect, test } from 'vitest';
 import { buildLinks, extractLinks, type Links } from './Links';
 import type { FileItem } from '../file_item/FileItem';
-import { lowerTitle2fileItemStore } from '../../Stores';
 
 // for debugging
 function dumpLinks(links: Links) {
