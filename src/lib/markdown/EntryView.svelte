@@ -53,10 +53,7 @@
             file.content = text;
 
             const newTitle = extractTitle(text);
-            if (file.title !== newTitle) {
-                file.title = newTitle;
-                await emit('change_title', { filename: file.filename });
-            }
+            file.title = newTitle;
             await saveMarkdownFile(file.filename, text);
             file.mtime = Math.floor(Date.now() / 1000);
 

@@ -26,18 +26,6 @@
             ? $searchKeywordStore.split(/\s+/)
             : undefined;
 
-    onMount(async () => {
-        const unlisten = await listen('change_title', (e) => {
-            const payload = e.payload as { filename: string };
-            if (payload.filename === fileItem.filename) {
-                fileItem = fileItem;
-            }
-        });
-        return () => {
-            unlisten();
-        };
-    });
-
     function handleOnClick(e: Event) {
         console.log('handleOnClick', fileItem.filename);
         if (
