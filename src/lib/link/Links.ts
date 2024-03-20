@@ -84,7 +84,7 @@ export function buildLinks(
                 .filter((it) => it);
             const twoHopDst = [
                 ...new Set([...forwardTwoHopDst, ...backwardTwoHopDst]),
-            ].filter((it) => it.title != selectedLowerTitle);
+            ].filter((it) => it.title.toLowerCase() != selectedLowerTitle);
 
             if (twoHopDst.length > 0) {
                 twoHopLinksMap.set(twoHopSrc, twoHopDst);

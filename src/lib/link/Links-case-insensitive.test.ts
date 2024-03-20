@@ -60,7 +60,7 @@ test('buildLinks', () => {
     expect(links.twoHopLinks).toStrictEqual([
         {
             src: perl,
-            dst: [lang, ruby],
+            dst: [ruby],
         },
     ]);
 });
