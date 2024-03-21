@@ -9,6 +9,7 @@
     import { createNewFileWithContent } from '../repository/NodeRepository';
     import QuickPadView from './QuickPadView.svelte';
     import { searchKeywordStore, selectedItemStore } from '../../Stores';
+    import DuplicatedNotes from '../markdown/DuplicatedNotes.svelte';
 
     export let dataFileItems: FileItem[] = [];
     export let pageTitles: string[];
@@ -147,6 +148,7 @@
                     {findEntryByTitle}
                     {autoLinks}
                 />
+                <DuplicatedNotes file={selectedItem} />
                 <LinkCards file={selectedItem} />
             {/if}
         {/if}
