@@ -5,7 +5,7 @@ export async function makeMigemoRegexes(searchWord: string): Promise<RegExp[]> {
         return [];
     }
 
-    const searchWords = searchWord.split(/\s+/);
+    const searchWords = searchWord.split(/\s+/).filter((w) => w.length > 0);
     const results = [];
     for (const word of searchWords) {
         const re = await migemoQuery(word.toLowerCase());
@@ -16,7 +16,7 @@ export async function makeMigemoRegexes(searchWord: string): Promise<RegExp[]> {
 
 let migemo: Migemo | null = null;
 
-async function migemoQuery(query: string) {
+async function migemoQuery(query: string): Promise<string> {
     if (!migemo) {
         console.log('Loading migemo dictionary');
         const e = await fetch(

@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { FileItem, MatchedLine } from './FileItem';
-    import { emit, listen } from '@tauri-apps/api/event';
+    import { emit } from '@tauri-apps/api/event';
     import { onMount } from 'svelte';
     import { format } from 'date-fns';
     import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
