@@ -40,24 +40,6 @@ TODO[Scheduled:YYYY-MM-DD]: Task Title
 - **Note Conversion**: 'n' on "TODO" to demote it to "NOTE".
 - **Make a Plan**: 'p' on "TODO" to demote it to "PLAN".
 
-### Task Scoring System
-
-Tasks are prioritized based on a scoring system to ensure important tasks are highlighted:
-
-- **Positive Scores**: Indicate tasks due soon or currently in progress.
-- **Negative Scores**: Completed or cancelled tasks receive negative scores to deprioritize them.
-- **Task Visibility**: Tasks with positive scores are shown prominently, directing focus to immediate priorities.
-
-#### Detailed Scoring Logic
-
-- **TODO**: Positive score if deadline is within 3 days or scheduled date is within 1 day.
-- **PLAN**: Positive score if scheduled date is within 3 days.
-- **DOING**: Always positive.
-- **CANCELED, COMPLETED, DONE**: Always negative.
-- **NOTE**: Positive if scheduled date is within 1 day.
-
-Tasks with a positive score are deemed important and are displayed at the top of the task list, ensuring you always know what needs attention.
-
 ## Special Markdown Features
 
 ### Images
