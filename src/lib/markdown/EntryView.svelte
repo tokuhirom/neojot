@@ -7,7 +7,7 @@
     import { onDestroy, onMount } from 'svelte';
     import { Transaction } from '@codemirror/state';
     import { EditorView } from '@codemirror/view';
-    import { extractTitle, type FileItem } from '../file_item/FileItem';
+    import { type FileItem } from '../file_item/FileItem';
     import { emit, listen, type UnlistenFn } from '@tauri-apps/api/event';
     import {
         autocompletion,
@@ -25,6 +25,7 @@
         searchKeywordStore,
         selectedItemStore,
     } from '../../Stores';
+    import { invoke } from '@tauri-apps/api/core';
 
     export let file: FileItem;
     // for completion
@@ -52,7 +53,9 @@
         if (file.content !== text) {
             file.content = text;
 
-            const newTitle = extractTitle(text);
+            const newTitle = (await invoke('tauri_get_title_markdown', {
+                content: text,
+            })) as string;
             file.title = newTitle;
             await saveMarkdownFile(file.filename, text);
             file.mtime = Math.floor(Date.now() / 1000);

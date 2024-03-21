@@ -1,5 +1,6 @@
 import { BaseDirectory, readFile } from '@tauri-apps/plugin-fs';
 import { uint8ArrayToDataUrl } from '../markdown/ImageViewWidget';
+import { invoke } from '@tauri-apps/api/core';
 
 export type MatchedLine = {
     content: string;
@@ -12,30 +13,6 @@ export type FileItem = {
     title: string;
     content: string;
 };
-
-export function extractTitle(content: string) {
-    const lines = content.split('\n');
-    if (lines.length >= 1) {
-        const title = lines[0].replace(/^#+\s*/, '');
-        // if title includes non-whitespace characters, return it.
-        if (/\S/.test(title)) {
-            return title;
-        }
-
-        // check remaining lines, and return first non-empty line.
-        for (const line of lines.slice(1)) {
-            if (/\S/.test(line)) {
-                console.log(line);
-                return line
-                    .replace(/^(TODO|DOING|PLAN|DONE|CANCELED)\[.*]:\s*/, '')
-                    .replace(/T/g, '');
-            }
-        }
-        return '';
-    } else {
-        return '';
-    }
-}
 
 export function extractBrackets(content: string): string[] {
     const pattern = /\[\[([^|]+?)]]/g;

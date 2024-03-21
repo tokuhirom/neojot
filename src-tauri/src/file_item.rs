@@ -60,11 +60,13 @@ pub fn get_title_markdown(content: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    use crate::file_item::get_title_markdown;
+
     #[test]
     fn it_works() {
-        assert_eq!(crate::get_title_markdown("# hello"), String::from("hello"));
-        assert_eq!(crate::get_title_markdown("# \nhello"), String::from("hello"));
-        assert_eq!(crate::get_title_markdown("# \nTODO[Scheduled: 2024-01-03(Mon)]: hello"), String::from("hello"));
+        assert_eq!(get_title_markdown("# hello"), String::from("hello"));
+        assert_eq!(get_title_markdown("# \nhello"), String::from("hello"));
+        assert_eq!(get_title_markdown("# \nTODO[Scheduled: 2024-01-03(Mon)]: hello"), String::from("hello"));
     }
 }
 

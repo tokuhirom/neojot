@@ -1,9 +1,5 @@
-import { describe, expect, test } from 'vitest';
-import {
-    extractBrackets,
-    extractBracketsWithCache,
-    extractTitle,
-} from './FileItem';
+import { expect, test } from 'vitest';
+import { extractBrackets, extractBracketsWithCache } from './FileItem';
 
 test('extractBrackets', () => {
     const links = extractBrackets('HAHAHA [[hoge]] [[fuga]]');
@@ -27,23 +23,4 @@ test('extractBracketsWithCache', () => {
     });
     expect(links3).toStrictEqual(['piyo', 'poyo']);
     // cache invalidate by mtime
-});
-
-describe('extractTitle', () => {
-    test('simple', () => {
-        const title = extractTitle('# hoge');
-        expect(title).toEqual('hoge');
-    });
-
-    test('second line', () => {
-        const title = extractTitle('# \n\nhoge');
-        expect(title).toEqual('hoge');
-    });
-
-    test('todo line', () => {
-        const title = extractTitle(
-            '# \n\nTODO[Scheduled:2024-03-22(Fri)]: wow',
-        );
-        expect(title).toEqual('wow');
-    });
 });

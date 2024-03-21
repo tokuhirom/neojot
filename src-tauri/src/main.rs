@@ -2,17 +2,14 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod git;
-mod file_item;
+pub mod file_item;
 
 use std::collections::HashMap;
 use std::fs;
-use std::path::PathBuf;
 use std::time::SystemTime;
 use anyhow::anyhow;
-use serde::{Deserialize, Serialize};
 use simplelog::ColorChoice;
 use url::Url;
-use regex::Regex;
 use tauri::{App, Manager, Wry};
 use tauri::menu::{Menu, MenuBuilder, MenuItemBuilder, SubmenuBuilder};
 use tauri_plugin_autostart::MacosLauncher;
@@ -54,6 +51,11 @@ fn open_url(url: String) -> Result<(), String> {
         },
         _ => Err(format!("URL must start with 'http://' or 'https://': {}", url))
     }
+}
+
+#[tauri::command]
+fn tauri_get_title_markdown(content: String) -> String {
+    file_item::get_title_markdown(content.as_str())
 }
 
 #[tauri::command]
@@ -261,6 +263,7 @@ fn main() -> anyhow::Result<()> {
             tauri_git_init,
             tauri_git_add_commit_push,
             tauri_get_commits_by_day,
+            tauri_get_title_markdown,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
