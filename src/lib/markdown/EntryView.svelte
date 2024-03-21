@@ -67,6 +67,9 @@
                     (it) => it.filename !== file.filename,
                 ),
             ];
+
+            // after writing something, clear the search keyword
+            searchKeywordStore.set('');
         }
     }
 
