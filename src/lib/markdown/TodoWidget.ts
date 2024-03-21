@@ -190,6 +190,14 @@ export const taskKeymap: KeyBinding[] = [
             }),
     },
     {
+        key: 'p',
+        run: (view) =>
+            replaceLine(view, (type, param, title) => {
+                const newType = type === 'PLAN' ? 'TODO' : 'PLAN';
+                return `${newType}[${param}]:${title}`;
+            }),
+    },
+    {
         key: 'd',
         run: (view) =>
             replaceLine(view, (type, param, title) => {
