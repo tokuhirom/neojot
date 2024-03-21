@@ -38,6 +38,7 @@ TODO[Scheduled:YYYY-MM-DD]: Task Title
 - **Complete a Task**: 'Enter' on "DOING" to mark as "DONE".
 - **Cancel a Task**: 'c' on "DOING" to mark as "CANCELLED".
 - **Note Conversion**: 'n' on "TODO" to demote it to "NOTE".
+- **Make a Plan**: 'p' on "TODO" to demote it to "PLAN".
 
 ### Task Scoring System
 
