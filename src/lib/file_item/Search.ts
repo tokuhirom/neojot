@@ -33,7 +33,7 @@ function searchLinesByWord(
     fileItem: FileItem,
     regExps: RegExp[],
 ): MatchedLine[] | undefined {
-    if (regExps && regExps.length > 0) {
+    if (regExps.length > 0) {
         if (fileItem.filename.endsWith('.excalidraw')) {
             return searchExcalidrawFile(fileItem, regExps);
         } else {
