@@ -43,12 +43,11 @@ class TaskWidget extends WidgetType {
             dateTasks.sort((a, b) => a.date.localeCompare(b.date));
 
             if (this.inner) {
-                this.inner.$$set({ tasks, doing, dateTasks });
+                this.inner.$$set({ doing, dateTasks });
             } else {
                 this.inner = new TaskWidgetInner({
                     target: container,
                     props: {
-                        tasks,
                         doing,
                         dateTasks,
                     },
