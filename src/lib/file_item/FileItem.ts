@@ -21,10 +21,14 @@ export function extractTitle(content: string) {
         if (/\S/.test(title)) {
             return title;
         }
+
         // check remaining lines, and return first non-empty line.
         for (const line of lines.slice(1)) {
             if (/\S/.test(line)) {
-                return line;
+                console.log(line);
+                return line
+                    .replace(/^(TODO|DOING|PLAN|DONE|CANCELED)\[.*]:\s*/, '')
+                    .replace(/T/g, '');
             }
         }
         return '';

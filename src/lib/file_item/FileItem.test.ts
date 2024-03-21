@@ -39,4 +39,11 @@ describe('extractTitle', () => {
         const title = extractTitle('# \n\nhoge');
         expect(title).toEqual('hoge');
     });
+
+    test('todo line', () => {
+        const title = extractTitle(
+            '# \n\nTODO[Scheduled:2024-03-22(Fri)]: wow',
+        );
+        expect(title).toEqual('wow');
+    });
 });
