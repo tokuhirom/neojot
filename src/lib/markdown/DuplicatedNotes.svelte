@@ -33,17 +33,19 @@
 </script>
 
 <div>
-    Duplicated entries:
-    <div class="dups">
-        {#each duplicatedNotes as k (k.title)}
-            <div class="dup">
-                <h2>{k.title}</h2>
-                {#each k.items as item}
-                    <FileCardItem file={item} />
-                {/each}
-            </div>
-        {/each}
-    </div>
+    {#if duplicatedNotes.length > 0}
+        Duplicated entries:
+        <div class="dups">
+            {#each duplicatedNotes as k (k.title)}
+                <div class="dup">
+                    <h2>{k.title}</h2>
+                    {#each k.items as item}
+                        <FileCardItem file={item} />
+                    {/each}
+                </div>
+            {/each}
+        </div>
+    {/if}
 </div>
 
 <style>
