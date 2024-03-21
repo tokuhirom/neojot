@@ -32,6 +32,7 @@ export function extractTitle(content: string) {
         return '';
     }
 }
+
 export function extractBrackets(content: string): string[] {
     const pattern = /\[\[([^|]+?)]]/g;
     const matches = [];
