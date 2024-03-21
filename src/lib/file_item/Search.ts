@@ -11,7 +11,7 @@ export function searchFileItems(
     fileItems: FileItem[],
     regExps: RegExp[] | undefined,
 ): SearchResult[] {
-    if (!regExps) {
+    if (regExps == undefined) {
         return fileItems.map((fileItem) => {
             return { lines: [], fileItem };
         });
