@@ -12,7 +12,9 @@
         <TaskButton {task} />
     {/each}
     {#each dateTasks as dateTask}
-        <div class="date">{dateTask.date}</div>
+        <div class="date" class:overdue={dateTask.overdue}>
+            {dateTask.date}
+        </div>
         {#each dateTask.tasks as task}<TaskButton {task} />{/each}
     {/each}
 </div>
@@ -20,5 +22,9 @@
 <style>
     .date {
         font-size: 89%;
+    }
+    .overdue {
+        color: red;
+        font-weight: bold;
     }
 </style>

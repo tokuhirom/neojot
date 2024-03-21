@@ -13,6 +13,7 @@ import { addDays, format, isEqual, startOfDay } from 'date-fns';
 
 export type DateTasks = {
     date: string;
+    overdue: boolean;
     tasks: Task[];
 };
 
@@ -36,7 +37,13 @@ class TaskWidget extends WidgetType {
                 if (dt !== 'DOING') {
                     const tasks = filteredTasks[dt];
                     if (tasks && tasks.length > 0) {
-                        dateTasks.push({ date: dt, tasks });
+                        dateTasks.push({
+                            date: dt,
+                            overdue:
+                                new Date(dt.replace(/\(.*\)/, '')).getTime() <
+                                startOfDay(new Date()).getTime(),
+                            tasks,
+                        });
                     }
                 }
             }
