@@ -31,14 +31,12 @@
     async function callOpenAI(prompt: Prompt) {
         if (openaiToken !== undefined) {
             result = 'Loading...';
-            setTimeout(async () => {
-                console.log(openaiToken, prompt.prompt, selectedItem.content);
-                result = await invoke('tauri_ask_openai', {
-                    openaiToken: openaiToken,
-                    prompt: prompt.prompt,
-                    note: selectedItem.content,
-                });
-            }, 1000);
+            console.log(openaiToken, prompt.prompt, selectedItem.content);
+            result = await invoke('tauri_ask_openai', {
+                openaiToken: openaiToken,
+                prompt: prompt.prompt,
+                note: selectedItem.content,
+            });
         } else {
             console.log('Missing OpenAI token.');
         }
