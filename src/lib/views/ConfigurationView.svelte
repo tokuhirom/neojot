@@ -2,6 +2,7 @@
     // https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/autostart/README.md
     import { enable, isEnabled, disable } from '@tauri-apps/plugin-autostart';
     import { onMount } from 'svelte';
+    import { invoke } from '@tauri-apps/api/core';
 
     let isEnabledState: boolean = false;
 
@@ -18,6 +19,12 @@
         await enable();
         isEnabledState = await isEnabled();
     }
+
+    let openaiToken = '';
+    onMount(async () => {
+        openaiToken = await invoke('get_openai_token');
+    });
+    $: invoke('set_openai_token', { openaiToken });
 </script>
 
 <div>
@@ -31,4 +38,9 @@
         <div>Current state: Disabled</div>
         <button on:click={enableAutoStart}>Enable</button>
     {/if}
+
+    <div>
+        <h2>OpenAI</h2>
+        <input type="text" bind:value={openaiToken} />
+    </div>
 </div>

@@ -3,12 +3,16 @@
 
 use std::collections::HashMap;
 use std::fs;
+use std::fs::File;
+use std::io::Write;
 use std::time::SystemTime;
 
 use anyhow::anyhow;
+use dirs::config_dir;
 use simplelog::ColorChoice;
 use tauri::{App, Manager, Wry};
 use tauri::menu::{Menu, MenuBuilder, MenuItemBuilder, SubmenuBuilder};
+use tauri::path::BaseDirectory::AppData;
 use tauri_plugin_autostart::MacosLauncher;
 use url::Url;
 
@@ -97,6 +101,33 @@ fn tauri_ask_openai(openai_token: String, prompt: String, note: String) -> Resul
     openai::ask_openai(openai_token, prompt, note)
         .map_err(|e| format!("Failed to ask OpenAI: {}", e))?;
     Ok(())
+}
+
+#[tauri::command]
+fn get_openai_token() -> Result<String, String> {
+    let config_dir = dirs::config_dir().ok_or("Config directory not found")?;
+    let path = config_dir.join("com.github.tokuhirom.neojot").join("openai_token.txt");
+    let result = fs::read_to_string(&path)
+        .map_err(|e| format!("Failed to read the token from the file: {}", e))?;
+    Ok(result)
+}
+
+#[tauri::command]
+fn set_openai_token(openai_token: String) -> Result<(), String> {
+    let config_dir = dirs::config_dir().ok_or("Config directory not found")?;
+    let path = config_dir.join("com.github.tokuhirom.neojot").join("openai_token.txt");
+
+    let mut file = match File::create(&path) {
+        Ok(file) => file,
+        Err(e) => return Err(format!("Failed to create/open the file: {}", e)),
+    };
+
+    log::info!("Write to {:?}", path);
+    // トークンをファイルに書き込む
+    match file.write_all(openai_token.as_bytes()) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(format!("Failed to write the token to the file: {}", e)),
+    }
 }
 
 #[tauri::command]
@@ -274,6 +305,8 @@ fn main() -> anyhow::Result<()> {
             tauri_get_commits_by_day,
             tauri_get_title_markdown,
             tauri_ask_openai,
+            get_openai_token,
+            set_openai_token,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
