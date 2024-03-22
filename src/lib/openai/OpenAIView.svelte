@@ -19,7 +19,7 @@
         },
         {
             title: 'Write the continuation of a Markdown memo',
-            prompt: "Here's a Markdown memo. Could you write the continuation of it?",
+            prompt: "Here's a Markdown memo. Could you write the continuation of it? Output should be in Japanese.",
         },
     ];
 
@@ -74,5 +74,11 @@
         background-color: #2f4f4f;
         font-size: 120%;
         cursor: pointer;
+    }
+    pre {
+        margin-left: 17px;
+        margin-right: 17px;
+        white-space: pre-wrap;
+        word-break: break-all;
     }
 </style>
