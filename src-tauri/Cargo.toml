@@ -29,7 +29,7 @@ regex = "1.10.3"
 git2 = "0.18.3"
 chrono = "0.4.35"
 lazy_static = "1.4.0"
-openai-api-rs = "4.0.8"
+openai = "1.0.0-alpha.14"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

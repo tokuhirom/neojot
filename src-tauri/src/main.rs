@@ -95,8 +95,9 @@ fn load_file_item(filename: String) -> Result<FileItem, String> {
 }
 
 #[tauri::command]
-fn tauri_ask_openai(openai_token: String, prompt: String, note: String) -> Result<String, String> {
+async fn tauri_ask_openai(openai_token: String, prompt: String, note: String) -> Result<String, String> {
     let result = openai::ask_openai(openai_token, prompt, note)
+        .await
         .map_err(|e| format!("Failed to ask OpenAI: {}", e))?;
     Ok(result)
 }

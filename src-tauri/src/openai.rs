@@ -1,35 +1,37 @@
-use openai_api_rs::v1::api::Client;
-use openai_api_rs::v1::chat_completion;
-use openai_api_rs::v1::chat_completion::{ChatCompletionChoice, ChatCompletionMessageForResponse, ChatCompletionRequest, ChatCompletionResponse};
-use openai_api_rs::v1::common::GPT4;
+use openai::chat::{ChatCompletion, ChatCompletionMessage, ChatCompletionMessageRole};
+use openai::set_key;
 
-pub(crate) fn ask_openai(openai_token: String, prompt: String, note: String) -> anyhow::Result<String> {
+pub(crate) async fn ask_openai(openai_token: String, prompt: String, note: String) -> anyhow::Result<String> {
     log::info!("ask_openai: {:?}", prompt.clone());
 
-    let client = Client::new(openai_token);
-    let req = ChatCompletionRequest::new(
-        GPT4.to_string(),
-        vec![
-            chat_completion::ChatCompletionMessage {
-                role: chat_completion::MessageRole::system,
-                content: chat_completion::Content::Text(prompt.clone()),
-                name: Some(String::from("Prompt")),
-            },
-            chat_completion::ChatCompletionMessage {
-                role: chat_completion::MessageRole::system,
-                content: chat_completion::Content::Text(note),
-                name: Some(String::from("Note")),
-            }
-        ],
+    set_key(openai_token.clone());
+
+    let messages = vec![
+        ChatCompletionMessage {
+            role: ChatCompletionMessageRole::System,
+            content: Some(prompt.clone()),
+            name: Some(String::from("Prompt")),
+            function_call: None,
+        },
+        ChatCompletionMessage {
+            role: ChatCompletionMessageRole::User,
+            content: Some(note),
+            name: Some(String::from("Note")),
+            function_call: None,
+        }
+    ];
+    let chat_completion = ChatCompletion::builder("gpt-4", messages.clone())
+        .create()
+        .await?;
+
+    let returned_message = chat_completion.choices.first().unwrap().message.clone();
+
+    log::info!(
+        "{:#?}: {}",
+        &returned_message.role,
+        &returned_message.content.clone().unwrap().trim()
     );
-    let result: ChatCompletionResponse = client.chat_completion(req)?;
-    // println!("{:?}", result.choices[0].message.
-    let choices: Vec<ChatCompletionChoice> = result.choices;
-    let choice: &ChatCompletionChoice = choices.iter().next().unwrap();
-    let message: &ChatCompletionMessageForResponse = &choice.message;
-    log::info!("Got result: ask_openai: {:?}", prompt);
-    let content: Option<String> = message.content.clone(); // Clone the Option<String>
-    Ok(content.unwrap())
+    Ok(returned_message.content.clone().unwrap().trim().parse()?)
 }
 
 #[cfg(test)]
