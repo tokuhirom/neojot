@@ -17,6 +17,7 @@ use url::Url;
 use crate::file_item::{FileItem, get_title};
 use crate::git::{get_commits_by_day, git_init};
 use crate::git::git_add_commit_push;
+use crate::openai::get_openai_progress;
 
 mod git;
 pub mod file_item;
@@ -95,11 +96,16 @@ fn load_file_item(filename: String) -> Result<FileItem, String> {
 }
 
 #[tauri::command]
-async fn tauri_ask_openai(openai_token: String, prompt: String, note: String) -> Result<String, String> {
-    let result = openai::ask_openai(openai_token, prompt, note)
+async fn tauri_ask_openai(uuid: String, openai_token: String, prompt: String, note: String) -> Result<String, String> {
+    let result = openai::ask_openai(uuid, openai_token, prompt, note)
         .await
         .map_err(|e| format!("Failed to ask OpenAI: {}", e))?;
     Ok(result)
+}
+
+#[tauri::command]
+fn tauri_get_openai_progress(uuid: String) -> Result<Option<String>, String>{
+    Ok(get_openai_progress(uuid))
 }
 
 #[tauri::command]
@@ -304,6 +310,7 @@ fn main() -> anyhow::Result<()> {
             tauri_get_commits_by_day,
             tauri_get_title_markdown,
             tauri_ask_openai,
+            tauri_get_openai_progress,
             get_openai_token,
             set_openai_token,
         ])

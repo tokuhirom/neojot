@@ -3,6 +3,7 @@
     import { invoke } from '@tauri-apps/api/core';
     import { openaiTokenStore } from '../../Stores';
     import type { FileItem } from '../file_item/FileItem';
+    import { v4 as uuidv4 } from 'uuid';
 
     export let selectedItem: FileItem | undefined = undefined;
 
@@ -32,11 +33,20 @@
         if (openaiToken !== undefined) {
             result = 'Loading...';
             console.log(openaiToken, prompt.prompt, selectedItem.content);
+            const uuid = uuidv4();
+            console.log(uuid);
+            const interval = setInterval(async () => {
+                result = await invoke('tauri_get_openai_progress', {
+                    uuid: uuid,
+                });
+            }, 300);
             result = await invoke('tauri_ask_openai', {
+                uuid: uuid,
                 openaiToken: openaiToken,
                 prompt: prompt.prompt,
                 note: selectedItem.content,
             });
+            clearInterval(interval);
         } else {
             console.log('Missing OpenAI token.');
         }
