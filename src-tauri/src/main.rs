@@ -1,22 +1,24 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod git;
-pub mod file_item;
-
 use std::collections::HashMap;
 use std::fs;
 use std::time::SystemTime;
+
 use anyhow::anyhow;
 use simplelog::ColorChoice;
-use url::Url;
 use tauri::{App, Manager, Wry};
 use tauri::menu::{Menu, MenuBuilder, MenuItemBuilder, SubmenuBuilder};
 use tauri_plugin_autostart::MacosLauncher;
-use crate::file_item::{FileItem, get_title};
+use url::Url;
 
+use crate::file_item::{FileItem, get_title};
 use crate::git::{get_commits_by_day, git_init};
 use crate::git::git_add_commit_push;
+
+mod git;
+pub mod file_item;
+mod openai;
 
 #[tauri::command]
 fn tauri_git_init() -> Result<(), String> {
@@ -88,6 +90,13 @@ fn load_file_item(filename: String) -> Result<FileItem, String> {
             Err(format!("Cannot load {}: {:?}", filename, err))
         }
     }
+}
+
+#[tauri::command]
+fn tauri_ask_openai(openai_token: String, prompt: String, note: String) -> Result<(), String> {
+    openai::ask_openai(openai_token, prompt, note)
+        .map_err(|e| format!("Failed to ask OpenAI: {}", e))?;
+    Ok(())
 }
 
 #[tauri::command]
@@ -264,6 +273,7 @@ fn main() -> anyhow::Result<()> {
             tauri_git_add_commit_push,
             tauri_get_commits_by_day,
             tauri_get_title_markdown,
+            tauri_ask_openai,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
