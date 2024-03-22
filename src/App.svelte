@@ -20,11 +20,13 @@
     import {
         dataFileItemsStore,
         lowerTitle2fileItemStore,
+        openaiTokenStore,
         searchKeywordStore,
         selectedItemStore,
     } from './Stores';
     import { extractTasks } from './lib/task/Task';
     import { tasksStore } from './Stores.js';
+    import { invoke } from '@tauri-apps/api/core';
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
@@ -38,6 +40,15 @@
     });
 
     onMount(async () => {
+        try {
+            const openaiToken = (await invoke('get_openai_token')) as string;
+            if (openaiToken) {
+                openaiTokenStore.set(openaiToken);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
         const items = await reloadFiles();
         console.log(`Loaded ${items.length} items!`);
         if (items.length > 0) {

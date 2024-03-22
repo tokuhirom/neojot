@@ -1,16 +1,18 @@
 use openai_api_rs::v1::api::Client;
 use openai_api_rs::v1::chat_completion;
-use openai_api_rs::v1::chat_completion::ChatCompletionRequest;
+use openai_api_rs::v1::chat_completion::{ChatCompletionChoice, ChatCompletionMessageForResponse, ChatCompletionRequest, ChatCompletionResponse};
 use openai_api_rs::v1::common::GPT4;
 
-pub(crate) fn ask_openai(openai_token: String, prompt: String, note: String) -> anyhow::Result<()> {
+pub(crate) fn ask_openai(openai_token: String, prompt: String, note: String) -> anyhow::Result<String> {
+    log::info!("ask_openai: {:?}", prompt.clone());
+
     let client = Client::new(openai_token);
     let req = ChatCompletionRequest::new(
         GPT4.to_string(),
         vec![
             chat_completion::ChatCompletionMessage {
                 role: chat_completion::MessageRole::system,
-                content: chat_completion::Content::Text(prompt),
+                content: chat_completion::Content::Text(prompt.clone()),
                 name: Some(String::from("Prompt")),
             },
             chat_completion::ChatCompletionMessage {
@@ -20,9 +22,14 @@ pub(crate) fn ask_openai(openai_token: String, prompt: String, note: String) -> 
             }
         ],
     );
-    let result = client.chat_completion(req)?;
-    println!("{:?}", result.choices[0].message.content);
-    Ok(())
+    let result: ChatCompletionResponse = client.chat_completion(req)?;
+    // println!("{:?}", result.choices[0].message.
+    let choices: Vec<ChatCompletionChoice> = result.choices;
+    let choice: &ChatCompletionChoice = choices.iter().next().unwrap();
+    let message: &ChatCompletionMessageForResponse = &choice.message;
+    log::info!("Got result: ask_openai: {:?}", prompt);
+    let content: Option<String> = message.content.clone(); // Clone the Option<String>
+    Ok(content.unwrap())
 }
 
 #[cfg(test)]

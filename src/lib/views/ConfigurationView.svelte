@@ -3,6 +3,7 @@
     import { enable, isEnabled, disable } from '@tauri-apps/plugin-autostart';
     import { onMount } from 'svelte';
     import { invoke } from '@tauri-apps/api/core';
+    import { openaiTokenStore } from '../../Stores';
 
     let isEnabledState: boolean = false;
 
@@ -24,7 +25,10 @@
     onMount(async () => {
         openaiToken = await invoke('get_openai_token');
     });
-    $: invoke('set_openai_token', { openaiToken });
+    $: if (openaiToken.length > 0) {
+        invoke('set_openai_token', { openaiToken });
+        openaiTokenStore.set(openaiToken);
+    }
 </script>
 
 <div>
@@ -44,3 +48,9 @@
         <input type="text" bind:value={openaiToken} />
     </div>
 </div>
+
+<style>
+    input {
+        min-width: 500px;
+    }
+</style>

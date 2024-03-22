@@ -16,3 +16,6 @@ export const searchFilteredFileItemsStore: Writable<SearchResult[]> = writable(
 
 export const lowerTitle2fileItemStore: Writable<Record<string, FileItem>> =
     writable({});
+
+export const openaiTokenStore: Writable<string | undefined> =
+    writable(undefined);

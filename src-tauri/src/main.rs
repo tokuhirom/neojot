@@ -8,11 +8,9 @@ use std::io::Write;
 use std::time::SystemTime;
 
 use anyhow::anyhow;
-use dirs::config_dir;
 use simplelog::ColorChoice;
 use tauri::{App, Manager, Wry};
 use tauri::menu::{Menu, MenuBuilder, MenuItemBuilder, SubmenuBuilder};
-use tauri::path::BaseDirectory::AppData;
 use tauri_plugin_autostart::MacosLauncher;
 use url::Url;
 
@@ -97,10 +95,10 @@ fn load_file_item(filename: String) -> Result<FileItem, String> {
 }
 
 #[tauri::command]
-fn tauri_ask_openai(openai_token: String, prompt: String, note: String) -> Result<(), String> {
-    openai::ask_openai(openai_token, prompt, note)
+fn tauri_ask_openai(openai_token: String, prompt: String, note: String) -> Result<String, String> {
+    let result = openai::ask_openai(openai_token, prompt, note)
         .map_err(|e| format!("Failed to ask OpenAI: {}", e))?;
-    Ok(())
+    Ok(result)
 }
 
 #[tauri::command]
