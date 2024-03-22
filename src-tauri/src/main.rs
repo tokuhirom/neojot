@@ -39,8 +39,8 @@ fn tauri_git_add_commit_push() -> Result<(), String> {
 
 #[tauri::command]
 fn tauri_get_commits_by_day(year: i32, month: u32) -> Result<HashMap<u32, Vec<String>>, String> {
-    return get_commits_by_day(year, month)
-        .map_err(|e| format!("Failed to operate repository: {}", e));
+    get_commits_by_day(year, month)
+        .map_err(|e| format!("Failed to operate repository: {}", e))
 }
 
 #[tauri::command]
@@ -68,7 +68,7 @@ fn load_file_item(filename: String) -> Result<FileItem, String> {
     let datadir = dirs::data_dir().ok_or("Data directory not found")?;
     let path = datadir.join("com.github.tokuhirom.neojot").join(filename.clone());
 
-    let metadata = fs::metadata(&path.clone())
+    let metadata = fs::metadata(path.clone())
         .map_err(|e| format!("Failed to read file metadata: {}", e))?;
 
     let mtime = metadata.modified()
@@ -112,7 +112,7 @@ fn tauri_get_openai_progress(uuid: String) -> Result<Option<String>, String>{
 fn get_openai_token() -> Result<String, String> {
     let config_dir = dirs::config_dir().ok_or("Config directory not found")?;
     let path = config_dir.join("com.github.tokuhirom.neojot").join("openai_token.txt");
-    let result = fs::read_to_string(&path)
+    let result = fs::read_to_string(path)
         .map_err(|e| format!("Failed to read the token from the file: {}", e))?;
     Ok(result)
 }
@@ -329,6 +329,6 @@ fn create_new_excalidraw() -> anyhow::Result<String> {
 
     // write the dummy content
     let content = include_str!("../assets/excalidraw");
-    fs::write(&path, content)?;
+    fs::write(path, content)?;
     Ok(filename)
 }

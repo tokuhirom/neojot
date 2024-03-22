@@ -66,9 +66,9 @@ async fn listen_for_tokens(uuid: String, mut chat_stream: Receiver<ChatCompletio
             content_buffer.push_str(content);
             PROGRESS.lock().unwrap().insert(uuid.clone(), content_buffer.clone());
         }
-        if let Some(_) = &choice.finish_reason {
+        if choice.finish_reason.is_some() {
             // The message being streamed has been fully received.
-            print!("\n");
+            println!();
         }
         stdout().flush().unwrap();
 

@@ -86,7 +86,7 @@ pub fn git_add_commit_push() -> anyhow::Result<()> {
 
         // リモートが設定されていればプッシュ（この部分は実装が必要）
         let remotes = repo.remotes()?;
-        if remotes.len() > 0 {
+        if !remotes.is_empty() {
             log::info!("[git] Pushing changes");
             push_changes(&repo)?;
         } else {
@@ -118,7 +118,7 @@ pub fn get_commits_by_day(year: i32, month: u32) -> anyhow::Result<HashMap<u32, 
         let commit_date = commit_datetime.date_naive();
 
         // 指定された年と月にフィルタリング
-        if commit_date.year() == year && commit_date.month() == month as u32 {
+        if commit_date.year() == year && commit_date.month() == month {
             let day = commit_date.day();
             let mut filenames = vec![];
 
@@ -141,7 +141,7 @@ pub fn get_commits_by_day(year: i32, month: u32) -> anyhow::Result<HashMap<u32, 
             // 重複を除去してMapに追加
             filenames.sort();
             filenames.dedup();
-            result.entry(day).or_insert_with(Vec::new).extend(filenames);
+            result.entry(day).or_default().extend(filenames);
         }
     }
 

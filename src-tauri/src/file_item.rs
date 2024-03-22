@@ -28,7 +28,7 @@ pub fn get_title(path: PathBuf, content: &str) -> String {
         };
     }
 
-    return get_title_markdown(content);
+    get_title_markdown(content)
 }
 
 pub fn get_title_markdown(content: &str) -> String {
