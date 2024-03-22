@@ -1,6 +1,5 @@
 import { BaseDirectory, readFile } from '@tauri-apps/plugin-fs';
 import { uint8ArrayToDataUrl } from '../markdown/ImageViewWidget';
-import { invoke } from '@tauri-apps/api/core';
 
 export type MatchedLine = {
     content: string;
