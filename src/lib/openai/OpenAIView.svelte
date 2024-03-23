@@ -21,6 +21,10 @@
             title: 'Write the continuation of a Markdown memo',
             prompt: "Here's a Markdown memo. Could you write the continuation of it? Output should be in Japanese.",
         },
+        {
+            title: 'Complete a Markdown memo',
+            prompt: "Here's a Markdown memo. Could you complete it? Output should be in Japanese.",
+        },
     ];
 
     let openaiToken: string | undefined = undefined;
