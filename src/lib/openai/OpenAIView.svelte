@@ -14,15 +14,15 @@
 
     let prompts: Prompt[] = [
         {
-            title: 'Generate a title for a Markdown memo',
+            title: 'Generate a title',
             prompt: "Here's a Markdown memo. Could you generate a better title for it? Output should be Japanese.Don't quote result.",
         },
         {
-            title: 'Write the continuation of a Markdown memo',
+            title: 'Write the continuation',
             prompt: "Here's a Markdown memo. Could you write the continuation of it? Output should be in Japanese.",
         },
         {
-            title: 'Complete a Markdown memo',
+            title: 'Complete it',
             prompt: "Here's a Markdown memo. Could you complete it? Output should be in Japanese.",
         },
     ];
