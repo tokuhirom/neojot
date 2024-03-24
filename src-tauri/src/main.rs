@@ -17,7 +17,7 @@ use url::Url;
 use crate::file_item::{FileItem, get_title};
 use crate::git::{get_commits_by_day, git_init};
 use crate::git::git_add_commit_push;
-use crate::openai::get_openai_progress;
+use crate::openai::{get_initial_prompts, get_openai_progress, Prompt, PromptConfig};
 
 mod git;
 pub mod file_item;
@@ -132,6 +132,45 @@ fn set_openai_token(openai_token: String) -> Result<(), String> {
     match file.write_all(openai_token.as_bytes()) {
         Ok(_) => Ok(()),
         Err(e) => Err(format!("Failed to write the token to the file: {}", e)),
+    }
+}
+
+
+#[tauri::command]
+fn get_openai_prompts() -> Result<Vec<Prompt>, String> {
+    let config_dir = dirs::config_dir().ok_or("Config directory not found")?;
+    let path = config_dir.join("com.github.tokuhirom.neojot").join("openai_prompts.json");
+    match fs::read_to_string(path) {
+        Ok(content) => {
+            match serde_json::from_str::<PromptConfig>(content.as_str()) {
+                Ok(config) => {
+                    return Ok(config.prompts);
+                }
+                Err(e) => {
+                    log::error!("Failed to parse JSON: {}", e)
+                }
+            }
+        }
+        Err(e) => {
+            log::error!("Failed to read the prompts from the file: {}", e)
+        }
+    }
+    return Ok(get_initial_prompts())
+}
+
+#[tauri::command]
+fn set_openai_prompts(prompts: Vec<Prompt>) -> Result<(), String> {
+    let config_dir = dirs::config_dir().ok_or("Config directory not found")?;
+    let path = config_dir.join("com.github.tokuhirom.neojot").join("openai_prompts.json");
+    let config = PromptConfig {
+        prompts
+    };
+
+    // write the prompts to the file in JSON format
+    log::info!("Write to {:?}", path);
+    match fs::write(path, serde_json::to_string_pretty(&config).unwrap()) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(format!("Failed to write the prompts to the file: {}", e)),
     }
 }
 
@@ -313,6 +352,8 @@ fn main() -> anyhow::Result<()> {
             tauri_get_openai_progress,
             get_openai_token,
             set_openai_token,
+            get_openai_prompts,
+            set_openai_prompts,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

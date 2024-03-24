@@ -2,6 +2,7 @@ import { type Writable, writable } from 'svelte/store';
 import type { FileItem } from './lib/file_item/FileItem';
 import type { Task } from './lib/task/Task';
 import type { SearchResult } from './lib/file_item/Search';
+import type { Prompt } from './lib/openai/Prompt';
 
 export const dataFileItemsStore: Writable<FileItem[]> = writable([]);
 export const searchKeywordStore: Writable<string> = writable('');
@@ -19,3 +20,4 @@ export const lowerTitle2fileItemStore: Writable<Record<string, FileItem>> =
 
 export const openaiTokenStore: Writable<string | undefined> =
     writable(undefined);
+export const promptsStore: Writable<Prompt[]> = writable([]);

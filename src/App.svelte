@@ -21,12 +21,14 @@
         dataFileItemsStore,
         lowerTitle2fileItemStore,
         openaiTokenStore,
+        promptsStore,
         searchKeywordStore,
         selectedItemStore,
     } from './Stores';
     import { extractTasks } from './lib/task/Task';
     import { tasksStore } from './Stores.js';
     import { invoke } from '@tauri-apps/api/core';
+    import type { Prompt } from './lib/openai/Prompt';
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
@@ -44,6 +46,14 @@
             const openaiToken = (await invoke('get_openai_token')) as string;
             if (openaiToken) {
                 openaiTokenStore.set(openaiToken);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+        try {
+            const prompts = (await invoke('get_openai_prompts')) as Prompt[];
+            if (prompts) {
+                promptsStore.set(prompts);
             }
         } catch (e) {
             console.error(e);

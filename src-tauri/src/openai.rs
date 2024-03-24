@@ -7,8 +7,36 @@ use openai::chat::{ChatCompletion, ChatCompletionDelta, ChatCompletionMessage, C
 use openai::set_key;
 use tokio::sync::mpsc::Receiver;
 
+#[derive(Debug, serde::Deserialize, serde::Serialize)]
+pub struct PromptConfig {
+    pub prompts: Vec<Prompt>,
+}
+
+#[derive(Debug, serde::Deserialize, serde::Serialize)]
+pub struct Prompt {
+    pub title: String,
+    pub prompt: String,
+}
+
 lazy_static! {
     static ref PROGRESS: Arc<Mutex<HashMap<String, String>>> = Arc::new(Mutex::new(HashMap::new()));
+}
+
+pub fn get_initial_prompts() -> Vec<Prompt> {
+    return vec![
+        Prompt {
+            title: String::from("Generate a title"),
+            prompt: String::from("Here's a Markdown memo. Could you generate a better title for it? Output should be Japanese.Don't quote result."),
+        },
+        Prompt {
+            title: String::from("Write the continuation"),
+            prompt: String::from("Here's a Markdown memo. Could you write the continuation of it? Output should be in Japanese."),
+        },
+        Prompt {
+            title: String::from("Complete it"),
+            prompt: String::from("Here's a Markdown memo. Could you complete it? Output should be in Japanese."),
+        },
+    ];
 }
 
 pub fn get_openai_progress(uuid: String) -> Option<String> {

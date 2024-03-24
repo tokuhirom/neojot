@@ -1,31 +1,17 @@
 <script lang="ts">
     // OpenAI の API をコールする。
     import { invoke } from '@tauri-apps/api/core';
-    import { openaiTokenStore } from '../../Stores';
+    import { openaiTokenStore, promptsStore } from '../../Stores';
     import type { FileItem } from '../file_item/FileItem';
     import { v4 as uuidv4 } from 'uuid';
+    import type { Prompt } from './Prompt';
 
     export let selectedItem: FileItem | undefined = undefined;
 
-    type Prompt = {
-        title: string;
-        prompt: string;
-    };
-
-    let prompts: Prompt[] = [
-        {
-            title: 'Generate a title',
-            prompt: "Here's a Markdown memo. Could you generate a better title for it? Output should be Japanese.Don't quote result.",
-        },
-        {
-            title: 'Write the continuation',
-            prompt: "Here's a Markdown memo. Could you write the continuation of it? Output should be in Japanese.",
-        },
-        {
-            title: 'Complete it',
-            prompt: "Here's a Markdown memo. Could you complete it? Output should be in Japanese.",
-        },
-    ];
+    let prompts: Prompt[] = [];
+    promptsStore.subscribe((value) => {
+        prompts = value;
+    });
 
     let openaiToken: string | undefined = undefined;
     openaiTokenStore.subscribe((value) => {
@@ -58,11 +44,13 @@
 </script>
 
 <div>
-    {#each prompts as prompt}
-        <button on:click={async () => await callOpenAI(prompt)}
-            >{prompt.title}</button
-        >
-    {/each}
+    <div>
+        {#each prompts as prompt}
+            <button on:click={async () => await callOpenAI(prompt)}
+                >{prompt.title}</button
+            >
+        {/each}
+    </div>
     {#if result}
         <pre>{result}</pre>
     {/if}
@@ -70,7 +58,6 @@
 
 <style>
     button {
-        display: block;
         margin: 10px;
         padding: 10px;
         border: 1px solid #ccc;
