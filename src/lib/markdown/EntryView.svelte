@@ -101,7 +101,7 @@
     const myCompletion = (context: CompletionContext) => {
         {
             // `[[foobar]]` style notation
-            const word = context.matchBefore(/\[\[\w*/);
+            const word = context.matchBefore(/\[\[.*/);
             if (word) {
                 console.log('Return links');
                 const options = pageTitles.map((title) => {
@@ -224,7 +224,7 @@
         aliasPlugin(),
         autoLinkHighlightPlugin(() => autoLinks, findOrCreateEntry),
         EditorView.domEventHandlers({ paste: handlePaste }),
-        autocompletion({ override: [myCompletion] }),
+        autocompletion({ override: [myCompletion], closeOnBlur: false }),
     ];
 
     let prevFileName = '';
