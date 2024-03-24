@@ -14,7 +14,7 @@ export type FileItem = {
 };
 
 export function extractBrackets(content: string): string[] {
-    const pattern = /\[\[([^|]+?)]]/g;
+    const pattern = /\[\[([^`|]+?)]]/g;
     const matches = [];
     let match;
 
