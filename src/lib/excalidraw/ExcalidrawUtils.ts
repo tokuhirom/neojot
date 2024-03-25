@@ -18,7 +18,7 @@ export function getExcalidrawTexts(elements: ExcalidrawElement[]): string[] {
 
 export async function loadExcalidrawImage(
     fileItem: FileItem,
-): Promise<string | undefined> {
+): Promise<string | null> {
     if (fileItem.filename.endsWith('.excalidraw')) {
         try {
             const blob = await readFile(
@@ -30,10 +30,10 @@ export async function loadExcalidrawImage(
             return await uint8ArrayToDataUrl(blob);
         } catch (e) {
             console.error(e);
-            return undefined;
+            return null;
         }
     } else {
-        return undefined;
+        return null;
     }
 }
 

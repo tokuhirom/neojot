@@ -82,11 +82,6 @@
 </div>
 
 <style>
-    section,
-    article {
-        margin-bottom: 20px;
-    }
-
     input[type='text'],
     textarea {
         width: 100%;

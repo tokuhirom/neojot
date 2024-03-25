@@ -13,7 +13,7 @@
         deleteArchivedFile,
         loadFileList,
     } from './lib/repository/NodeRepository';
-    import type { FileItem } from './lib/file_item/FileItem';
+    import { type FileItem, loadImage } from './lib/file_item/FileItem';
     import ManualView from './lib/views/ManualView.svelte';
     import { initGit } from './lib/git/GitCommands';
     import { cachedExtractLinks } from './lib/file_item/AutoLinks';
@@ -37,8 +37,29 @@
     });
 
     let dataFileItems: FileItem[] = [];
+    let imageLoadQueue: FileItem[] = [];
+    let imageLoadInterval: number | undefined = undefined;
     dataFileItemsStore.subscribe((value) => {
         dataFileItems = value;
+
+        // load image cache
+        imageLoadQueue = dataFileItems.filter(
+            (fileItem) => fileItem.imgSrc === undefined,
+        );
+        if (imageLoadInterval === undefined) {
+            imageLoadInterval = setInterval(async () => {
+                if (imageLoadQueue.length > 0) {
+                    const fileItem = imageLoadQueue.pop();
+                    if (fileItem && fileItem.imgSrc === undefined) {
+                        fileItem.imgSrc = await loadImage(fileItem);
+                    }
+                } else {
+                    if (imageLoadInterval !== undefined) {
+                        clearInterval(imageLoadInterval);
+                    }
+                }
+            }, 10);
+        }
     });
 
     onMount(async () => {

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { cachedLoadImage, type FileItem } from '../file_item/FileItem';
+    import { type FileItem, loadImage } from '../file_item/FileItem';
     import CardItem from './CardItem.svelte';
     import { onMount } from 'svelte';
     import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
@@ -16,7 +16,7 @@
 
     let title: string | undefined;
     let content: string | undefined;
-    let imgSrc: string | undefined;
+    let imgSrc: string | null;
 
     onMount(async () => {
         await loadFile();
@@ -30,7 +30,7 @@
             title = file.title;
             content = undefined;
             imgSrc = await loadExcalidrawImage(file);
-            if (imgSrc === undefined) {
+            if (imgSrc === null) {
                 console.error('Failed to load excalidraw image');
                 title = '**Excalidraw image failed to load**';
             }
@@ -42,11 +42,36 @@
             content = extractCardContent(file.content);
 
             // content に markdown の画像記法が含まれていた場合は、それを読み取ります。
-            // lazy loading...
-            setTimeout(async () => {
-                imgSrc = await cachedLoadImage(file);
-            }, 0);
+            if (file.imgSrc === undefined) {
+                pushToImageLoadQueue(file);
+            } else {
+                imgSrc = file.imgSrc;
+            }
         }
+    }
+
+    const queue = [];
+    let interval = undefined;
+    function pushToImageLoadQueue(file: FileItem) {
+        // 画像の読み込みをキューに追加
+        queue.push(file);
+        if (interval === undefined) {
+            console.log(`Register interval ${interval}`);
+            interval = setInterval(loadImageOnce, 100);
+        }
+    }
+
+    async function loadImageOnce() {
+        if (queue.length === 0) {
+            console.log('queue is empty');
+            clearInterval(interval);
+            interval = undefined;
+            return;
+        }
+
+        const file = queue.shift();
+        file.imgSrc = await loadImage(file);
+        imgSrc = file.imgSrc;
     }
 </script>
 

@@ -11,6 +11,10 @@ export type FileItem = {
     mtime: number;
     title: string;
     content: string;
+    // undefined: image is not loaded yet.
+    // string: image is loaded. content is the data URL.
+    // null: image is not included in this note.
+    imgSrc: string | null | undefined;
 };
 
 export function extractBrackets(content: string): string[] {
@@ -46,39 +50,20 @@ export function extractBracketsWithCache(fileItem: FileItem) {
     }
 }
 
-type ImageCacheItem = {
-    mtime: number;
-    imgSrc: string | undefined;
-};
-const imageCache = new Map<string, ImageCacheItem>();
-
-export async function cachedLoadImage(
-    fileItem: FileItem,
-): Promise<string | undefined> {
-    const cacheItem = imageCache.get(fileItem.filename);
-    if (cacheItem && cacheItem.mtime === fileItem.mtime) {
-        return cacheItem.imgSrc;
-    } else {
-        const imgSrc = await loadImage(fileItem);
-        imageCache.set(fileItem.filename, {
-            mtime: fileItem.mtime,
-            imgSrc,
-        });
-        return imgSrc;
-    }
-}
-
-// TODO: load image by <img> tag.
 // see https://github.com/tauri-apps/tauri/discussions/1438
-async function loadImage(fileItem: FileItem): Promise<string | undefined> {
-    const match = fileItem.content.match(/!\[.*]\((.*)\)/);
+export async function loadImage(fileItem: FileItem): Promise<string | null> {
+    // ![[../images/20240325094802.jpg|100]] のパターンもサポートしたい。
+    const match = fileItem.content.match(
+        /!\[.*]\((.*)\)|!\[\[([^|]+)(?:\|[0-9-]+)?]]/,
+    );
     if (match) {
-        const url = match[1];
+        const url = match[1] || match[2];
+        console.log(`Loading image source ${url}`);
         const value = await readFile(url.replace('../', ''), {
             baseDir: BaseDirectory.AppData,
         });
         return await uint8ArrayToDataUrl(value);
     } else {
-        return undefined;
+        return null;
     }
 }
