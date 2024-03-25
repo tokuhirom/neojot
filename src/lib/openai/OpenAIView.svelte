@@ -18,24 +18,26 @@
         openaiToken = value;
     });
 
-    let result: string | undefined = undefined;
+    let result: string[] = [];
     async function callOpenAI(prompt: Prompt) {
         if (openaiToken !== undefined) {
-            result = 'Loading...';
+            result = ['Loading...'];
             console.log(openaiToken, prompt.prompt, selectedItem.content);
             const uuid = uuidv4();
             console.log(uuid);
             const interval = setInterval(async () => {
-                result = await invoke('tauri_get_openai_progress', {
+                const got = await invoke('tauri_get_openai_progress', {
                     uuid: uuid,
                 });
+                result = got.split('\n');
             }, 300);
-            result = await invoke('tauri_ask_openai', {
+            const got = await invoke('tauri_ask_openai', {
                 uuid: uuid,
                 openaiToken: openaiToken,
                 prompt: prompt.prompt,
                 note: selectedItem.content,
             });
+            result = got.split('\n');
             clearInterval(interval);
         } else {
             console.log('Missing OpenAI token.');
@@ -52,7 +54,9 @@
         {/each}
     </div>
     {#if result}
-        <pre>{result}</pre>
+        <div class="result">
+            {#each result as line}<pre>{line}</pre>{/each}
+        </div>
     {/if}
 </div>
 
@@ -66,10 +70,14 @@
         font-size: 120%;
         cursor: pointer;
     }
-    pre {
+    .result {
         margin-left: 17px;
         margin-right: 17px;
+    }
+    .result pre {
         white-space: pre-wrap;
         word-break: break-all;
+        margin-top: 0;
+        margin-bottom: 2px;
     }
 </style>
