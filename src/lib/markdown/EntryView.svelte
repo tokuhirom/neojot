@@ -101,7 +101,7 @@
     const myCompletion = (context: CompletionContext) => {
         {
             // `[[foobar]]` style notation
-            const word = context.matchBefore(/\[\[.*/);
+            const word = context.matchBefore(/\[\[(?:(?!\]\].*).)*/);
             if (word) {
                 console.log('Return links');
                 const options = pageTitles.map((title) => {
