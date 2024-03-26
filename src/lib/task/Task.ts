@@ -1,6 +1,5 @@
 import type { FileItem } from '../file_item/FileItem';
-import { differenceInDays, startOfDay } from 'date-fns';
-import { parse as parseDate2 } from 'date-fns';
+import { differenceInDays, parse as parseDate2, startOfDay } from 'date-fns';
 import { emit } from '@tauri-apps/api/event';
 import { selectedItemStore } from '../../Stores';
 
@@ -109,7 +108,7 @@ export function parseTask(
     const titleMatch = line.replace(/\[.*?]/, '').match(/:\s*(.+)$/);
     if (!titleMatch) return;
 
-    const title = titleMatch[1];
+    const title = /\S/.exec(titleMatch[1]) ? titleMatch[1] : fileItem.title;
 
     return {
         type: typeMatch[1],
