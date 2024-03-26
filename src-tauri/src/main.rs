@@ -155,7 +155,7 @@ fn get_openai_prompts() -> Result<Vec<Prompt>, String> {
             log::error!("Failed to read the prompts from the file: {}", e)
         }
     }
-    return Ok(get_initial_prompts())
+    Ok(get_initial_prompts())
 }
 
 #[tauri::command]

@@ -23,7 +23,7 @@ lazy_static! {
 }
 
 pub fn get_initial_prompts() -> Vec<Prompt> {
-    return vec![
+    vec![
         Prompt {
             title: String::from("Generate a title"),
             prompt: String::from("Here's a Markdown memo. Could you generate a better title for it? Output should be Japanese.Don't quote result."),
@@ -36,7 +36,7 @@ pub fn get_initial_prompts() -> Vec<Prompt> {
             title: String::from("Complete it"),
             prompt: String::from("Here's a Markdown memo. Could you complete it? Output should be in Japanese."),
         },
-    ];
+    ]
 }
 
 pub fn get_openai_progress(uuid: String) -> Option<String> {
