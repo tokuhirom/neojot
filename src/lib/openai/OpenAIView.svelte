@@ -19,17 +19,21 @@
     });
 
     let result: string[] = [];
+    let latestUuid: string | undefined = undefined;
     async function callOpenAI(prompt: Prompt) {
         if (openaiToken !== undefined) {
             result = ['Loading...'];
             console.log(openaiToken, prompt.prompt, selectedItem.content);
             const uuid = uuidv4();
+            latestUuid = uuid;
             console.log(uuid);
             const interval = setInterval(async () => {
-                const got = await invoke('tauri_get_openai_progress', {
-                    uuid: uuid,
-                });
-                result = got.split('\n');
+                if (latestUuid === uuid) {
+                    const got = await invoke('tauri_get_openai_progress', {
+                        uuid: uuid,
+                    });
+                    result = got.split('\n');
+                }
             }, 300);
             const got = await invoke('tauri_ask_openai', {
                 uuid: uuid,
@@ -37,7 +41,9 @@
                 prompt: prompt.prompt,
                 note: selectedItem.content,
             });
-            result = got.split('\n');
+            if (latestUuid === uuid) {
+                result = got.split('\n');
+            }
             clearInterval(interval);
         } else {
             console.log('Missing OpenAI token.');
