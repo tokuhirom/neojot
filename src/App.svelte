@@ -29,6 +29,7 @@
     import { tasksStore } from './Stores.js';
     import { invoke } from '@tauri-apps/api/core';
     import type { Prompt } from './lib/openai/Prompt';
+    import NetworkView from './lib/views/NetworkView.svelte';
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
@@ -246,6 +247,10 @@
             class:active={tabPane === 'task'}>✅</button
         >
         <button
+            on:click={() => (tabPane = 'network')}
+            class:active={tabPane === 'network'}>🦑</button
+        >
+        <button
             on:click={() => (tabPane = 'calendar')}
             class:active={tabPane === 'calendar'}>📆</button
         >
@@ -286,6 +291,8 @@
             <ManualView />
         {:else if tabPane === 'configuration'}
             <ConfigurationView />
+        {:else if tabPane === 'network'}
+            <NetworkView />
         {:else}
             <CardView
                 {dataFileItems}
