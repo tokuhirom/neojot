@@ -161,7 +161,7 @@
                 readAndSaveImage(blob).then((pathFromAppDir) => {
                     const path = `../${pathFromAppDir}`;
 
-                    const markdownImageText = `![[${path}|100]]\n`;
+                    const markdownImageText = `![[${path}|500]]\n`;
                     const transaction = view.state.update({
                         changes: {
                             from: view.state.selection.main.from,
