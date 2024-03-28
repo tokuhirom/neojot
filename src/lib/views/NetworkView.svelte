@@ -10,6 +10,7 @@
     import EntryView from '../markdown/EntryView.svelte';
     import LinkCards from '../link/LinkCards.svelte';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
+    import { onMount } from 'svelte';
 
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem | undefined;
@@ -20,21 +21,12 @@
     let selectedItem: FileItem | undefined = undefined;
 
     let dataFileItems: FileItem[] = [];
+    const title2id = {};
+    const id2title = {};
+    let forwardLinks: Map<string, string[]> = new Map();
     dataFileItemsStore.subscribe((value) => {
         dataFileItems = value;
-    });
 
-    let showProgress = false;
-    $: if (container && dataFileItems.length) {
-        // create an array with nodes
-        const nodes = new DataSet();
-        nodes.add(
-            dataFileItems.map((it, i) => {
-                return { id: i, label: it.title, shape: 'box' };
-            }),
-        );
-        const title2id = {};
-        const id2title = {};
         dataFileItems.forEach((it, i) => {
             title2id[it.title] = i;
             id2title[i] = it.title;
@@ -42,29 +34,13 @@
 
         const { forward }: { forward: Map<string, string[]> } =
             extractLinks(dataFileItems);
+        forwardLinks = forward;
+    });
 
-        // create an array with edges
-        const edges = new DataSet();
-        // each forward key and value is a link
-        const rawEdges = new Set();
-        for (const [from, tos] of forward) {
-            for (const to of tos) {
-                const fromId = title2id[from];
-                const toId = title2id[to];
-                const edgeKey = `${fromId}-${toId}`;
-                rawEdges.add(edgeKey);
-            }
-        }
-        edges.add(
-            Array.from(rawEdges).map((key) => {
-                const [from, to] = key.split('-');
-                return {
-                    from: parseInt(from, 10),
-                    to: parseInt(to, 10),
-                };
-            }),
-        );
+    const nodes = new DataSet();
+    const edges = new DataSet();
 
+    onMount(() => {
         // provide the data in the vis format
         const data = {
             nodes: nodes,
@@ -79,10 +55,9 @@
         const network = new Network(container, data, options);
         showProgress = true;
         network.on('doubleClick', function (params) {
-            const nodes = params.nodes;
             console.log(params);
-            if (nodes && nodes.length > 0) {
-                const nodeId = nodes[0];
+            if (params.nodes && params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
                 const title = id2title[nodeId];
                 console.log('DOUBLE CLICK', title);
                 selectedItem = findEntryByTitle(title);
@@ -93,6 +68,46 @@
             showProgress = false;
         });
         console.log('DONE');
+    });
+
+    let showProgress = false;
+    $: if (container && dataFileItems.length) {
+        // create an array with nodes
+        if (nodes.length == 0) {
+            nodes.add(
+                dataFileItems.map((it, i) => {
+                    return { id: i, label: it.title, shape: 'box' };
+                }),
+            );
+        } else {
+            nodes.update(
+                dataFileItems.map((it, i) => {
+                    return { id: i, label: it.title, shape: 'box' };
+                }),
+            );
+        }
+
+        // create an array with edges
+        // each forward key and value is a link
+        const rawEdges = new Set();
+        for (const [from, tos] of forwardLinks) {
+            for (const to of tos) {
+                const fromId = title2id[from];
+                const toId = title2id[to];
+                const edgeKey = `${fromId}-${toId}`;
+                rawEdges.add(edgeKey);
+            }
+        }
+        edges.clear();
+        edges.update(
+            Array.from(rawEdges).map((key) => {
+                const [from, to] = key.split('-');
+                return {
+                    from: parseInt(from, 10),
+                    to: parseInt(to, 10),
+                };
+            }),
+        );
     }
 </script>
 
