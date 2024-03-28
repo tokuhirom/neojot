@@ -2,7 +2,6 @@
     import type { FileItem, MatchedLine } from './FileItem';
     import { emit } from '@tauri-apps/api/event';
     import { onMount } from 'svelte';
-    import { format } from 'date-fns';
     import { loadExcalidrawImage } from '../excalidraw/ExcalidrawUtils';
     import {
         searchKeywordStore,
@@ -44,12 +43,6 @@
         if (lineNumber && lineNumber.length) {
             emit('go-to-line-number', parseInt(lineNumber, 10));
         }
-    }
-
-    function formatEpochSeconds() {
-        const epochSeconds = fileItem.mtime;
-        const date = new Date(epochSeconds * 1000);
-        return format(date, 'yyyy-MM-dd HH:mm');
     }
 
     function highlightKeyword(
@@ -106,7 +99,7 @@
         }
     }
 
-    let imgSrc: string | undefined;
+    let imgSrc: string | null;
 
     onMount(async () => {
         imgSrc = await loadExcalidrawImage(fileItem);
@@ -141,12 +134,6 @@
                 src={imgSrc}
             />
         {/if}
-        <span class="mtime">{formatEpochSeconds()}</span>
-        <span class="filename" title={fileItem.filename}
-            >{fileItem.filename
-                .replace(/.+\//, '')
-                .replace(/\.excalidraw\./, '.e..')}</span
-        >
     </button>
 </div>
 
@@ -171,13 +158,6 @@
         border: 1px solid red;
     }
 
-    .mtime {
-        display: block;
-        font-size: 60%;
-        color: darkgrey;
-        float: left;
-    }
-
     .match-line {
         font-size: 80%;
         display: block;
@@ -188,12 +168,6 @@
         display: block;
         overflow-y: hidden;
         min-height: 1em;
-    }
-
-    .filename {
-        color: darkgrey;
-        font-size: 80%;
-        float: right;
     }
 
     button.active {
