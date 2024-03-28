@@ -79,7 +79,7 @@
         viewerMode = true;
     }
 
-    let fixedAreaHeight = 0; // 初期値を設定
+    let fixedAreaHeight = 0;
 
     $: if (selectedItem) {
         updateFixedAreaHeight();

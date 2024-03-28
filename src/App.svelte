@@ -292,7 +292,7 @@
         {:else if tabPane === 'configuration'}
             <ConfigurationView />
         {:else if tabPane === 'network'}
-            <NetworkView />
+            <NetworkView {pageTitles} {findEntryByTitle} {autoLinks} />
         {:else}
             <CardView
                 {dataFileItems}

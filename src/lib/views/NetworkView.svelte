@@ -1,14 +1,23 @@
 <script lang="ts">
-    import * as vis from 'vis-network';
     import { DataSet } from 'vis-data/esnext';
     import { Network } from 'vis-network/esnext';
     import 'vis-network/styles/vis-network.css';
-    import { onMount } from 'svelte';
     import { dataFileItemsStore } from '../../Stores';
     import type { FileItem } from '../file_item/FileItem';
     import { extractLinks } from '../link/Links';
+    import DuplicatedNotes from '../markdown/DuplicatedNotes.svelte';
+    import OpenAIView from '../openai/OpenAIView.svelte';
+    import EntryView from '../markdown/EntryView.svelte';
+    import LinkCards from '../link/LinkCards.svelte';
+    import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
+
+    export let pageTitles: string[];
+    export let findEntryByTitle: (title: string) => FileItem | undefined;
+    export let autoLinks: string[];
 
     let container;
+
+    let selectedItem: FileItem | undefined = undefined;
 
     let dataFileItems: FileItem[] = [];
     dataFileItemsStore.subscribe((value) => {
@@ -31,12 +40,8 @@
             id2title[i] = it.title;
         });
 
-        const {
-            forward,
-            backward,
-        }: { forward: Map<string, string[]>; backward: Map<string, string[]> } =
+        const { forward }: { forward: Map<string, string[]> } =
             extractLinks(dataFileItems);
-        console.log('GREAT LINKS', forward, backward);
 
         // create an array with edges
         const edges = new DataSet();
@@ -80,6 +85,7 @@
                 const nodeId = nodes[0];
                 const title = id2title[nodeId];
                 console.log('DOUBLE CLICK', title);
+                selectedItem = findEntryByTitle(title);
             }
         });
         network.on('stabilized', function () {
@@ -92,12 +98,48 @@
 
 <div>
     <div style:display={showProgress ? 'block' : 'none'}>Now loading...</div>
-    <div bind:this={container} class="network-container"></div>
+    <div class="network-view">
+        <div bind:this={container} class="network-container"></div>
+        <!-- eslint-disable-next-line -->
+        <div class="log-view">
+            {#if selectedItem !== undefined}
+                {#if selectedItem.filename.endsWith('.excalidraw')}
+                    <ExcalidrawView {selectedItem} />
+                {:else}
+                    <EntryView
+                        file={selectedItem}
+                        {pageTitles}
+                        {findEntryByTitle}
+                        {autoLinks}
+                    />
+                    <DuplicatedNotes file={selectedItem} />
+                    <LinkCards file={selectedItem} />
+                    <OpenAIView {selectedItem} />
+                {/if}
+            {/if}
+        </div>
+    </div>
 </div>
 
 <style>
-    .network-container {
-        width: 100%;
+    .network-view {
+        display: flex; /* Enables Flexbox */
+        flex-direction: row; /* Stack children vertically */
         height: 100vh;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .network-container {
+        flex: 0 0 49%;
+        height: 100vh;
+    }
+    .log-view {
+        flex: 0 0 49%;
+        /*overflow-x: hidden;*/
+        padding-inline-start: 0;
+        flex-grow: 1;
+        height: 100vh;
+        overflow-y: auto;
     }
 </style>
