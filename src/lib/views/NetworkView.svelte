@@ -101,11 +101,12 @@
                 rawEdges.add(edgeKey);
             }
         }
-        edges.clear();
+        // Support edge deleting
         edges.update(
             Array.from(rawEdges).map((key) => {
                 const [from, to] = key.split('-');
                 return {
+                    id: key,
                     arrows: 'to',
                     from: parseInt(from, 10),
                     to: parseInt(to, 10),
