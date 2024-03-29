@@ -15,6 +15,7 @@ export const searchFilteredFileItemsStore: Writable<SearchResult[]> = writable(
     [],
 );
 
+// this supports alias and auto links.
 export const lowerTitle2fileItemStore: Writable<Record<string, FileItem>> =
     writable({});
 

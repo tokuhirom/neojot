@@ -2,7 +2,11 @@
     import { DataSet } from 'vis-data/esnext';
     import { Network } from 'vis-network/esnext';
     import 'vis-network/styles/vis-network.css';
-    import { dataFileItemsStore } from '../../Stores';
+    import {
+        dataFileItemsStore,
+        lowerTitle2fileItemStore,
+        selectedItemStore,
+    } from '../../Stores';
     import type { FileItem } from '../file_item/FileItem';
     import { extractLinks } from '../link/Links';
     import DuplicatedNotes from '../markdown/DuplicatedNotes.svelte';
@@ -19,17 +23,28 @@
     let container;
 
     let selectedItem: FileItem | undefined = undefined;
+    selectedItemStore.subscribe((value) => {
+        selectedItem = value;
+    });
+
+    let lowerTitle2filename = {};
+    lowerTitle2fileItemStore.subscribe((value: Record<string, FileItem>) => {
+        const newMap = {};
+        for (let valueKey in value) {
+            newMap[valueKey.toLowerCase()] = value[valueKey].filename;
+        }
+        lowerTitle2filename = newMap;
+    });
 
     let dataFileItems: FileItem[] = [];
-    const title2id = {};
-    const id2title = {};
+    const filename2title = {};
     let forwardLinks: Map<string, string[]> = new Map();
     dataFileItemsStore.subscribe((value) => {
         dataFileItems = value;
 
-        dataFileItems.forEach((it, i) => {
-            title2id[it.title.toLowerCase()] = i;
-            id2title[i] = it.title;
+        dataFileItems.forEach((it) => {
+            lowerTitle2filename[it.title.toLowerCase()] = it.filename;
+            filename2title[it.filename] = it.title;
         });
 
         const { forward }: { forward: Map<string, string[]> } =
@@ -61,9 +76,10 @@
             console.log(params);
             if (params.nodes && params.nodes.length > 0) {
                 const nodeId = params.nodes[0];
-                const title = id2title[nodeId];
+                const title = filename2title[nodeId];
                 console.log('DOUBLE CLICK', title);
-                selectedItem = findEntryByTitle(title);
+                const selectedItem = findEntryByTitle(title);
+                selectedItemStore.set(selectedItem);
             }
         });
         network.on('stabilized', function () {
@@ -78,29 +94,29 @@
     $: if (container && dataFileItems.length) {
         // create an array with nodes
         nodes.update(
-            dataFileItems.map((it, i) => {
-                return { id: i, label: it.title, shape: 'box' };
+            dataFileItems.map((it) => {
+                return { id: it.filename, label: it.title, shape: 'box' };
             }),
         );
 
         // create an array with edges
         // each forward key and value is a link
         const addEdge = (key: string) => {
-            const [from, to] = key.split('-');
+            const [from, to] = key.split('\0');
             const edge = {
                 id: key,
                 arrows: 'to',
-                from: parseInt(from, 10),
-                to: parseInt(to, 10),
+                from: from,
+                to: to,
             };
             edges.update([edge]);
         };
 
         for (const [from, tos] of forwardLinks) {
             for (const to of tos) {
-                const fromId = title2id[from.toLowerCase()];
-                const toId = title2id[to.toLowerCase()];
-                const edgeKey = `${fromId}-${toId}`;
+                const fromId = lowerTitle2filename[from.toLowerCase()];
+                const toId = lowerTitle2filename[to.toLowerCase()];
+                const edgeKey = `${fromId}\0${toId}`;
                 if (!edgeSet.has(edgeKey)) {
                     edgeSet.add(edgeKey);
                     addEdge(edgeKey);
@@ -113,7 +129,7 @@
 
     function onSaved(fileItem: FileItem) {
         if (network) {
-            network.focus(title2id[fileItem.title.toLowerCase()]);
+            network.focus(lowerTitle2filename[fileItem.title.toLowerCase()]);
         }
     }
 </script>
