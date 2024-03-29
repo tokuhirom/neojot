@@ -76,19 +76,11 @@
     let showProgress = false;
     $: if (container && dataFileItems.length) {
         // create an array with nodes
-        if (nodes.length == 0) {
-            nodes.add(
-                dataFileItems.map((it, i) => {
-                    return { id: i, label: it.title, shape: 'box' };
-                }),
-            );
-        } else {
-            nodes.update(
-                dataFileItems.map((it, i) => {
-                    return { id: i, label: it.title, shape: 'box' };
-                }),
-            );
-        }
+        nodes.update(
+            dataFileItems.map((it, i) => {
+                return { id: i, label: it.title, shape: 'box' };
+            }),
+        );
 
         // create an array with edges
         // each forward key and value is a link
