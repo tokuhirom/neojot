@@ -40,19 +40,22 @@
     const nodes = new DataSet();
     const edges = new DataSet();
 
+    let network: Network | undefined = undefined;
+
     onMount(() => {
-        // provide the data in the vis format
         const data = {
             nodes: nodes,
             edges: edges,
         };
         const options = {
             layout: {
+                // fix the random seed to generate the same graph each time
+                randomSeed: 0,
                 improvedLayout: false,
             },
         };
 
-        const network = new Network(container, data, options);
+        network = new Network(container, data, options);
         showProgress = true;
         network.on('doubleClick', function (params) {
             console.log(params);
@@ -109,6 +112,12 @@
             }),
         );
     }
+
+    function onSaved(fileItem: FileItem) {
+        if (network) {
+            network.focus(title2id[fileItem.title]);
+        }
+    }
 </script>
 
 <div>
@@ -126,6 +135,7 @@
                         {pageTitles}
                         {findEntryByTitle}
                         {autoLinks}
+                        {onSaved}
                     />
                     <DuplicatedNotes file={selectedItem} />
                     <LinkCards file={selectedItem} />
@@ -148,6 +158,8 @@
     .network-container {
         flex: 0 0 49%;
         height: 100vh;
+        border-right: #757575 1px solid;
+        padding-right: 8px;
     }
     .log-view {
         flex: 0 0 49%;

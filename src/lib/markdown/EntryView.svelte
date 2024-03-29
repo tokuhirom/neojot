@@ -32,6 +32,7 @@
     export let pageTitles: string[];
     export let findEntryByTitle: (title: string) => FileItem;
     export let autoLinks: string[];
+    export let onSaved: (fileItem: FileItem) => void = () => {};
 
     selectedItemStore.subscribe((value) => {
         if (value) {
@@ -59,6 +60,8 @@
             file.title = newTitle;
             await saveMarkdownFile(file.filename, text);
             file.mtime = Math.floor(Date.now() / 1000);
+
+            onSaved(file);
 
             // move to top of the list.
             $dataFileItemsStore = [
