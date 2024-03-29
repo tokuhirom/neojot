@@ -28,7 +28,7 @@
         dataFileItems = value;
 
         dataFileItems.forEach((it, i) => {
-            title2id[it.title] = i;
+            title2id[it.title.toLowerCase()] = i;
             id2title[i] = it.title;
         });
 
@@ -51,7 +51,7 @@
             layout: {
                 // fix the random seed to generate the same graph each time
                 randomSeed: 0,
-                improvedLayout: false,
+                improvedLayout: true,
             },
         };
 
@@ -74,6 +74,7 @@
     });
 
     let showProgress = false;
+    let edgeSet = new Set();
     $: if (container && dataFileItems.length) {
         // create an array with nodes
         nodes.update(
@@ -84,32 +85,35 @@
 
         // create an array with edges
         // each forward key and value is a link
-        const rawEdges = new Set();
+        const addEdge = (key: string) => {
+            const [from, to] = key.split('-');
+            const edge = {
+                id: key,
+                arrows: 'to',
+                from: parseInt(from, 10),
+                to: parseInt(to, 10),
+            };
+            edges.update([edge]);
+        };
+
         for (const [from, tos] of forwardLinks) {
             for (const to of tos) {
-                const fromId = title2id[from];
-                const toId = title2id[to];
+                const fromId = title2id[from.toLowerCase()];
+                const toId = title2id[to.toLowerCase()];
                 const edgeKey = `${fromId}-${toId}`;
-                rawEdges.add(edgeKey);
+                if (!edgeSet.has(edgeKey)) {
+                    edgeSet.add(edgeKey);
+                    addEdge(edgeKey);
+                }
             }
         }
-        // Support edge deleting
-        edges.update(
-            Array.from(rawEdges).map((key) => {
-                const [from, to] = key.split('-');
-                return {
-                    id: key,
-                    arrows: 'to',
-                    from: parseInt(from, 10),
-                    to: parseInt(to, 10),
-                };
-            }),
-        );
+
+        // TODO: 削除されたエッジも ケアしてくれ
     }
 
     function onSaved(fileItem: FileItem) {
         if (network) {
-            network.focus(title2id[fileItem.title]);
+            network.focus(title2id[fileItem.title.toLowerCase()]);
         }
     }
 </script>
