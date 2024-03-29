@@ -106,6 +106,7 @@
             Array.from(rawEdges).map((key) => {
                 const [from, to] = key.split('-');
                 return {
+                    arrows: 'to',
                     from: parseInt(from, 10),
                     to: parseInt(to, 10),
                 };
@@ -156,7 +157,7 @@
     }
 
     .network-container {
-        flex: 0 0 49%;
+        flex: 0 0 47%;
         height: 100vh;
         border-right: #757575 1px solid;
         padding-right: 8px;
