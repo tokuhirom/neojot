@@ -155,7 +155,11 @@
 
                 const fileItem = await createNewFileWithContent('# \n\n');
 
-                if (tabPane !== 'list' && tabPane !== 'card') {
+                if (
+                    tabPane !== 'list' &&
+                    tabPane !== 'card' &&
+                    tabPane !== 'network'
+                ) {
                     tabPane = 'list';
                 }
 
