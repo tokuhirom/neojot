@@ -12,6 +12,7 @@
     import { taskPlugin } from '../markdown/TaskPlugin';
     import type { FileItem } from '../file_item/FileItem';
     import { openInternalLink } from '../markdown/KeyHandler';
+    import { debounce } from '../utils/Debounce';
 
     export let findOrCreateEntry: (pageName: string) => void;
     export let findEntryByTitle: (title: string) => FileItem | undefined;
@@ -31,12 +32,15 @@
         }
     }
 
-    // save 00QuickPad.md
-    async function onUpdateText(text: string) {
-        console.log('onUpdateText', text);
+    const debouncedUpdateText = debounce(async (text: string) => {
+        console.log(`テキストが変更されました`);
         await writeTextFile('00QuickPad.md', text, {
             baseDir: BaseDirectory.AppData,
         });
+    }, 500);
+
+    function onUpdateText(text: string) {
+        debouncedUpdateText(text);
     }
 
     let extensions = [

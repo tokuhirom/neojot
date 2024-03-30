@@ -52,14 +52,6 @@
         ...defaultKeymap, // 標準のキーマップを含める
     ];
 
-    const debouncedUpdateText = debounce(async () => {
-        console.log(`テキストが変更されました`);
-        let state = view.state;
-        let doc = state.doc;
-        let text = doc.toString();
-        await onUpdateText(text);
-    }, 500); // 500ミリ秒のデバウンス遅延
-
     onMount(async () => {
         const doc = await initialContent();
         let startState = EditorState.create({
@@ -85,7 +77,7 @@
                                     'program' && tr.docChanged,
                         );
                         if (isUserInput) {
-                            await debouncedUpdateText();
+                            await onUpdateText(view.state.doc.toString());
                         }
                     }
                 }),

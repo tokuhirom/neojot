@@ -26,6 +26,7 @@
         selectedItemStore,
     } from '../../Stores';
     import { invoke } from '@tauri-apps/api/core';
+    import { debounce } from '../utils/Debounce';
 
     export let file: FileItem;
     // for completion
@@ -49,7 +50,19 @@
         },
     ];
 
-    async function onUpdateText(text: string) {
+    function onUpdateText(text: string) {
+        debouncedUpdateText(file, text);
+    }
+
+    const debouncedUpdateText = debounce(
+        async (file: FileItem, text: string) => {
+            console.log(`テキストが変更されました`);
+            await doUpdateText(file, text);
+        },
+        500,
+    );
+
+    async function doUpdateText(file: FileItem, text: string) {
         console.log(`SAVING: ${file.filename}`);
         if (file.content !== text) {
             file.content = text;
