@@ -58,6 +58,7 @@
     let network: Network | undefined = undefined;
 
     onMount(() => {
+        console.log('Start NetworkView:onMount()');
         const data = {
             nodes: nodes,
             edges: edges,
@@ -86,18 +87,52 @@
             console.log('stabilized');
             showProgress = false;
         });
-        console.log('DONE');
+        console.log('Finished NetworkView:onMount()');
     });
 
     let showProgress = false;
+    let nodeMap: Record<string, string> = {};
     let edgeSet = new Set();
     $: if (container && dataFileItems.length) {
         // create an array with nodes
-        nodes.update(
-            dataFileItems.map((it) => {
+        const updateNodes = [];
+        const addNodes = [];
+        dataFileItems.forEach((it) => {
+            if (it.filename in nodeMap) {
+                if (it.title !== nodeMap[it.filename]) {
+                    // title changed.
+                    nodeMap[it.filename] = it.title;
+                    updateNodes.push({
+                        id: it.filename,
+                        label: it.title,
+                        shape: 'box',
+                    });
+                }
                 return { id: it.filename, label: it.title, shape: 'box' };
-            }),
-        );
+            } else {
+                nodeMap[it.filename] = it.title;
+                addNodes.push({
+                    id: it.filename,
+                    label: it.title,
+                    shape: 'box',
+                });
+            }
+        });
+        if (updateNodes.length > 0) {
+            nodes.update(updateNodes);
+        }
+        if (addNodes.length > 0) {
+            nodes.add(addNodes);
+        }
+        // delete the removed nodes.
+        const nodeIds = new Set(dataFileItems.map((it) => it.filename));
+        for (const nodeId in nodeMap) {
+            if (!nodeIds.has(nodeId)) {
+                console.log('delete node', nodeId, nodeMap[nodeId]);
+                nodes.remove(nodeId);
+                delete nodeMap[nodeId];
+            }
+        }
 
         // create an array with edges
         // each forward key and value is a link
@@ -112,6 +147,7 @@
             edges.update([edge]);
         };
 
+        const addEdges = [];
         for (const [from, tos] of forwardLinks) {
             for (const to of tos) {
                 const fromId = lowerTitle2filename[from.toLowerCase()];
@@ -119,12 +155,32 @@
                 const edgeKey = `${fromId}\0${toId}`;
                 if (!edgeSet.has(edgeKey)) {
                     edgeSet.add(edgeKey);
-                    addEdge(edgeKey);
+                    addEdges.push(edgeKey);
                 }
             }
         }
-
-        // TODO: 削除されたエッジも ケアしてくれ
+        if (addEdges.length > 0) {
+            edges.add(
+                addEdges.map((key) => ({
+                    id: key,
+                    arrows: 'to',
+                    from: key.split('\0')[0],
+                    to: key.split('\0')[1],
+                })),
+            );
+        }
+        // delete the removed edges.
+        for (const edgeId in edgeSet) {
+            const [from, to] = edgeId.split('\0');
+            if (
+                !forwardLinks.has(from) ||
+                !forwardLinks.get(from).includes(to)
+            ) {
+                console.log('delete edge', from, to);
+                edges.remove(edgeId);
+                edgeSet.delete(edgeId);
+            }
+        }
     }
 
     function onSaved(fileItem: FileItem) {
