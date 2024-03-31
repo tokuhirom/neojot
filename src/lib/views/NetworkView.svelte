@@ -136,17 +136,6 @@
 
         // create an array with edges
         // each forward key and value is a link
-        const addEdge = (key: string) => {
-            const [from, to] = key.split('\0');
-            const edge = {
-                id: key,
-                arrows: 'to',
-                from: from,
-                to: to,
-            };
-            edges.update([edge]);
-        };
-
         const addEdges = [];
         for (const [from, tos] of forwardLinks) {
             for (const to of tos) {

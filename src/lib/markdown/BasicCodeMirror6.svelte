@@ -23,7 +23,6 @@
     import { mermaidPlugin } from './MermaidWidget';
     import { syntaxHighlighting } from '@codemirror/language';
     import { openSearchPanel, searchKeymap } from '@codemirror/search';
-    import { debounce } from '../utils/Debounce';
 
     let container;
     export let view: EditorView;
