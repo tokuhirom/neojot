@@ -47,7 +47,7 @@
   "devDependencies": {
     "@codemirror/language-data": "^6.4.1",
     "@codemirror/legacy-modes": "^6.3.3",
-    "@excalidraw/excalidraw": "^0.17.3",
+    "@excalidraw/excalidraw": "^0.17.6",
     "@sveltejs/vite-plugin-svelte": "^3.0.1",
     "@tauri-apps/cli": "^2.0.0-beta.2",
     "@tsconfig/svelte": "^5.0.2",
