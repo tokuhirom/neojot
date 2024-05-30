@@ -1,14 +1,15 @@
 # NeoJot
 
-This is a my own note taking app.
+NeoJot is a note-taking app designed for efficiency and simplicity.
 
 ![img.png](img.png)
 
 Based on : `Tauri + Svelte + Typescript`.
 
-## Supported platforms
+## Features
 
-* Mac OS X Ventura or later
+* Built with Tauri, Svelte, and TypeScript for a smooth and responsive experience.
+* Optimized for Mac OS X Ventura and later.
 
 ## LICENSE
 
