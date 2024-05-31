@@ -43,7 +43,8 @@
     "mermaid": "^10.8.0",
     "uuid": "^9.0.1",
     "vis-data": "^7.1.9",
-    "vis-network": "^9.1.9"
+    "vis-network": "^9.1.9",
+    "vis-util": "^5.0.7"
   },
   "devDependencies": {
     "@codemirror/language-data": "^6.4.1",
