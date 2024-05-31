@@ -27,7 +27,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: install frontend dependencies
-        run: yarn install # change this to npm or pnpm depending on which one you use
+        run: npm install # change this to npm or pnpm depending on which one you use
 
       - name: update tauri.config.json version
         run: |
