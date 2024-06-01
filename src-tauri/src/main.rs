@@ -213,6 +213,12 @@ fn get_files(prefix: String) -> Result<Vec<FileItem>, String> {
 
 fn build_menu(app: &App) -> tauri::Result<Menu<Wry>> {
     let app_menu = SubmenuBuilder::new(app, "App")
+        .item(
+            &MenuItemBuilder::new("Quit")
+                .id("quit")
+                .accelerator("Command+Q")
+                .build(app)?
+        )
         .build()?;
     let file_menu = SubmenuBuilder::new(app, "File")
         .item(
@@ -330,6 +336,8 @@ fn main() -> anyhow::Result<()> {
                         },
                         Err(err) => log::error!("Failed to create new Excalidraw: {:?}", err)
                     }
+                } else if event.id().0 == "quit" {
+                    app.exit(0);
                 } else {
                     let action_name = format!("do_{}", event.id().0);
                     log::info!("Forwarding menu item: {:?}", action_name);
