@@ -22,15 +22,30 @@
     {
       "identifier": "fs:scope",
       "allow": [
-        {"path": "$APPDATA"},
-        {"path": "$APPDATA/*"},
-        {"path": "$APPDATA/.git"},
-        {"path": "$APPDATA/data/*"},
-        {"path": "$APPDATA/calendar/*"},
-        {"path": "$APPDATA/archived/*"},
-        {"path": "$APPDATA/images/*"}
+        {
+          "path": "$APPDATA"
+        },
+        {
+          "path": "$APPDATA/*"
+        },
+        {
+          "path": "$APPDATA/.git"
+        },
+        {
+          "path": "$APPDATA/data/*"
+        },
+        {
+          "path": "$APPDATA/calendar/*"
+        },
+        {
+          "path": "$APPDATA/archived/*"
+        },
+        {
+          "path": "$APPDATA/images/*"
+        }
       ]
-    }
+    },
+    "notification:default"
   ],
   "platforms": [
     "linux",

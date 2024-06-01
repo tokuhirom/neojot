@@ -167,9 +167,9 @@ export function getTaskIcon(task: Task): string {
         return '⏳';
     } else if (task.type === 'CANCELED') {
         return '❌';
-    } else if (task.deadline && task.deadline.getDate() <= today.getDate()) {
+    } else if (task.deadline && task.deadline <= today) {
         return '🚨';
-    } else if (task.scheduled && task.scheduled.getDate() === today.getDate()) {
+    } else if (task.scheduled && task.scheduled === today) {
         return '💪';
     } else {
         return '📝';

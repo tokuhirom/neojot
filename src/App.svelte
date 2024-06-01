@@ -25,11 +25,17 @@
         searchKeywordStore,
         selectedItemStore,
     } from './Stores';
-    import { extractTasks } from './lib/task/Task';
+    import { extractTasks, type Task } from './lib/task/Task';
     import { tasksStore } from './Stores.js';
     import { invoke } from '@tauri-apps/api/core';
     import type { Prompt } from './lib/openai/Prompt';
     import NetworkView from './lib/views/NetworkView.svelte';
+    import {
+        isPermissionGranted,
+        requestPermission,
+        sendNotification,
+    } from '@tauri-apps/plugin-notification';
+    import { startOfDay } from 'date-fns';
 
     let tabPane = 'list';
     let selectedItem: FileItem | undefined = undefined;
@@ -61,6 +67,70 @@
                 }
             }, 10);
         }
+    });
+
+    // hourly notification for overdue tasks
+    onMount(async () => {
+        // Do you have permission to send a notification?
+        let permissionGranted = await isPermissionGranted();
+        console.log('notification permission granted:', permissionGranted);
+
+        // If not we need to request it
+        if (!permissionGranted) {
+            const permission = await requestPermission();
+            permissionGranted = permission === 'granted';
+        }
+
+        let overdueTasks: Task[] = [];
+        tasksStore.subscribe((value) => {
+            const now = startOfDay(new Date());
+            overdueTasks = value.filter((task) => {
+                return (
+                    ((task.deadline && task.deadline <= now) ||
+                        (task.scheduled && task.scheduled <= now)) &&
+                    task.type !== 'DONE' &&
+                    task.type !== 'PLAN' &&
+                    task.type !== 'CANCELED'
+                );
+            });
+            console.log(
+                'notification: overdueTasks:',
+                overdueTasks.map(
+                    (t) => t.title + ' ' + t.deadline + ' ' + t.scheduled,
+                ),
+                now,
+            );
+        });
+
+        function sendOverdueNotification() {
+            console.log(
+                'sendOverdueNotification: overdue tasks=',
+                overdueTasks.length,
+            );
+            if (overdueTasks.length > 0) {
+                // take top 3 tasks
+                let message = '';
+                for (let i = 0; i < Math.min(3, overdueTasks.length); i++) {
+                    message += overdueTasks[i].title + '\n';
+                }
+                if (overdueTasks.length > 3) {
+                    message += '...(and more)';
+                }
+
+                sendNotification({
+                    title: 'NeoJot: Overdue Tasks',
+                    body: message,
+                });
+            }
+        }
+
+        sendOverdueNotification();
+        setInterval(
+            () => {
+                sendOverdueNotification();
+            },
+            1000 * 60 * 60, // TODO: hourly... so this should be configurable.
+        );
     });
 
     onMount(async () => {
@@ -232,6 +302,7 @@
 
     dataFileItemsStore.subscribe((value) => {
         const tasks = extractTasks(value);
+        console.log(tasks);
         tasksStore.set(tasks);
     });
 </script>

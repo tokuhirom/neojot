@@ -3,7 +3,9 @@ use std::io::{stdout, Write};
 use std::sync::{Arc, Mutex};
 
 use lazy_static::lazy_static;
-use openai::chat::{ChatCompletion, ChatCompletionDelta, ChatCompletionMessage, ChatCompletionMessageRole};
+use openai::chat::{
+    ChatCompletion, ChatCompletionDelta, ChatCompletionMessage, ChatCompletionMessageRole,
+};
 use openai::set_key;
 use tokio::sync::mpsc::Receiver;
 
@@ -45,7 +47,12 @@ pub fn get_openai_progress(uuid: String) -> Option<String> {
 }
 
 // save the current state by 'uuid' as key.
-pub(crate) async fn ask_openai(uuid: String, openai_token: String, prompt: String, note: String) -> anyhow::Result<String> {
+pub(crate) async fn ask_openai(
+    uuid: String,
+    openai_token: String,
+    prompt: String,
+    note: String,
+) -> anyhow::Result<String> {
     log::info!("ask_openai: {:?}", prompt.clone());
 
     set_key(openai_token.clone());
@@ -62,16 +69,14 @@ pub(crate) async fn ask_openai(uuid: String, openai_token: String, prompt: Strin
             content: Some(note),
             name: Some(String::from("Note")),
             function_call: None,
-        }
+        },
     ];
     let chat_stream = ChatCompletionDelta::builder("gpt-4", messages.clone())
         .create_stream()
         .await?;
     let chat_completion: ChatCompletion = listen_for_tokens(uuid, chat_stream).await;
 
-    let returned_message = chat_completion.choices
-        .first()
-        .unwrap().message.clone();
+    let returned_message = chat_completion.choices.first().unwrap().message.clone();
 
     log::info!(
         "{:#?}: {}",
@@ -81,7 +86,10 @@ pub(crate) async fn ask_openai(uuid: String, openai_token: String, prompt: Strin
     Ok(returned_message.content.clone().unwrap().trim().parse()?)
 }
 
-async fn listen_for_tokens(uuid: String, mut chat_stream: Receiver<ChatCompletionDelta>) -> ChatCompletion {
+async fn listen_for_tokens(
+    uuid: String,
+    mut chat_stream: Receiver<ChatCompletionDelta>,
+) -> ChatCompletion {
     let mut merged: Option<ChatCompletionDelta> = None;
     let mut content_buffer = String::new();
     while let Some(delta) = chat_stream.recv().await {
@@ -92,7 +100,10 @@ async fn listen_for_tokens(uuid: String, mut chat_stream: Receiver<ChatCompletio
         if let Some(content) = &choice.delta.content {
             print!("{}", content);
             content_buffer.push_str(content);
-            PROGRESS.lock().unwrap().insert(uuid.clone(), content_buffer.clone());
+            PROGRESS
+                .lock()
+                .unwrap()
+                .insert(uuid.clone(), content_buffer.clone());
         }
         if choice.finish_reason.is_some() {
             // The message being streamed has been fully received.
