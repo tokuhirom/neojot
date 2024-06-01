@@ -69,9 +69,14 @@ mod tests {
     #[test]
     fn it_works() {
         assert_eq!(get_title_markdown("# hello"), String::from("hello"));
-        assert_eq!(get_title_markdown("# hello world"), String::from("hello world"));
+        assert_eq!(
+            get_title_markdown("# hello world"),
+            String::from("hello world")
+        );
         assert_eq!(get_title_markdown("# \nhello"), String::from("hello"));
-        assert_eq!(get_title_markdown("# \nTODO[Scheduled: 2024-01-03(Mon)]: hello"), String::from("hello"));
+        assert_eq!(
+            get_title_markdown("# \nTODO[Scheduled: 2024-01-03(Mon)]: hello"),
+            String::from("hello")
+        );
     }
 }
-

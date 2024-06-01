@@ -31,6 +31,7 @@ chrono = "0.4.38"
 lazy_static = "1.4.0"
 openai = "1.0.0-alpha.14"
 tokio = "1.37.0"
+tauri-plugin-notification = "2.0.0-beta.7"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
