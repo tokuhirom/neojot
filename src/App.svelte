@@ -70,6 +70,7 @@
     });
 
     // hourly notification for overdue tasks
+    let notificationInterval: number | undefined = undefined;
     onMount(async () => {
         // Do you have permission to send a notification?
         let permissionGranted = await isPermissionGranted();
@@ -125,12 +126,17 @@
         }
 
         sendOverdueNotification();
-        setInterval(
+        notificationInterval = setInterval(
             () => {
                 sendOverdueNotification();
             },
             1000 * 60 * 60, // TODO: hourly... so this should be configurable.
         );
+    });
+    onDestroy(() => {
+        if (notificationInterval !== undefined) {
+            clearInterval(notificationInterval);
+        }
     });
 
     onMount(async () => {
