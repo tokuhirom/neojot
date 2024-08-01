@@ -2704,9 +2704,9 @@ dependencies = [
 
 [[package]]
 name = "openai"
-version = "1.0.0-alpha.14"
+version = "1.0.0-alpha.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "595f9127fd06a0ea0813606a218021951681c15345f818ee3f483fa06d2545a7"
+checksum = "73e7678a802756525c7fc0d1b112aa6f95aa13508ce8197211326056ac214e64"
 dependencies = [
  "anyhow",
  "bytes",
