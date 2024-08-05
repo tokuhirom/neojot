@@ -10,7 +10,7 @@ use std::time::SystemTime;
 use anyhow::anyhow;
 use simplelog::ColorChoice;
 use tauri::menu::{Menu, MenuBuilder, MenuItemBuilder, SubmenuBuilder};
-use tauri::{App, Manager, Wry};
+use tauri::{App, Emitter, Wry};
 use tauri_plugin_autostart::MacosLauncher;
 use url::Url;
 
