@@ -42,7 +42,7 @@
     "cm6-theme-nord": "^0.2.0",
     "date-fns": "^3.3.1",
     "mermaid": "^10.8.0",
-    "uuid": "^9.0.1",
+    "uuid": "^10.0.0",
     "vis-data": "^7.1.9",
     "vis-network": "^9.1.9",
     "vis-util": "^5.0.7"
@@ -54,7 +54,7 @@
     "@sveltejs/vite-plugin-svelte": "^3.0.1",
     "@tauri-apps/cli": "^2.0.0-rc.1",
     "@tsconfig/svelte": "^5.0.2",
-    "@types/uuid": "^9.0.8",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^8.56.0",
