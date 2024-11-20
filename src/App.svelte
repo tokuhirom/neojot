@@ -199,10 +199,12 @@
         } else {
             console.log(`Archiving: ${fileItem.filename}`);
             await archiveFile(fileItem);
+            // TODO: ここで、該当のファイルだけを除外するようにしたいところ。。
             await reloadFiles();
         }
 
-        if (tabPane === 'archive') {
+        if (tabPane === 'archive' || tabPane === 'card') {
+            // After archiving, we should be back to the list view.
             return undefined;
         } else {
             return dataFileItems[0];
