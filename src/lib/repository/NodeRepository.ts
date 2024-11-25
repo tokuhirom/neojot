@@ -26,7 +26,14 @@ export async function loadMarkdownFile(name: string): Promise<string> {
 }
 
 export async function loadFileList(prefix: string): Promise<FileItem[]> {
+    if (!(await exists('', { baseDir: BaseDirectory.AppData }))) {
+        console.log(`There's no data directory. try to create it. prefix`);
+        await mkdir('', { baseDir: BaseDirectory.AppData });
+    }
     if (!(await exists(prefix, { baseDir: BaseDirectory.AppData }))) {
+        console.log(
+            `There's no data directory. try to create it. prefix: ${prefix}`,
+        );
         await mkdir(prefix, { baseDir: BaseDirectory.AppData });
     }
 

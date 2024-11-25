@@ -146,7 +146,7 @@
                 openaiTokenStore.set(openaiToken);
             }
         } catch (e) {
-            console.error(e);
+            console.error(`Cannot load openapi token: ${e}`);
         }
         try {
             const prompts = (await invoke('get_openai_prompts')) as Prompt[];
@@ -213,6 +213,7 @@
 
     let unlistenCallbackPromises: UnlistenFn[] = [];
 
+    console.log('Registering onMount...');
     onMount(async () => {
         console.log(`Register callbacks: ${unlistenCallbackPromises.length}!`);
         for (let p of ['card', 'list', 'task', 'calendar', 'archive']) {
