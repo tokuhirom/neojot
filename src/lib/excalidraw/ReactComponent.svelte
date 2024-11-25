@@ -18,7 +18,7 @@
     });
 </script>
 
-<div class="reactComponent" bind:this={container} />
+<div class="reactComponent" bind:this={container}></div>
 
 <style>
     .reactComponent {

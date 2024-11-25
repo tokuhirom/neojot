@@ -91,32 +91,34 @@
 
 <div>
     <table>
-        {#each calendars as week}
-            <tr>
-                {#each week as day}
-                    <td class="day-cell">
-                        {#if day.day !== null}
-                            <div class={getDayClass(day)}>
-                                {day.day}
-                            </div>
-                            {#if taskMap}
-                                {#each taskMap.get(day.day) || [] as task}
-                                    <button
-                                        on:click={() => handleTaskOnClick(task)}
-                                        class={task.type.toLowerCase()}
-                                    >
-                                        <span class="icon"
-                                            >{getTaskIcon(task)}</span
+        <tbody>
+            {#each calendars as week}
+                <tr>
+                    {#each week as day}
+                        <td class="day-cell">
+                            {#if day.day !== null}
+                                <div class={getDayClass(day)}>
+                                    {day.day}
+                                </div>
+                                {#if taskMap}
+                                    {#each taskMap.get(day.day) || [] as task}
+                                        <button
+                                            on:click={() => handleTaskOnClick(task)}
+                                            class={task.type.toLowerCase()}
                                         >
-                                        {task.title}
-                                    </button>
-                                {/each}
+                                            <span class="icon"
+                                                >{getTaskIcon(task)}</span
+                                            >
+                                            {task.title}
+                                        </button>
+                                    {/each}
+                                {/if}
                             {/if}
-                        {/if}
-                    </td>
-                {/each}
-            </tr>
-        {/each}
+                        </td>
+                    {/each}
+                </tr>
+            {/each}
+        </tbody>
     </table>
 </div>
 
