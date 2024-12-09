@@ -10,6 +10,7 @@ import { type Task } from '../task/Task';
 import TaskWidgetInner from './TaskWidgetInner.svelte';
 import { tasksStore } from '../../Stores';
 import { addDays, format, isEqual, startOfDay } from 'date-fns';
+import { mount } from "svelte";
 
 export type DateTasks = {
     date: string;
@@ -18,7 +19,11 @@ export type DateTasks = {
 };
 
 class TaskWidget extends WidgetType {
-    private inner: TaskWidgetInner | undefined = undefined;
+    private innerProps: { doing: Task[]; dateTasks: DateTasks[] } = $state({
+        doing: [],
+        dateTasks: [],
+    });
+    private innerInitialized = false;
 
     constructor() {
         super();
@@ -49,16 +54,15 @@ class TaskWidget extends WidgetType {
             }
             dateTasks.sort((a, b) => a.date.localeCompare(b.date));
 
-            if (this.inner) {
-                this.inner.$$set({ doing, dateTasks });
+            if (this.innerInitialized) {
+                this.innerProps.doing = doing;
+                this.innerProps.dateTasks = dateTasks;
             } else {
-                this.inner = new TaskWidgetInner({
+                mount(TaskWidgetInner, {
                     target: container,
-                    props: {
-                        doing,
-                        dateTasks,
-                    },
+                    props: this.innerProps,
                 });
+                this.innerInitialized = true;
             }
         });
         return container;
@@ -116,7 +120,7 @@ class TaskWidget extends WidgetType {
     }
 }
 
-export function taskPlugin() {
+export function taskPluginSvelte() {
     return ViewPlugin.fromClass(
         class {
             decorations;

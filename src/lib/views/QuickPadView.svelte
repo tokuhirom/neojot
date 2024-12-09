@@ -9,7 +9,7 @@
     import type { EditorView } from '@codemirror/view';
     import { internalLinkPlugin } from '../markdown/InternalWikiLink';
     import { nord } from 'cm6-theme-nord';
-    import { taskPlugin } from '../markdown/TaskPlugin';
+    import { taskPluginSvelte } from '../markdown/TaskPlugin.svelte';
     import type { FileItem } from '../file_item/FileItem';
     import { openInternalLink } from '../markdown/KeyHandler';
     import { debounce } from '../utils/Debounce';
@@ -46,7 +46,7 @@
     let extensions = [
         internalLinkPlugin(findEntryByTitle, findOrCreateEntry),
         nord,
-        taskPlugin(),
+        taskPluginSvelte(),
     ];
 
     let keymaps = [
