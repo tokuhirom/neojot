@@ -1,6 +1,6 @@
 <script lang="ts">
     import { type Task } from '../task/Task';
-    import type { DateTasks } from './TaskPlugin';
+    import type { DateTasks } from './TaskPlugin.svelte';
     import TaskButton from './TaskButton.svelte';
 
     export let doing: Task[];
