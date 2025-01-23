@@ -103,7 +103,8 @@
                                 {#if taskMap}
                                     {#each taskMap.get(day.day) || [] as task}
                                         <button
-                                            on:click={() => handleTaskOnClick(task)}
+                                            on:click={() =>
+                                                handleTaskOnClick(task)}
                                             class={task.type.toLowerCase()}
                                         >
                                             <span class="icon"

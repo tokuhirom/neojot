@@ -10,7 +10,7 @@ import { type Task } from '../task/Task';
 import TaskWidgetInner from './TaskWidgetInner.svelte';
 import { tasksStore } from '../../Stores';
 import { addDays, format, isEqual, startOfDay } from 'date-fns';
-import { mount } from "svelte";
+import { mount } from 'svelte';
 
 export type DateTasks = {
     date: string;
