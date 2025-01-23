@@ -10,7 +10,6 @@
     import type { FileItem } from '../file_item/FileItem';
     import { extractLinks } from '../link/Links';
     import DuplicatedNotes from '../markdown/DuplicatedNotes.svelte';
-    import OpenAIView from '../openai/OpenAIView.svelte';
     import EntryView from '../markdown/EntryView.svelte';
     import LinkCards from '../link/LinkCards.svelte';
     import ExcalidrawView from '../excalidraw/ExcalidrawView.svelte';
@@ -198,7 +197,6 @@
                     />
                     <DuplicatedNotes file={selectedItem} />
                     <LinkCards file={selectedItem} />
-                    <OpenAIView {selectedItem} />
                 {/if}
             {/if}
         </div>
