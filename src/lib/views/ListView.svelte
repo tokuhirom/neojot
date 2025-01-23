@@ -10,7 +10,6 @@
     import QuickPadView from './QuickPadView.svelte';
     import { searchKeywordStore, selectedItemStore } from '../../Stores';
     import DuplicatedNotes from '../markdown/DuplicatedNotes.svelte';
-    import OpenAIView from '../openai/OpenAIView.svelte';
 
     export let dataFileItems: FileItem[] = [];
     export let pageTitles: string[];
@@ -151,7 +150,6 @@
                 />
                 <DuplicatedNotes file={selectedItem} />
                 <LinkCards file={selectedItem} />
-                <OpenAIView {selectedItem} />
             {/if}
         {/if}
     </div>

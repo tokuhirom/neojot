@@ -20,15 +20,11 @@
     import {
         dataFileItemsStore,
         lowerTitle2fileItemStore,
-        openaiTokenStore,
-        promptsStore,
         searchKeywordStore,
         selectedItemStore,
     } from './Stores';
     import { extractTasks, type Task } from './lib/task/Task';
     import { tasksStore } from './Stores.js';
-    import { invoke } from '@tauri-apps/api/core';
-    import type { Prompt } from './lib/openai/Prompt';
     import NetworkView from './lib/views/NetworkView.svelte';
     import {
         isPermissionGranted,
@@ -140,23 +136,6 @@
     });
 
     onMount(async () => {
-        try {
-            const openaiToken = (await invoke('get_openai_token')) as string;
-            if (openaiToken) {
-                openaiTokenStore.set(openaiToken);
-            }
-        } catch (e) {
-            console.error(`Cannot load openapi token: ${e}`);
-        }
-        try {
-            const prompts = (await invoke('get_openai_prompts')) as Prompt[];
-            if (prompts) {
-                promptsStore.set(prompts);
-            }
-        } catch (e) {
-            console.error(e);
-        }
-
         const items = await reloadFiles();
         console.log(`Loaded ${items.length} items!`);
         if (items.length > 0) {

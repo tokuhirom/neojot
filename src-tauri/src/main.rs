@@ -3,8 +3,6 @@
 
 use std::collections::HashMap;
 use std::fs;
-use std::fs::File;
-use std::io::Write;
 use std::time::SystemTime;
 
 use anyhow::anyhow;
@@ -17,11 +15,9 @@ use url::Url;
 use crate::file_item::{get_title, FileItem};
 use crate::git::git_add_commit_push;
 use crate::git::{get_commits_by_day, git_init};
-use crate::openai::{get_initial_prompts, get_openai_progress, Prompt, PromptConfig};
 
 pub mod file_item;
 mod git;
-mod openai;
 
 #[tauri::command]
 fn tauri_git_init() -> Result<(), String> {
@@ -96,92 +92,6 @@ fn load_file_item(filename: String) -> Result<FileItem, String> {
     }
 }
 
-#[tauri::command]
-async fn tauri_ask_openai(
-    uuid: String,
-    openai_token: String,
-    prompt: String,
-    note: String,
-) -> Result<String, String> {
-    let result = openai::ask_openai(uuid, openai_token, prompt, note)
-        .await
-        .map_err(|e| format!("Failed to ask OpenAI: {}", e))?;
-    Ok(result)
-}
-
-#[tauri::command]
-fn tauri_get_openai_progress(uuid: String) -> Result<Option<String>, String> {
-    Ok(get_openai_progress(uuid))
-}
-
-#[tauri::command]
-fn get_openai_token() -> Result<String, String> {
-    let config_dir = dirs::config_dir().ok_or("Config directory not found")?;
-    let path = config_dir
-        .join("com.github.tokuhirom.neojot")
-        .join("openai_token.txt");
-    let result = fs::read_to_string(path)
-        .map_err(|e| format!("Failed to read the token from the file: {}", e))?;
-    Ok(result)
-}
-
-#[tauri::command]
-fn set_openai_token(openai_token: String) -> Result<(), String> {
-    let config_dir = dirs::config_dir().ok_or("Config directory not found")?;
-    let path = config_dir
-        .join("com.github.tokuhirom.neojot")
-        .join("openai_token.txt");
-
-    let mut file = match File::create(&path) {
-        Ok(file) => file,
-        Err(e) => return Err(format!("Failed to create/open the file: {}", e)),
-    };
-
-    log::info!("Write to {:?}", path);
-    // トークンをファイルに書き込む
-    match file.write_all(openai_token.as_bytes()) {
-        Ok(_) => Ok(()),
-        Err(e) => Err(format!("Failed to write the token to the file: {}", e)),
-    }
-}
-
-#[tauri::command]
-fn get_openai_prompts() -> Result<Vec<Prompt>, String> {
-    let config_dir = dirs::config_dir().ok_or("Config directory not found")?;
-    let path = config_dir
-        .join("com.github.tokuhirom.neojot")
-        .join("openai_prompts.json");
-    match fs::read_to_string(path) {
-        Ok(content) => match serde_json::from_str::<PromptConfig>(content.as_str()) {
-            Ok(config) => {
-                return Ok(config.prompts);
-            }
-            Err(e) => {
-                log::error!("Failed to parse JSON: {}", e)
-            }
-        },
-        Err(e) => {
-            log::error!("Failed to read the prompts from the file: {}", e)
-        }
-    }
-    Ok(get_initial_prompts())
-}
-
-#[tauri::command]
-fn set_openai_prompts(prompts: Vec<Prompt>) -> Result<(), String> {
-    let config_dir = dirs::config_dir().ok_or("Config directory not found")?;
-    let path = config_dir
-        .join("com.github.tokuhirom.neojot")
-        .join("openai_prompts.json");
-    let config = PromptConfig { prompts };
-
-    // write the prompts to the file in JSON format
-    log::info!("Write to {:?}", path);
-    match fs::write(path, serde_json::to_string_pretty(&config).unwrap()) {
-        Ok(_) => Ok(()),
-        Err(e) => Err(format!("Failed to write the prompts to the file: {}", e)),
-    }
-}
 
 #[tauri::command]
 fn get_files(prefix: String) -> Result<Vec<FileItem>, String> {
@@ -378,12 +288,6 @@ fn main() -> anyhow::Result<()> {
             tauri_git_add_commit_push,
             tauri_get_commits_by_day,
             tauri_get_title_markdown,
-            tauri_ask_openai,
-            tauri_get_openai_progress,
-            get_openai_token,
-            set_openai_token,
-            get_openai_prompts,
-            set_openai_prompts,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
