@@ -1,3 +1,6 @@
+> [!WARNING]
+> I'm no longer using NeoJot. I'm using Obsidian instead.
+
 # NeoJot
 
 NeoJot is a note-taking app designed for efficiency and simplicity.
