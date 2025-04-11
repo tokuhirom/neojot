@@ -30,7 +30,7 @@ regex = "1.10.4"
 git2 = "0.20.0"
 chrono = "0.4.38"
 lazy_static = "1.4.0"
-tokio = "1.37.0"
+tokio = "1.43.1"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
